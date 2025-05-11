@@ -1,4 +1,4 @@
-name: Build and Release EXE
+name: Building and Release EXE
 
 on:
   push:

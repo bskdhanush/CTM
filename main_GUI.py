@@ -57,7 +57,7 @@ btn_frame1.pack(fill="x", padx=padx, pady=pady)
 
 ttk.Button(btn_frame1, text="Control Framework", command=run_control_framework).grid(row=0, column=0, padx=5, sticky="ew")
 ttk.Button(btn_frame1, text="Traffic Framework", command=run_traffic_framework).grid(row=0, column=1, padx=5, sticky="ew")
-ttk.Button(btn_frame1, text="Both Frameworks (3s delay)", command=run_both_frameworks).grid(row=1, column=0, columnspan=2, padx=5, pady=(10, 0), sticky="ew")
+ttk.Button(btn_frame1, text="Run both Frameworks (3s delay)", command=run_both_frameworks).grid(row=1, column=0, columnspan=2, padx=5, pady=(10, 0), sticky="ew")
 btn_frame1.columnconfigure(0, weight=1)
 btn_frame1.columnconfigure(1, weight=1)
 

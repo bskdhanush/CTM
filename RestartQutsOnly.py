@@ -46,3 +46,7 @@ def smart_restart_quts(callback=None):
         except subprocess.CalledProcessError:
             if callback:
                 callback("Failed to start QUTS service.")
+<<<<<<< HEAD
+=======
+
+>>>>>>> 48109831f984b17baab68ebd3577e1418818172c

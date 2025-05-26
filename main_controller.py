@@ -5,7 +5,7 @@ from tkinter import messagebox
 import ctypes
 import sys
 from idna import check_label
-import Kill_process, Start_testCase,Track_process, Check_updates
+import Kill_process, Start_testCase,Track_process
 
 CMD_DIR_Control = r"C:\QSTAF\QSTAFpy\bin\Control_laptop\Windows"
 BAT_FILE_Control = "Run_framework_contol.bat"  

@@ -1,6 +1,5 @@
-import datetime
+from datetime import datetime
 import os    
-import sys
 import requests
 from packaging.version import parse as parse_version
 
@@ -11,7 +10,7 @@ print("[DEBUG] GitHub updater module imported")
 GITHUB_USERNAME   = os.getenv("GITHUB_USERNAME", "bskdhanush")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY", "QC_stuff")
 GITHUB_PAT        = os.getenv("GITHUB_PAT") or "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"
-__version__       = os.getenv("APP_VERSION", "1.0.0")  # Current app version
+__version__       = os.getenv("APP_VERSION", "0.0.0")  # Current app version
 
 def get_session():
     """
@@ -137,8 +136,8 @@ def main_update_check():
         print(f"[INFO] New version available: {latest_tag}")
         try:
             api_url, asset_name = find_latest_exe_download_url(release)
-            download_dir = os.getenv('TEMP', '/tmp')
-            downloaded   = download_file(api_url, download_dir, asset_name)
+            #download_dir = os.getenv('TEMP', '/tmp')
+            downloaded   = download_file(api_url, r"C:\QSTAF", asset_name)
             print(f"[INFO] Downloaded new version to: {downloaded}")
         except Exception as e:
             print(f"[ERROR] Update failed: {e}")

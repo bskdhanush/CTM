@@ -7,6 +7,10 @@ import datetime
 import aws_scheduler as aws
 import main_controller
 import Track_process
+import Check_updates
+
+Check_updates.main_update_check()
+
 
 # ------------------------------------------------------------------
 # Root window & theme

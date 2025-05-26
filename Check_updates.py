@@ -1,67 +1,90 @@
-import os
+import datetime
+import os    
+import sys
 import requests
 from packaging.version import parse as parse_version
 
-# Debug: module import
+
 print("[DEBUG] GitHub updater module imported")
 
 # Configuration from environment for security
-GITHUB_USERNAME = os.getenv("GITHUB_USERNAME", "bskdhanush")
+GITHUB_USERNAME   = os.getenv("GITHUB_USERNAME", "bskdhanush")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY", "QC_stuff")
-EXE_NAME = "QSTAF_Tool.exe"
-GITHUB_PAT = os.getenv("GITHUB_PAT") or "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"
-__version__ = os.getenv("APP_VERSION", "0.0.0")  # Current app version
-
+GITHUB_PAT        = os.getenv("GITHUB_PAT") or "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"
+__version__       = os.getenv("APP_VERSION", "1.0.0")  # Current app version
 
 def get_session():
     """
     Creates an authenticated session with GitHub API.
-    Reads PAT from GITHUB_PAT env var and sets appropriate headers.
+    Raises EnvironmentError if PAT is missing.
     """
     print("[DEBUG] Creating GitHub session...")
-    token = GITHUB_PAT
-    if not token:
+    if not GITHUB_PAT:
         msg = "GITHUB_PAT not set. Cannot access private repository."
         print(f"[ERROR] {msg}")
         raise EnvironmentError(msg)
+
     session = requests.Session()
     session.headers.update({
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {GITHUB_PAT}",
         "Accept": "application/vnd.github.v3+json"
     })
-    print("[DEBUG] Session created with headers:", session.headers)
     return session
 
-
-def get_latest_release_info():
+def fetch_latest_release_data():
     """
-    Fetches the latest release info for the given repo.
+    Fetches the full JSON for the latest release.
     Raises HTTPError on failure.
     """
     print(f"[DEBUG] Fetching latest release for {GITHUB_USERNAME}/{GITHUB_REPOSITORY}")
     session = get_session()
-    api_url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPOSITORY}/releases/latest"
-    resp = session.get(api_url, timeout=10)
+    url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPOSITORY}/releases/latest"
+    resp = session.get(url, timeout=10)
     resp.raise_for_status()
-    print(f"[DEBUG] HTTP {resp.status_code} received for latest release info")
+    print(f"[DEBUG] HTTP {resp.status_code} received for latest release JSON")
     return resp.json()
 
-
-def find_asset_download_url(release_data, asset_name):
+def get_latest_release_version():
     """
-    Locates the API URL for the named asset in the release data.
-    Uses the asset's `url` (API endpoint) for authenticated download.
+    Returns only the version string (tag_name or name) of the latest release.
     """
-    print(f"[DEBUG] Searching for asset '{asset_name}' in release data...")
-    for asset in release_data.get("assets", []):
-        if asset.get("name") == asset_name:
-            api_url = asset.get("url")
-            print(f"[DEBUG] Found asset API URL: {api_url}")
-            return api_url
-    msg = f"Asset '{asset_name}' not found in release."
-    print(f"[ERROR] {msg}")
-    raise ValueError(msg)
+    data = fetch_latest_release_data()
+    version = data.get("tag_name") or data.get("name")
+    if not version:
+        msg = "Latest release has no tag_name or name."
+        print(f"[ERROR] {msg}")
+        raise ValueError(msg)
 
+    print(f"[DEBUG] Parsed latest release version: {version}")
+    return version
+
+def find_latest_exe_download_url(release_data):
+    """
+    From a release JSON, finds the newest .exe asset by created_at
+    and returns a tuple (asset_api_url, asset_filename).
+    Raises ValueError if none found.
+    """
+    print("[DEBUG] Searching for .exe assets in release data…")
+    assets = release_data.get("assets", [])
+    exe_assets = [a for a in assets if a.get("name", "").lower().endswith(".exe")]
+
+    if not exe_assets:
+        msg = "No .exe asset found in latest release."
+        print(f"[ERROR] {msg}")
+        raise ValueError(msg)
+
+    # Helper to parse GitHub's ISO timestamp
+    def _parse_iso(ts: str) -> datetime:
+        return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")
+
+    # Sort descending by creation time
+    exe_assets.sort(key=lambda a: _parse_iso(a.get("created_at", "")), reverse=True)
+    chosen = exe_assets[0]
+
+    api_url  = chosen.get("url")
+    filename = chosen.get("name")
+    print(f"[DEBUG] Selected .exe '{filename}' → {api_url}")
+    return api_url, filename
 
 def download_file(asset_api_url, dest_folder, dest_name):
     """
@@ -73,21 +96,19 @@ def download_file(asset_api_url, dest_folder, dest_name):
     session.headers.update({"Accept": "application/octet-stream"})
 
     os.makedirs(dest_folder, exist_ok=True)
-    temp_path = os.path.join(dest_folder, dest_name + ".tmp")
+    temp_path  = os.path.join(dest_folder, dest_name + ".tmp")
     final_path = os.path.join(dest_folder, dest_name)
 
     with session.get(asset_api_url, stream=True, timeout=60) as r:
-        print(f"[DEBUG] HTTP {r.status_code} start streaming...")
+        print(f"[DEBUG] HTTP {r.status_code} start streaming.")
         r.raise_for_status()
         with open(temp_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
-                print(f"[DEBUG] Wrote chunk of size {len(chunk)}")
 
     os.replace(temp_path, final_path)
     print(f"[DEBUG] Downloaded and saved to {final_path}")
     return final_path
-
 
 def is_update_available(current_ver, latest_tag):
     """
@@ -98,14 +119,13 @@ def is_update_available(current_ver, latest_tag):
     print(f"[DEBUG] Update available: {result}")
     return result
 
-
 def main_update_check():
     """
-    Main entry to check for updates and download new version if available.
+    Main entry to check for updates and download the newest .exe if available.
     """
     print(f"[INFO] Starting update check — current version: {__version__}")
     try:
-        release = get_latest_release_info()
+        release = fetch_latest_release_data()
     except Exception as e:
         print(f"[ERROR] Failed to fetch release info: {e}")
         return
@@ -116,16 +136,15 @@ def main_update_check():
     if is_update_available(__version__, latest_tag):
         print(f"[INFO] New version available: {latest_tag}")
         try:
-            asset_url = find_asset_download_url(release, EXE_NAME)
+            api_url, asset_name = find_latest_exe_download_url(release)
             download_dir = os.getenv('TEMP', '/tmp')
-            downloaded = download_file(asset_url, download_dir, EXE_NAME)
+            downloaded   = download_file(api_url, download_dir, asset_name)
             print(f"[INFO] Downloaded new version to: {downloaded}")
         except Exception as e:
             print(f"[ERROR] Update failed: {e}")
     else:
         print("[INFO] You already have the latest version.")
 
-
-# Run on import for immediate feedback
-print("[DEBUG] Invoking main_update_check()")
-main_update_check()
+# Uncomment to run automatically on import
+# print("[DEBUG] Invoking main_update_check()")
+# main_update_check()

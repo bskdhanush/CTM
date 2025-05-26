@@ -5,8 +5,7 @@ from tkinter import messagebox
 import ctypes
 import sys
 from idna import check_label
-import Kill_process, Start_testCase,Track_process,updater
-
+import Kill_process, Start_testCase,Track_process, Check_updates
 
 CMD_DIR_Control = r"C:\QSTAF\QSTAFpy\bin\Control_laptop\Windows"
 BAT_FILE_Control = "Run_framework_contol.bat"  
@@ -15,7 +14,7 @@ BAT_FILE_traffic = "Run_framework_Traffic.bat"
 CMD_DIR_AWS= r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS= "aws_s3_uploder.bat"
 
-updater.main_update_check()
+#updater.main_update_check()
 def ensure_admin():
     try:
         if not ctypes.windll.shell32.IsUserAnAdmin():
@@ -69,3 +68,6 @@ def restart_quts_pcat_qxdm():
     Track_process.restart_quts_pcat_qxdm(callback=show_status)
 
 
+#def check_for_updates():
+ #   print(Check_updates.get_latest_release_version)
+    #print(Check_updates.find_latest_exe_download_url( check_for_updates.fetch_latest_release_data()))

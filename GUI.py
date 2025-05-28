@@ -106,7 +106,7 @@ def launch_gui():
 
     _update_quts_status()
 
-    # --- Main Page ---
+    # --- Main Page --- 
     main_page = ttk.Frame(container)
     main_page.grid(row=0, column=0, sticky="nsew")
     pages["Main"] = main_page

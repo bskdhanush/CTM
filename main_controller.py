@@ -53,7 +53,8 @@ def run_both_with_delay():
 def stop_all():
     found = Kill_process.stop_all_tests()
     msg = "All processes stopped." if found else "No processes found to stop."
-    messagebox.showinfo("Info", msg)
+    #messagebox.showinfo("Info", msg)
+    print(msg)
 
 def run_s3_uploader():
     try:
@@ -90,5 +91,14 @@ def run_app():
     # Launch the GUI
     gui.launch_gui()
 
+def start_Pact_QXDM():
+    Quts_conroller.start_app(Quts_conroller.PCAT_PATH)
+    Quts_conroller.start_app(Quts_conroller.QXDM_PATH)
+
+def stop_all_tools_Framework():
+    stop_all()
+    subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
+    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
+    
 if __name__ == "__main__":
     run_app()

@@ -16,7 +16,7 @@ def launch_gui():
     # --- Window Setup ---
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("560x450")  # Reduced size to fit content better
+    root.geometry("560x500")  # Reduced size to fit content better
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -172,6 +172,15 @@ def launch_gui():
         command=on_aws_toggle,
     ).pack(anchor="w", padx=16)
 
+    stopAll_application_frameworks = ttk.LabelFrame(main_page, text="PCAT_QXDM")
+    stopAll_application_frameworks.pack(fill="x", **PADDING)
+
+    ttk.Button(
+        stopAll_application_frameworks,
+        text="Start PCAT QXDM",
+        command=main_controller.start_Pact_QXDM,
+    ).pack(fill="x", padx=16, pady=8, ipady=8)
+
     # --- QUTS Tools Page ---
     quts_page = ttk.Frame(container)
     quts_page.grid(row=0, column=0, sticky="nsew")
@@ -194,6 +203,15 @@ def launch_gui():
         text="Restart QUTS only",
         command=Quts_conroller.restart_quts,
         width=30,
+    ).pack(fill="x", **PADDING)
+
+    stopAll_application_frameworks = ttk.LabelFrame(quts_page, text="Stop all Frameworks and Tools")
+    stopAll_application_frameworks.pack(fill="x", **PADDING)
+
+    ttk.Button(
+        stopAll_application_frameworks,
+        text="Stop all Tools",
+        command=main_controller.stop_all_tools_Framework,
     ).pack(fill="x", **PADDING)
 
     show("Main")

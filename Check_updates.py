@@ -1,5 +1,6 @@
 from datetime import datetime
-import os    
+import os
+from tkinter import messagebox    
 import requests
 from packaging.version import parse as parse_version
 
@@ -10,7 +11,8 @@ print("[DEBUG] GitHub updater module imported")
 GITHUB_USERNAME   = os.getenv("GITHUB_USERNAME", "bskdhanush")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY", "QC_stuff")
 GITHUB_PAT        = os.getenv("GITHUB_PAT") or "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"
-__version__       = os.getenv("APP_VERSION", "1.2.0")  # Current app version
+__version__       = os.getenv("APP_VERSION", "1.2.1")  # Current app version
+DOWNLOAD_DIR      = r"C:\QSTAF" 
 
 def get_session():
     """
@@ -19,16 +21,13 @@ def get_session():
     """
     print("[DEBUG] Creating GitHub session...")
     if not GITHUB_PAT:
-        msg = "GITHUB_PAT not set. Cannot access private repository."
-        print(f"[ERROR] {msg}")
-        raise EnvironmentError(msg)
-
-    session = requests.Session()
-    session.headers.update({
+        raise EnvironmentError("GITHUB_PAT not set. Cannot access private repository.")
+    s = requests.Session()
+    s.headers.update({
         "Authorization": f"Bearer {GITHUB_PAT}",
         "Accept": "application/vnd.github.v3+json"
     })
-    return session
+    return s
 
 def fetch_latest_release_data():
     """
@@ -118,11 +117,15 @@ def is_update_available(current_ver, latest_tag):
     print(f"[DEBUG] Update available: {result}")
     return result
 
+def asset_already_present(dest_folder: str, filename: str) -> bool:
+    """
+    Returns True if the exact asset file is already present on disk.
+    """
+    return os.path.isfile(os.path.join(dest_folder, filename))
+
 def main_update_check():
-    """
-    Main entry to check for updates and download the newest .exe if available.
-    """
     print(f"[INFO] Starting update check — current version: {__version__}")
+
     try:
         release = fetch_latest_release_data()
     except Exception as e:
@@ -132,17 +135,24 @@ def main_update_check():
     latest_tag = release.get("tag_name", "")
     print(f"[INFO] Latest tag on GitHub: {latest_tag}")
 
-    if is_update_available(__version__, latest_tag):
-        print(f"[INFO] New version available: {latest_tag}")
-        try:
-            api_url, asset_name = find_latest_exe_download_url(release)
-            #download_dir = os.getenv('TEMP', '/tmp')
-            downloaded   = download_file(api_url, r"C:\QSTAF", asset_name)
-            print(f"[INFO] Downloaded new version to: {downloaded}")
-        except Exception as e:
-            print(f"[ERROR] Update failed: {e}")
-    else:
-        print("[INFO] You already have the latest version.")
+    if not is_update_available(__version__, latest_tag):
+        print("[INFO] You already have the latest version running.")
+        return
+
+    print(f"[INFO] New version available: {latest_tag}")
+
+    try:
+        api_url, asset_name = find_latest_exe_download_url(release)
+        if asset_already_present(DOWNLOAD_DIR, asset_name):
+            print(f"[INFO] '{asset_name}' is already present in {DOWNLOAD_DIR}. Skipping download.")
+            return
+
+        downloaded_path = download_file(api_url, DOWNLOAD_DIR, asset_name)
+        #print(f"[INFO] Downloaded new version to: {downloaded_path}")
+        messagebox.showinfo("Update available",f"Downloaded new version at '{downloaded_path}'")
+
+    except Exception as e:
+        print(f"[ERROR] Update failed: {e}")
 
 # Uncomment to run automatically on import
 # print("[DEBUG] Invoking main_update_check()")

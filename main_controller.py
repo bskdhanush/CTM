@@ -13,9 +13,9 @@ import GUI as gui
 
 # Constants for batch file directories and names
 CMD_DIR_CONTROL = r"C:\QSTAF\QSTAFpy\bin\Control_laptop\Windows"
-BAT_FILE_CONTROL = "Run_framework_contol.bat"
+BAT_FILE_CONTROL = "Run_framework.bat"
 CMD_DIR_TRAFFIC = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows"
-BAT_FILE_TRAFFIC = "Run_framework_Traffic.bat"
+BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS = "aws_s3_uploder.bat"
 

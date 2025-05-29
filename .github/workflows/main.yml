@@ -16,6 +16,6 @@ jobs:
       - name: Upload pre-built EXE to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/QSTAF_Tool_v1.2.0.exe  # Replace with your .exe path
+          files: dist/QSTAF_Tool_v1.2.1.exe  # Replace with your .exe path
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

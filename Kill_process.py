@@ -13,7 +13,7 @@ def kill_process_and_children(pid):
 def stop_all_tests():
     found = False
     keywords = [
-        "run_framework_traffic.bat", "control_laptop\\windows", "aws_", 
+        "run_framework.bat", "control_laptop\\windows", "aws_", 
         "pinghandler", "iperf", "ping"
     ]
 

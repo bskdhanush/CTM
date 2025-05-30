@@ -7,7 +7,7 @@ from tkinter import messagebox
 
 import Kill_process
 import Start_testCase
-import Quts_conroller
+import Quts_controller
 import Check_updates
 import GUI as gui
 
@@ -65,7 +65,7 @@ def run_s3_uploader():
 def restart_quts_pcat_qxdm():
     def show_status(msg: str):
         print(msg)
-    Quts_conroller.restart_quts_pcat_qxdm(callback=show_status)
+    Quts_controller.restart_quts_pcat_qxdm(callback=show_status)
 
 def check_for_updates() -> bool:
     """
@@ -92,8 +92,8 @@ def run_app():
     gui.launch_gui()
 
 def start_Pact_QXDM():
-    Quts_conroller.start_app(Quts_conroller.PCAT_PATH)
-    Quts_conroller.start_app(Quts_conroller.QXDM_PATH)
+    Quts_controller.start_app(Quts_controller.PCAT_PATH)
+    Quts_controller.start_app(Quts_controller.QXDM_PATH)
 
 def stop_all_tools_Framework():
     stop_all()

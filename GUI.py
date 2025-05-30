@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import sv_ttk
 import datetime
+
+import Wifi_controller
 import aws_scheduler as aws
 import main_controller
 import Quts_controller
@@ -188,7 +190,7 @@ def launch_gui() -> None:
     _add_nav("Set Wifi","Wifi Config")
 
     # all Wifi config's 
-    choices = ("3 SLO","3 MLO","2G SLO + 5G-6G MLO", "5G SLO + 2G-6G MLO","6G SLO + 2G-5G MLO")
+    choices = ("3 SLO", "2G SLO + 5G-6G MLO")
     select_config= ttk.LabelFrame(wifi_config_page, text=" Select config Type")
     select_config.pack(fill="x", **PADDING)
     dropdown=ttk.Combobox(select_config, values=choices, state="readonly")
@@ -196,6 +198,7 @@ def launch_gui() -> None:
     dropdown.pack(padx=20, pady=10)
 
     ttk.Button(select_config, text="Set config",
+               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current())
                ).pack(fill="x", **PADDING)
     
 

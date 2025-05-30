@@ -205,7 +205,7 @@ def launch_gui() -> None:
     pages["Testing_page"]=Testing_page
     _add_nav("Field Testing ","Testing_page")
 
-    
+
 
 
 
@@ -215,4 +215,4 @@ def launch_gui() -> None:
 
 
 if __name__ == "__main__":
-    launch_gui()
+     main_controller.run_app()

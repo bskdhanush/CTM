@@ -5,8 +5,8 @@ a = Analysis(
     ['GUI.py'],
     pathex=[],
     binaries=[],
-    datas=[('Kill_process.py', '.'), ('Start_testCase.py', '.'), ('Quts_controller.py', '.'), ('Wifi_controller.py', '.'), ('aws_scheduler.py', '.'), ('Check_updates.py', '.')],
-    hiddenimports=['sv_ttk', 'packaging.version'],
+    datas=[],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['logo.ico'],
 )

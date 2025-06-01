@@ -1,0 +1,141 @@
+2025-06-01 01:25:03  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:25:03  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:25:05  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:25:05  [INFO]  Attempting to remove old EXE at C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:25:05  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/5): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:25:05  [INFO]  Waiting 2.0 seconds before retry...
+2025-06-01 01:25:07  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/5): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:25:07  [INFO]  Waiting 2.0 seconds before retry...
+2025-06-01 01:25:09  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 3/5): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:25:09  [INFO]  Waiting 2.0 seconds before retry...
+2025-06-01 01:25:11  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 4/5): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:25:11  [INFO]  Waiting 2.0 seconds before retry...
+2025-06-01 01:25:13  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 5/5): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:25:13  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 5 attempts
+2025-06-01 01:25:13  [INFO]  Successfully removed: C:\QSTAF\QSTAF_Tool.exe.old
+2025-06-01 01:25:13  [INFO]  Renamed old EXE to: C:\QSTAF\QSTAF_Tool.exe.old
+2025-06-01 01:25:13  [INFO]  Renaming C:\QSTAF\QSTAF_Tool.exe.tmp to C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:25:13  [INFO]  Replacement complete.
+2025-06-01 01:25:13  [INFO]  Successfully removed: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:27:18  [INFO]  Checking for updates...
+2025-06-01 01:27:18  [INFO]  Latest release on GitHub: 1.2.2 (local: 1.2.1)
+2025-06-01 01:27:18  [INFO]  Newer version detected. Downloading and replacing...
+2025-06-01 01:27:18  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:27:18  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:27:21  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:27:21  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:27:21  [INFO]  Successfully removed: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:27:21  [INFO]  Renaming C:\QSTAF\QSTAF_Tool.exe.tmp to C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:27:21  [INFO]  Direct replacement successful.
+2025-06-01 01:27:21  [INFO]  Successfully removed: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:27:21  [INFO]  Replaced old EXE with version 1.2.2. Launching updated EXE.
+2025-06-01 01:27:21  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-01 01:28:50  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:28:50  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:28:53  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:28:53  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:28:53  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:28:53  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:28:54  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:28:54  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:28:54  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:28:54  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:28:54  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:30:04  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:30:04  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:30:06  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:30:06  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:30:06  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:30:06  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:30:07  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:30:07  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:30:07  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:30:07  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:30:07  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:40:55  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:40:55  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:40:57  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:40:57  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:40:57  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:40:57  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:40:58  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:40:58  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:40:58  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:40:58  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:40:58  [INFO]  Batch file created successfully, size: 4690 bytes
+2025-06-01 01:40:58  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:40:58  [INFO]  Batch script path: C:\QSTAF\update_helper.bat
+2025-06-01 01:40:58  [INFO]  Temp file path: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:40:58  [INFO]  Target file path: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:40:58  [INFO]  Launched batch script with elevated privileges
+2025-06-01 01:40:59  [INFO]  Exiting Python process to allow file replacement...
+2025-06-01 01:44:08  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:44:08  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:44:11  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:44:11  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:44:11  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:44:11  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:44:12  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:44:12  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:44:12  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:44:12  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:44:12  [INFO]  Batch file created successfully, size: 4690 bytes
+2025-06-01 01:44:12  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:44:12  [INFO]  Batch script path: C:\QSTAF\update_helper.bat
+2025-06-01 01:44:12  [INFO]  Temp file path: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:44:12  [INFO]  Target file path: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:44:12  [INFO]  Launched batch script with elevated privileges
+2025-06-01 01:44:13  [INFO]  Exiting Python process to allow file replacement...
+2025-06-01 01:45:19  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:45:19  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:45:23  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:45:23  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:45:23  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:45:23  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:45:23  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:45:23  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:45:24  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:45:24  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:45:24  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:45:24  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:45:24  [INFO]  Batch file created successfully, size: 4690 bytes
+2025-06-01 01:45:24  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:45:24  [INFO]  Batch script path: C:\QSTAF\update_helper.bat
+2025-06-01 01:45:24  [INFO]  Temp file path: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:45:24  [INFO]  Target file path: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:45:24  [INFO]  Launched batch script with elevated privileges
+2025-06-01 01:45:25  [INFO]  Exiting Python process to allow file replacement...
+2025-06-01 01:46:22  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:46:22  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:46:25  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:46:25  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:46:25  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:46:25  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:46:26  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:46:26  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:46:26  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:46:26  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:46:26  [INFO]  Batch file created successfully, size: 4690 bytes
+2025-06-01 01:46:26  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:46:26  [INFO]  Batch script path: C:\QSTAF\update_helper.bat
+2025-06-01 01:46:26  [INFO]  Temp file path: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:46:26  [INFO]  Target file path: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:46:26  [INFO]  Launched batch script with elevated privileges
+2025-06-01 01:46:27  [INFO]  Exiting Python process to allow file replacement...
+2025-06-01 01:47:41  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-01 01:47:41  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:47:43  [INFO]  Finished download: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:47:43  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:47:43  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:47:43  [INFO]  Waiting 1.0 seconds before retry...
+2025-06-01 01:47:44  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
+2025-06-01 01:47:44  [ERROR]  Failed to remove C:\QSTAF\QSTAF_Tool.exe after 2 attempts
+2025-06-01 01:47:44  [INFO]  Direct replacement failed, using batch script approach...
+2025-06-01 01:47:44  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-01 01:47:44  [INFO]  Batch file created successfully, size: 4690 bytes
+2025-06-01 01:47:44  [INFO]  Launching update helper script and exiting...
+2025-06-01 01:47:44  [INFO]  Batch script path: C:\QSTAF\update_helper.bat
+2025-06-01 01:47:44  [INFO]  Temp file path: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-01 01:47:44  [INFO]  Target file path: C:\QSTAF\QSTAF_Tool.exe
+2025-06-01 01:47:44  [INFO]  Launched batch script with elevated privileges
+2025-06-01 01:47:45  [INFO]  Exiting Python process to allow file replacement...

@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['launcher.py'],
+    ['GUI.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[('Kill_process.py', '.'), ('Start_testCase.py', '.'), ('Quts_controller.py', '.'), ('Wifi_controller.py', '.'), ('aws_scheduler.py', '.'), ('Check_updates.py', '.')],
+    hiddenimports=['sv_ttk', 'packaging.version'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='QSTAF_Tool_v1.2.2',
+    name='QSTAF_Tool',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -35,5 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['logo.ico'],
 )

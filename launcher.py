@@ -7,7 +7,7 @@ QSTAF launcher – ONLY two decisions
 from __future__ import annotations
 import os, subprocess, sys, typing
 
-import Check_updates as updater           # local helper module
+import Quts_tool.Check_updates_old as updater           # local helper module
 from packaging.version import parse as vparse
 
 # ── config derived from Check_updates ──────────────────────────────────────

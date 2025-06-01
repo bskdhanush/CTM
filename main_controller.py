@@ -84,12 +84,16 @@ def run_app():
     # Ensure running with administrative privileges
     ensure_admin()
     # Check for updates and restart if needed
+    '''
     if check_for_updates():
         exe_path = sys.executable
         subprocess.Popen([exe_path] + sys.argv[1:])
         sys.exit(0)
     # Launch the GUI
+
+    '''
     gui.launch_gui()
+    
 
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)

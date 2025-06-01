@@ -11,7 +11,7 @@ print("[DEBUG] GitHub updater module imported")
 GITHUB_USERNAME   = os.getenv("GITHUB_USERNAME", "bskdhanush")
 GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY", "QC_stuff")
 GITHUB_PAT        = os.getenv("GITHUB_PAT") or "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"
-__version__       = os.getenv("APP_VERSION", "1.2.2")  # Current app version
+__version__       = os.getenv("APP_VERSION", "1.2.0")  # Current app version
 DOWNLOAD_DIR      = r"C:\QSTAF" 
 
 def get_session():

@@ -19,7 +19,7 @@ GITHUB_REPO   = "QC_stuff"
 GITHUB_PAT    = os.getenv("GITHUB_PAT") or "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"
 
 # Bump this on each new build/exe you generate:
-LOCAL_VERSION = "1.2.1"
+LOCAL_VERSION = "1.2.3"
 
 DOWNLOAD_DIR  = r"C:\QSTAF"
 EXE_NAME      = "QSTAF_Tool.exe"
@@ -250,7 +250,7 @@ if errorlevel 1 (
 
 if exist "{target_clean}" (
     echo SUCCESS: File replacement completed! >> "{log_clean}"
-    goto DELAY_AND_LAUNCH
+    goto Update_message
 ) else (
     echo ERROR: Moved file not found at {target_clean} >> "{log_clean}"
     goto RESTORE_BACKUP
@@ -273,19 +273,10 @@ if not "{backup_clean}"=="" (
     echo No backup available to restore. >> "{log_clean}"
 )
 
-:DELAY_AND_LAUNCH
-echo Waiting 5 seconds before opening a new terminal... >> "{log_clean}"
-timeout /t 5 /nobreak >nul
+:Update_message
 
-if exist "{target_clean}" (
-    echo Launching updated application in a new terminal... >> "{log_clean}"
-    rem Open a new cmd window and run the EXE with --skip-updates, keeping the terminal open
-    start cmd /k "\"{target_clean}\" --skip-updates"
-    echo Application launched >> "{log_clean}"
-) else (
-    echo ERROR: Cannot launch—EXE not found at {target_clean} >> "{log_clean}"
-    pause
-)
+rem Show a “Update is complete” pop-up using PowerShell
+powershell -noprofile -windowstyle hidden -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Update is complete','Update Finished')"
 
 echo Script completed at %date% %time% >> "{log_clean}"
 
@@ -295,6 +286,7 @@ timeout /t 2 /nobreak >nul
 rem Self-delete (silently)
 del "%~f0" >nul 2>&1
 '''
+
     # Write out the batch file
     with open(batch_script_path, "w", encoding="utf-8") as f:
         f.write(batch_content)

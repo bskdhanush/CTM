@@ -218,4 +218,4 @@ def launch_gui() -> None:
 
 
 if __name__ == "__main__":
-     main_controller.run_app()
+    main_controller.run_app()

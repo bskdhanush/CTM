@@ -170,6 +170,7 @@ def run_app():
      ensure_admin()
 
      # 2) If the user did NOT pass "--skip-updates", check for updates
+     '''
      if "--skip-updates" not in sys.argv:
          if is_running_as_exe():
              # Running as EXE - do integrated update check
@@ -192,11 +193,11 @@ def run_app():
                      print("Check_updates.py not found, skipping update check")
              except Exception as e:
                  print(f"Failed to launch updater: {e}")
-
+ '''
     # 3) Launch the GUI
-     gui.launch_gui()
+    #gui.launch_gui()
      # 3) At this point, run_app has done all update/log work. Now elevate if needed.
-     ensure_admin()
+    # ensure_admin()
  
      # 4) Launch the GUI
      gui.launch_gui()

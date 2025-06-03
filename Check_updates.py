@@ -1,5 +1,6 @@
 # ─── Check_updates.py (with batch-helper launching EXE in a new terminal) ─────────
 
+import glob
 import os
 import sys
 import subprocess
@@ -27,14 +28,15 @@ EXE_PATH      = os.path.join(DOWNLOAD_DIR, EXE_NAME)
 EXE_BACKUP    = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool.exe.backup")
 
 # Log file location (adjust as desired):
-LOG_FILENAME  = os.path.join("D:\\QC_testing\\GUI\\Quts_tool\\logs", "check_updates.log")
+LOG_DIR      = os.path.join(DOWNLOAD_DIR, "logs")
+LOG_FILENAME = os.path.join(LOG_DIR, "check_updates.log")
 
 
 # ── SET UP LOGGING ──────────────────────────────────────────────────────────────
 
 # Ensure directories exist
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-os.makedirs(os.path.dirname(LOG_FILENAME), exist_ok=True)
+os.makedirs(LOG_DIR,       exist_ok=True)
 
 logger = logging.getLogger("CheckUpdates")
 logger.setLevel(logging.INFO)
@@ -172,7 +174,7 @@ def create_update_script(temp_path: str, target_path: str, backup_path: str) -> 
     Returns the absolute path of the created .bat.
     """
     batch_script_path = os.path.join(DOWNLOAD_DIR, "update_helper.bat")
-    log_file_path     = os.path.join(DOWNLOAD_DIR, "update_helper.log")
+    log_file_path     = os.path.join(LOG_DIR, "update_helper.log")
 
     # Convert forward slashes to backslashes for Windows paths
     temp_clean    = temp_path.replace("/", "\\")
@@ -335,25 +337,33 @@ def download_and_replace(asset_api_url: str, asset_name: str):
         raise
 
 
-
 def launch_updated_exe():
     """
-    Launch whatever sits at EXE_PATH with the --skip-updates flag, then exit.
-    If EXE_PATH is missing, try to restore from backup.
+    Look for the newest “QSTAF_Tool*.exe” inside DOWNLOAD_DIR and run it with
+    --skip-updates.  Falls back to the backup if no matching EXE is found.
     """
-    if not os.path.isfile(EXE_PATH):
-        log_warn(f"EXE not found at {EXE_PATH}; attempting restore from backup...")
-        if not restore_from_backup(EXE_BACKUP, EXE_PATH):
-            log_error("Cannot find or restore the EXE. Aborting.")
-            sys.exit(1)
+    # 1) gather candidate EXEs
+    pattern     = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool*.exe")
+    candidates  = glob.glob(pattern)
 
-    log_info(f"Launching updated EXE: {EXE_PATH} --skip-updates")
+    if not candidates:
+        log_warn("No QSTAF_Tool*.exe found; attempting to restore from backup.")
+        if not restore_from_backup(EXE_BACKUP, EXE_PATH):
+            log_error("No executable available to launch. Aborting.")
+            sys.exit(1)
+        candidates = [EXE_PATH]
+
+    # 2) pick the most‑recently modified one
+    exe_to_run = max(candidates, key=os.path.getmtime)
+
+    log_info(f"Launching updated EXE: {exe_to_run} --skip-updates")
     try:
-        subprocess.Popen([EXE_PATH, "--skip-updates"], shell=False)
+        subprocess.Popen([exe_to_run, "--skip-updates"], shell=False)
         sys.exit(0)
     except Exception as e:
-        log_error(f"Failed to launch {EXE_PATH}: {e}")
+        log_error(f"Failed to launch {exe_to_run}: {e}")
         sys.exit(1)
+
 
 
 def check_and_update():

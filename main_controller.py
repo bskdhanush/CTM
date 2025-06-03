@@ -169,7 +169,10 @@ def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
     # 1) Require admin
     ensure_admin()
+    #commont the below line and uncomment step 2 to check for updates
+    gui.launch_gui()
 
+'''
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -188,6 +191,8 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
+  '''
+
 
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)

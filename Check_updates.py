@@ -88,7 +88,7 @@ def fetch_latest_release_data():
     r.raise_for_status()
     return r.json()
 
-def find_latest_exe_asset(release_data: dict) -> (str, str):
+def find_latest_exe_asset(release_data: dict) -> (str, str): # type: ignore
     """
     Scan release_data["assets"] for the newest .exe whose name 
     starts with "QSTAF_Tool" (case‐insensitive). Returns (asset_url, asset_name).

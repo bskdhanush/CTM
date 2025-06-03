@@ -115,3 +115,4 @@
 2025-06-02 22:54:45  [INFO]  Target file: C:\QSTAF\QSTAF_Tool.exe
 2025-06-02 22:54:45  [INFO]  Batch script launched via 'start'.
 2025-06-02 22:54:46  [INFO]  Exiting Python updater to let batch do its work.
+2025-06-02 23:00:21  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp

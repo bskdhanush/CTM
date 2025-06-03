@@ -2,12 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 import sv_ttk
 import datetime
+from PIL import Image, ImageTk  
+
 #Modules import 
 import Wifi_controller
 import aws_scheduler as aws
 import main_controller
 import Quts_controller
-
+import data_monitor_controller
 
 def launch_gui() -> None:
     """Construct and run the UI.  All business logic lives in main_controller."""
@@ -65,6 +67,8 @@ def launch_gui() -> None:
     container = ttk.Frame(root)
     sidebar.grid(row=1, column=0, sticky="ns")
     container.grid(row=1, column=1, sticky="nsew")
+    container.columnconfigure(0, weight=1)
+    container.rowconfigure(0,    weight=1)
 
     pages: dict[str, ttk.Frame] = {}
     nav_buttons: dict[str, ttk.Button] = {}
@@ -207,6 +211,48 @@ def launch_gui() -> None:
     Testing_page.grid(row=0, column=0, sticky="nsew")
     pages["Testing_page"]=Testing_page
     _add_nav("Field Testing ","Testing_page")
+
+
+  # ── Data Monitoring PAGE ────────────────────────────────────────────────────────────
+  
+    Data_page= ttk.Frame(container)
+    Data_page.grid(row=0, column=0, sticky="nsew")
+    pages["Data_page"]= Data_page
+    _add_nav("CPE Data Monitor","Data_page")
+
+        # --- Scrollable thumbnail list (NO classes) ---------------------------
+        # --- Scrollable thumbnail list (NO classes) ---------------------------
+    canvas   = tk.Canvas(Data_page, borderwidth=0, highlightthickness=0)
+    vscroll  = ttk.Scrollbar(Data_page, orient="vertical", command=canvas.yview)
+    list_fr  = ttk.Frame(canvas)
+
+    # keep the canvas’ scrollregion in sync with its inner frame size
+    list_fr.bind("<Configure>",
+                 lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=list_fr, anchor="nw")
+    canvas.configure(yscrollcommand=vscroll.set)
+
+    # layout: canvas fills the space; scrollbar sits at far‑right with 10 px pad
+    canvas.pack(side="left", fill="both", expand=True)
+    vscroll.pack(side="right", fill="y", padx=(0, 0))
+
+    # populate dynamically --------------------------------------------------
+    thumbs = []                       # keep references so Tk doesn’t GC them
+    size   = (400, 200)
+
+    for path in data_monitor_controller.get_pic_paths():
+        try:
+            img = Image.open(path).resize(size, Image.LANCZOS)
+        except Exception:
+            from PIL import Image as _Img
+            img = _Img.new("RGB", size, "grey")  # fallback if image missing
+
+        ph = ImageTk.PhotoImage(img)
+        ttk.Label(
+            list_fr, image=ph, text=path.name,
+            compound="top", padding=6
+        ).pack(anchor="center")
+        thumbs.append(ph)
 
 
 

@@ -5,26 +5,80 @@ import time
 import ctypes
 from tkinter import messagebox
 
-import Kill_process
+import Kill_process 
+import Check_updates
 import Start_testCase
 import Quts_controller
-import Check_updates
 import GUI as gui
 
+# ── NEW IMPORT ────────────────────────────────────────────────────────────────
+# We need to know when to skip updates:
+import os
+
 # Constants for batch file directories and names
-CMD_DIR_CONTROL = r"C:\QSTAF\QSTAFpy\bin\Control_laptop\Windows"
+CMD_DIR_CONTROL  = r"C:\QSTAF\QSTAFpy\bin\Control_laptop\Windows"
 BAT_FILE_CONTROL = "Run_framework.bat"
-CMD_DIR_TRAFFIC = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows"
+CMD_DIR_TRAFFIC  = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows"
 BAT_FILE_TRAFFIC = "Run_framework.bat"
-CMD_DIR_AWS = r"C:\QSTAF\QSTAFpy\bin"
-BAT_FILE_AWS = "aws_s3_uploder.bat"
+CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
+BAT_FILE_AWS     = "aws_s3_uploder.bat"
+
+import logging
+import traceback
+
+# Set up logging for debugging EXE issues
+if getattr(sys, 'frozen', False):
+    # Running as EXE - log to file
+    log_dir = r"C:\QSTAF"
+    os.makedirs(log_dir, exist_ok=True)
+    logging.basicConfig(
+        filename=os.path.join(log_dir, "app_debug.log"),
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    
+    # Redirect stderr to log file for debugging
+    sys.stderr = open(os.path.join(log_dir, "app_errors.log"), "w")
+
+def log_exception(exc_type, exc_value, exc_traceback):
+    """Log uncaught exceptions"""
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    
+    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    
+sys.excepthook = log_exception
+
+
+
+
+def get_executable_dir():
+    """Get the directory where the executable is located, works for both .py and .exe"""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as Python script
+        return os.path.dirname(os.path.abspath(__file__))
+
+def is_running_as_exe():
+    """Check if we're running as a compiled executable"""
+    return getattr(sys, 'frozen', False)
 
 def ensure_admin():
     try:
         if not ctypes.windll.shell32.IsUserAnAdmin():
-            ctypes.windll.shell32.ShellExecuteW(
-                None, "runas", sys.executable, " ".join(sys.argv), None, 1
-            )
+            if is_running_as_exe():
+                # If running as EXE, restart the EXE with admin privileges
+                ctypes.windll.shell32.ShellExecuteW(
+                    None, "runas", sys.executable, " ".join(sys.argv), None, 1
+                )
+            else:
+                # If running as Python script
+                ctypes.windll.shell32.ShellExecuteW(
+                    None, "runas", sys.executable, " ".join(sys.argv), None, 1
+                )
             sys.exit(0)
     except Exception as e:
         print(f"[ERROR] Admin check failed: {e}")
@@ -53,7 +107,6 @@ def run_both_with_delay():
 def stop_all():
     found = Kill_process.stop_all_tests()
     msg = "All processes stopped." if found else "No processes found to stop."
-    #messagebox.showinfo("Info", msg)
     print(msg)
 
 def run_s3_uploader():
@@ -67,29 +120,79 @@ def restart_quts_pcat_qxdm():
         print(msg)
     Quts_controller.restart_quts_pcat_qxdm(callback=show_status)
 
-def check_for_updates() -> bool:
+def check_for_updates_integrated():
     """
-    Perform an update check. Returns True if an update was downloaded and should trigger a restart.
+    Integrated update checker that works in both .py and .exe modes
+    Returns True if update was found and applied, False otherwise
     """
     try:
-        updated = Check_updates.main_update_check()
-        if updated:
-            print("[INFO] Update applied, restarting...")
-        return bool(updated)
-    except Exception as e:
-        print(f"[WARNING] Update check failed: {e}")
+        # Import the update checking functionality directly
+        import Check_updates
+        
+        # Run the update check logic
+        data = Check_updates.fetch_latest_release_data()
+        raw_tag = data.get("tag_name", "")
+        latest_tag = raw_tag.lstrip("v")
+        
+        print(f"Latest release on GitHub: {latest_tag} (local: {Check_updates.LOCAL_VERSION})")
+        
+        if Check_updates.parse_version(latest_tag) > Check_updates.parse_version(Check_updates.LOCAL_VERSION):
+            print("Newer version detected. Downloading and replacing...")
+            asset_api_url, asset_name = Check_updates.find_latest_exe_asset(data)
+            
+            # Download the new version
+            Check_updates.download_and_replace(asset_api_url, asset_name)
+            print(f"Replaced old EXE with version {latest_tag}.")
+            
+            # Launch the updated EXE and exit
+            launch_updated_exe()
+            return True
+        else:
+            print("Already up to date.")
+            return False
+            
+    except Exception as exc:
+        print(f"Update check failed: {exc}")
         return False
 
-def run_app():
-    # Ensure running with administrative privileges
-    ensure_admin()
-    # Check for updates and restart if needed
-    if check_for_updates():
-        exe_path = sys.executable
-        subprocess.Popen([exe_path] + sys.argv[1:])
+def launch_updated_exe():
+    """Launch the updated executable"""
+    exe_path = Check_updates.EXE_PATH
+    if os.path.isfile(exe_path):
+        print(f"Launching updated EXE: {exe_path} --skip-updates")
+        subprocess.Popen([exe_path, "--skip-updates"], shell=False)
         sys.exit(0)
-    # Launch the GUI
+    else:
+        print(f"Cannot find EXE at {exe_path}. Continuing with current version.")
+
+def run_app() -> None:
+    """Entry‑point called by QSTAF_Tool.exe"""
+    # 1) Require admin
+    ensure_admin()
+    #commont the below line and uncomment step 2 to check for updates
     gui.launch_gui()
+
+'''
+    # 2) One‑time update check unless the flag is present
+    if "--skip-updates" not in sys.argv:
+        if is_running_as_exe():
+            if check_for_updates_integrated():
+                # New version will relaunch, so stop here
+                return
+        else:
+            # Running from .py – spawn updater in separate console
+            updater = os.path.join(get_executable_dir(), "Check_updates.py")
+            if os.path.exists(updater):
+                subprocess.Popen(
+                    ["cmd", "/c", "start", "", sys.executable, updater],
+                    shell=False
+                )
+                sys.exit(0)
+
+    # 3) Fire up the GUI
+    gui.launch_gui()
+  '''
+
 
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
@@ -99,6 +202,6 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
-    
+
 if __name__ == "__main__":
     run_app()

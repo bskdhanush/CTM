@@ -1,159 +1,408 @@
-from datetime import datetime
+# ─── Check_updates.py (with batch-helper launching EXE in a new terminal) ─────────
+
 import os
-from tkinter import messagebox    
+import sys
+import subprocess
 import requests
+import logging
+import time
+import shutil
+from datetime import datetime
 from packaging.version import parse as parse_version
 
+# ── CONFIGURATION ────────────────────────────────────────────────────────────────
 
-print("[DEBUG] GitHub updater module imported")
+GITHUB_USER   = "bskdhanush"
+GITHUB_REPO   = "QC_stuff"
 
-# Configuration from environment for security
-GITHUB_USERNAME   = os.getenv("GITHUB_USERNAME", "bskdhanush")
-GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY", "QC_stuff")
-GITHUB_PAT        = os.getenv("GITHUB_PAT") or "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"
-__version__       = os.getenv("APP_VERSION", "1.2.2")  # Current app version
-DOWNLOAD_DIR      = r"C:\QSTAF" 
+# You should supply a valid PAT in your environment; do NOT hard-code in production.
+GITHUB_PAT    = os.getenv("GITHUB_PAT") or "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"
+
+# Bump this on each new build/exe you generate:
+LOCAL_VERSION = "1.2.3"
+
+DOWNLOAD_DIR  = r"C:\QSTAF"
+EXE_NAME      = "QSTAF_Tool.exe"
+EXE_PATH      = os.path.join(DOWNLOAD_DIR, EXE_NAME)
+EXE_BACKUP    = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool.exe.backup")
+
+# Log file location (adjust as desired):
+LOG_FILENAME  = os.path.join("D:\\QC_testing\\GUI\\Quts_tool\\logs", "check_updates.log")
+
+
+# ── SET UP LOGGING ──────────────────────────────────────────────────────────────
+
+# Ensure directories exist
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+os.makedirs(os.path.dirname(LOG_FILENAME), exist_ok=True)
+
+logger = logging.getLogger("CheckUpdates")
+logger.setLevel(logging.INFO)
+logger.handlers.clear()
+
+file_handler = logging.FileHandler(LOG_FILENAME, mode="a", encoding="utf-8")
+file_fmt = logging.Formatter(
+    "%(asctime)s  [%(levelname)s]  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+file_handler.setFormatter(file_fmt)
+logger.addHandler(file_handler)
+
+def log_info(msg: str):
+    print(msg)
+    logger.info(msg)
+
+def log_warn(msg: str):
+    print(msg)
+    logger.warning(msg)
+
+def log_error(msg: str):
+    print(msg, file=sys.stderr)
+    logger.error(msg)
+
+
+# ── SESSION & API HELPERS ────────────────────────────────────────────────────────
 
 def get_session():
     """
-    Creates an authenticated session with GitHub API.
-    Raises EnvironmentError if PAT is missing.
+    Return a requests.Session that includes the GitHub PAT header.
+    Raises EnvironmentError if the PAT is missing.
     """
-    print("[DEBUG] Creating GitHub session...")
     if not GITHUB_PAT:
         raise EnvironmentError("GITHUB_PAT not set. Cannot access private repository.")
-    s = requests.Session()
-    s.headers.update({
+    sess = requests.Session()
+    sess.headers.update({
         "Authorization": f"Bearer {GITHUB_PAT}",
         "Accept": "application/vnd.github.v3+json"
     })
-    return s
+    return sess
 
 def fetch_latest_release_data():
     """
-    Fetches the full JSON for the latest release.
-    Raises HTTPError on failure.
+    Hits GitHub's /repos/:owner/:repo/releases/latest endpoint.
+    Returns the JSON payload or raises HTTPError.
     """
-    print(f"[DEBUG] Fetching latest release for {GITHUB_USERNAME}/{GITHUB_REPOSITORY}")
-    session = get_session()
-    url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPOSITORY}/releases/latest"
-    resp = session.get(url, timeout=10)
-    resp.raise_for_status()
-    print(f"[DEBUG] HTTP {resp.status_code} received for latest release JSON")
-    return resp.json()
+    api_url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
+    sess = get_session()
+    r = sess.get(api_url, timeout=10)
+    r.raise_for_status()
+    return r.json()
 
-def get_latest_release_version():
+def find_latest_exe_asset(release_data: dict) -> (str, str): # type: ignore
     """
-    Returns only the version string (tag_name or name) of the latest release.
+    Scan release_data["assets"] for the newest .exe whose name 
+    starts with "QSTAF_Tool" (case‐insensitive). Returns (asset_url, asset_name).
     """
-    data = fetch_latest_release_data()
-    version = data.get("tag_name") or data.get("name")
-    if not version:
-        msg = "Latest release has no tag_name or name."
-        print(f"[ERROR] {msg}")
-        raise ValueError(msg)
-
-    print(f"[DEBUG] Parsed latest release version: {version}")
-    return version
-
-def find_latest_exe_download_url(release_data):
-    """
-    From a release JSON, finds the newest .exe asset by created_at
-    and returns a tuple (asset_api_url, asset_filename).
-    Raises ValueError if none found.
-    """
-    print("[DEBUG] Searching for .exe assets in release data…")
     assets = release_data.get("assets", [])
-    exe_assets = [a for a in assets if a.get("name", "").lower().endswith(".exe")]
-
+    exe_assets = [
+        a for a in assets
+        if a.get("name", "").lower().startswith("qstaf_tool")
+           and a.get("name", "").lower().endswith(".exe")
+    ]
     if not exe_assets:
-        msg = "No .exe asset found in latest release."
-        print(f"[ERROR] {msg}")
-        raise ValueError(msg)
+        raise RuntimeError("No .exe asset named like 'QSTAF_Tool*.exe' found in latest release.")
 
-    # Helper to parse GitHub's ISO timestamp
-    def _parse_iso(ts: str) -> datetime:
+    def parse_iso(ts: str) -> datetime:
         return datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ")
 
-    # Sort descending by creation time
-    exe_assets.sort(key=lambda a: _parse_iso(a.get("created_at", "")), reverse=True)
+    # Sort by created_at descending
+    exe_assets.sort(
+        key=lambda a: parse_iso(a.get("created_at", "1970-01-01T00:00:00Z")),
+        reverse=True
+    )
     chosen = exe_assets[0]
+    return chosen["url"], chosen["name"]
 
-    api_url  = chosen.get("url")
-    filename = chosen.get("name")
-    print(f"[DEBUG] Selected .exe '{filename}' → {api_url}")
-    return api_url, filename
+def download_asset_to_temp(asset_api_url: str, asset_name: str) -> str:
+    sess = get_session()
+    sess.headers.update({"Accept": "application/octet-stream"})
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-def download_file(asset_api_url, dest_folder, dest_name):
-    """
-    Downloads the GitHub release asset using the API URL with octet-stream accept header.
-    Streams to disk safely with a temporary file.
-    """
-    print(f"[DEBUG] Preparing to download asset from {asset_api_url}")
-    session = get_session()
-    session.headers.update({"Accept": "application/octet-stream"})
+    temp_filename = asset_name + ".tmp"
+    temp_path     = os.path.join(DOWNLOAD_DIR, temp_filename)
 
-    os.makedirs(dest_folder, exist_ok=True)
-    temp_path  = os.path.join(dest_folder, dest_name + ".tmp")
-    final_path = os.path.join(dest_folder, dest_name)
-
-    with session.get(asset_api_url, stream=True, timeout=60) as r:
-        print(f"[DEBUG] HTTP {r.status_code} start streaming.")
+    log_info(f"Downloading asset to temp file: {temp_path}")
+    with sess.get(asset_api_url, stream=True, timeout=60) as r:
         r.raise_for_status()
         with open(temp_path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
+            for chunk in r.iter_content(chunk_size=1024*1024):
+                if chunk:
+                    f.write(chunk)
+    log_info(f"Finished download of {temp_path}")
+    return temp_path
 
-    os.replace(temp_path, final_path)
-    print(f"[DEBUG] Downloaded and saved to {final_path}")
-    return final_path
 
-def is_update_available(current_ver, latest_tag):
+def create_backup(source_path: str, backup_path: str) -> bool:
     """
-    Compares current app version against latest Git tag using packaging.version.
+    Copy source_path → backup_path. Return True on success or if source didn’t exist.
     """
-    print(f"[DEBUG] Comparing versions: current={current_ver}, latest={latest_tag}")
-    result = parse_version(latest_tag.lstrip('v')) > parse_version(current_ver.lstrip('v'))
-    print(f"[DEBUG] Update available: {result}")
-    return result
+    if not os.path.isfile(source_path):
+        return True
+    try:
+        shutil.copy2(source_path, backup_path)
+        log_info(f"Created backup: {backup_path}")
+        return True
+    except Exception as e:
+        log_warn(f"Failed to back up {source_path} → {backup_path}: {e}")
+        return False
 
-def asset_already_present(dest_folder: str, filename: str) -> bool:
+def restore_from_backup(backup_path: str, target_path: str) -> bool:
     """
-    Returns True if the exact asset file is already present on disk.
+    Copy backup_path → target_path. Return True if successful.
     """
-    return os.path.isfile(os.path.join(dest_folder, filename))
+    if not os.path.isfile(backup_path):
+        log_error(f"Backup file not found: {backup_path}")
+        return False
+    try:
+        shutil.copy2(backup_path, target_path)
+        log_info(f"Restored from backup: {target_path}")
+        return True
+    except Exception as e:
+        log_error(f"Failed to restore backup {backup_path} → {target_path}: {e}")
+        return False
 
-def main_update_check():
-    print(f"[INFO] Starting update check — current version: {__version__}")
+def create_update_script(temp_path: str, target_path: str, backup_path: str) -> str:
+    """
+    Generate a self-deleting batch file (update_helper.bat) under DOWNLOAD_DIR that:
+     1) Waits for the updater-EXE to close.
+     2) Deletes/moves the old EXE into place.
+     3) Waits 5 seconds, then opens a new terminal and runs the new EXE with --skip-updates.
+     4) Deletes itself (silently, even if %~f0 is missing).
+
+    Returns the absolute path of the created .bat.
+    """
+    batch_script_path = os.path.join(DOWNLOAD_DIR, "update_helper.bat")
+    log_file_path     = os.path.join(DOWNLOAD_DIR, "update_helper.log")
+
+    # Convert forward slashes to backslashes for Windows paths
+    temp_clean    = temp_path.replace("/", "\\")
+    target_clean  = target_path.replace("/", "\\")
+    backup_clean  = backup_path.replace("/", "\\") if backup_path else ""
+    log_clean     = log_file_path.replace("/", "\\")
+
+    # Build the batch-file content
+    batch_content = f'''@echo off
+rem ─────────────────────────────────────────────────────────────────────────────
+rem  Ensure we run from the script’s own folder so that %~f0 is valid:
+cd /d "%~dp0"
+
+rem Create or append to a log for debugging:
+echo Update Helper Script Started at %date% %time% > "{log_clean}"
+echo Waiting for updater to close... >> "{log_clean}"
+timeout /t 5 /nobreak >nul
+
+echo Attempting to replace EXE file: {target_clean} >> "{log_clean}"
+echo Temp file found: {temp_clean} >> "{log_clean}"
+
+rem Kill any running instance of the old EXE (if still hanging around)
+taskkill /f /im QSTAF_Tool.exe 2>nul
+timeout /t 2 /nobreak >nul
+
+set MAX_ATTEMPTS=15
+set ATTEMPT=1
+
+:RETRY
+echo Attempt !ATTEMPT! of !MAX_ATTEMPTS! >> "{log_clean}"
+if exist "{target_clean}" (
+    del /f /q "{target_clean}" 2>>"{log_clean}"
+    if exist "{target_clean}" (
+        echo File still in use, trying rename... >> "{log_clean}"
+        ren "{target_clean}" "QSTAF_Tool.exe.locked.!ATTEMPT!" 2>>"{log_clean}"
+        if not exist "{target_clean}" goto MOVE_NEW
+        timeout /t 3 /nobreak >nul
+        set /a ATTEMPT+=1
+        if !ATTEMPT! leq !MAX_ATTEMPTS! goto RETRY
+        echo FAILED to remove/rename after !MAX_ATTEMPTS! attempts >> "{log_clean}"
+        goto RESTORE_BACKUP
+    )
+)
+
+:MOVE_NEW
+echo Moving new file into place... >> "{log_clean}"
+move "{temp_clean}" "{target_clean}" 2>>"{log_clean}"
+if errorlevel 1 (
+    echo ERROR: Failed to move new file >> "{log_clean}"
+    goto RESTORE_BACKUP
+)
+
+if exist "{target_clean}" (
+    echo SUCCESS: File replacement completed! >> "{log_clean}"
+    goto Update_message
+) else (
+    echo ERROR: Moved file not found at {target_clean} >> "{log_clean}"
+    goto RESTORE_BACKUP
+)
+
+:RESTORE_BACKUP
+if not "{backup_clean}"=="" (
+    if exist "{backup_clean}" (
+        echo Restoring from backup... >> "{log_clean}"
+        copy "{backup_clean}" "{target_clean}" >nul 2>>"{log_clean}"
+        if exist "{target_clean}" (
+            echo Backup restored successfully >> "{log_clean}"
+        ) else (
+            echo ERROR: Failed to restore backup >> "{log_clean}"
+        )
+    ) else (
+        echo ERROR: Backup not found: {backup_clean} >> "{log_clean}"
+    )
+) else (
+    echo No backup available to restore. >> "{log_clean}"
+)
+
+:Update_message
+
+rem Show a “Update is complete” pop-up using PowerShell
+powershell -noprofile -windowstyle hidden -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Update is complete','Update Finished')"
+
+echo Script completed at %date% %time% >> "{log_clean}"
+
+rem Allow 2 seconds before self-delete
+timeout /t 2 /nobreak >nul
+
+rem Self-delete (silently)
+del "%~f0" >nul 2>&1
+'''
+
+    # Write out the batch file
+    with open(batch_script_path, "w", encoding="utf-8") as f:
+        f.write(batch_content)
+
+    log_info(f"Created update helper script: {batch_script_path}")
+    return batch_script_path
+
+
+def download_and_replace(asset_api_url: str, asset_name: str):
+    r"""
+    Always use the batch‑file helper to swap the running EXE.
+
+    Steps
+    -----
+    1. Back up the existing EXE (if present).
+    2. Download the new EXE to <DOWNLOAD_DIR>\<asset_name>.tmp.
+    3. Generate update_helper.bat that:
+          • waits for the updater to exit,
+          • moves the new file into place,
+          • shows “Update is complete”,
+          • launches the fresh EXE in a new console,
+          • self‑deletes.
+    4. Launch the .bat in a detached console and quit Python so the file
+       lock on the old EXE is released.
+    """
+    backup_created = False
+    temp_path      = None
 
     try:
-        release = fetch_latest_release_data()
-    except Exception as e:
-        print(f"[ERROR] Failed to fetch release info: {e}")
-        return
+        # 1) optional backup
+        if os.path.isfile(EXE_PATH):
+            backup_created = create_backup(EXE_PATH, EXE_BACKUP)
 
-    latest_tag = release.get("tag_name", "")
-    print(f"[INFO] Latest tag on GitHub: {latest_tag}")
+        # 2) download to temp
+        temp_path = download_asset_to_temp(asset_api_url, asset_name)
 
-    if not is_update_available(__version__, latest_tag):
-        print("[INFO] You already have the latest version running.")
-        return
+        # 3) batch helper
+        batch_script = create_update_script(
+            temp_path,
+            EXE_PATH,
+            EXE_BACKUP if backup_created else ""
+        )
 
-    print(f"[INFO] New version available: {latest_tag}")
+        log_info("Launching batch helper in a detached console …")
+        subprocess.Popen(
+            ["cmd.exe", "/c", "start", "", batch_script],
+            shell=False
+        )
 
+        # 4) give the .bat a moment to start, then exit updater
+        time.sleep(1)
+        log_info("Updater exiting so batch script can replace the EXE.")
+        sys.exit(0)
+
+    except Exception as exc:
+        log_error(f"download_and_replace failed: {exc}")
+
+        # tidy up temp
+        if temp_path and os.path.isfile(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+        # try to put the backup back if we nuked the original
+        if backup_created and not os.path.isfile(EXE_PATH):
+            restore_from_backup(EXE_BACKUP, EXE_PATH)
+
+        raise
+
+
+
+def launch_updated_exe():
+    """
+    Launch whatever sits at EXE_PATH with the --skip-updates flag, then exit.
+    If EXE_PATH is missing, try to restore from backup.
+    """
+    if not os.path.isfile(EXE_PATH):
+        log_warn(f"EXE not found at {EXE_PATH}; attempting restore from backup...")
+        if not restore_from_backup(EXE_BACKUP, EXE_PATH):
+            log_error("Cannot find or restore the EXE. Aborting.")
+            sys.exit(1)
+
+    log_info(f"Launching updated EXE: {EXE_PATH} --skip-updates")
     try:
-        api_url, asset_name = find_latest_exe_download_url(release)
-        if asset_already_present(DOWNLOAD_DIR, asset_name):
-            print(f"[INFO] '{asset_name}' is already present in {DOWNLOAD_DIR}. Skipping download.")
-            return
-
-        downloaded_path = download_file(api_url, DOWNLOAD_DIR, asset_name)
-        #print(f"[INFO] Downloaded new version to: {downloaded_path}")
-        messagebox.showinfo("Update available",f"Downloaded new version at '{downloaded_path}'")
-
+        subprocess.Popen([EXE_PATH, "--skip-updates"], shell=False)
+        sys.exit(0)
     except Exception as e:
-        print(f"[ERROR] Update failed: {e}")
+        log_error(f"Failed to launch {EXE_PATH}: {e}")
+        sys.exit(1)
 
-# Uncomment to run automatically on import
-# print("[DEBUG] Invoking main_update_check()")
-# main_update_check()
+
+def check_and_update():
+    """
+    Check GitHub for a newer tag vs. LOCAL_VERSION. If newer:
+    - Download & replace (directly or via batch helper). Returns True if replaced.
+    Otherwise returns False.
+    """
+    try:
+        log_info("Checking for updates on GitHub...")
+        data = fetch_latest_release_data()
+        raw_tag = data.get("tag_name", "")
+        latest_tag = raw_tag.lstrip("v")
+
+        log_info(f"Latest GitHub release: {latest_tag} (local: {LOCAL_VERSION})")
+        if parse_version(latest_tag) > parse_version(LOCAL_VERSION):
+            log_info("Newer version detected. Beginning download & replace...")
+            asset_api_url, asset_name = find_latest_exe_asset(data)
+            download_and_replace(asset_api_url, asset_name)
+            return True
+        else:
+            log_info("Already up to date.")
+            return False
+    except Exception as exc:
+        log_warn(f"Update check failed: {exc!r}")
+        return False
+
+
+# ── MAIN ROUTINE ─────────────────────────────────────────────────────────────────
+
+def main():
+    try:
+        log_info("Launching updater...")
+        data = fetch_latest_release_data()
+        raw_tag = data.get("tag_name", "")
+        latest_tag = raw_tag.lstrip("v")
+
+        log_info(f"Latest GitHub release: {latest_tag} (local: {LOCAL_VERSION})")
+        if parse_version(latest_tag) > parse_version(LOCAL_VERSION):
+            log_info("Newer version detected. Downloading & replacing...")
+            asset_api_url, asset_name = find_latest_exe_asset(data)
+            download_and_replace(asset_api_url, asset_name)
+        else:
+            log_info("Already up to date. Launching existing EXE.")
+            launch_updated_exe()
+    except Exception as exc:
+        log_warn(f"Update check failed: {exc!r}")
+        launch_updated_exe()
+
+
+if __name__ == "__main__":
+    main()

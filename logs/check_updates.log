@@ -1,47 +1,65 @@
-2025-06-01 11:29:42  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
-2025-06-01 11:29:42  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:29:45  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:29:45  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:29:45  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 1/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
-2025-06-01 11:29:46  [WARNING]  Permission denied removing C:\QSTAF\QSTAF_Tool.exe (attempt 2/2): [WinError 5] Access is denied: 'C:\\QSTAF\\QSTAF_Tool.exe'
-2025-06-01 11:29:46  [ERROR]  Give up removing C:\QSTAF\QSTAF_Tool.exe after 2 attempts.
-2025-06-01 11:29:46  [INFO]  Direct replacement failed; falling back to batch script approach.
-2025-06-01 11:29:46  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
-2025-06-01 11:29:46  [INFO]  Launching batch helper in a new, detached console and exiting Python...
-2025-06-01 11:29:46  [INFO]  Batch script: C:\QSTAF\update_helper.bat
-2025-06-01 11:29:46  [INFO]  Temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:29:46  [INFO]  Target file: C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:29:46  [INFO]  Batch script launched via 'start'.
-2025-06-01 11:29:47  [INFO]  Exiting Python updater to let batch do its work.
-2025-06-01 11:45:59  [INFO]  Launching updater...
-2025-06-01 11:46:00  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.1)
-2025-06-01 11:46:00  [INFO]  Newer version detected. Downloading & replacing...
-2025-06-01 11:46:00  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
-2025-06-01 11:46:00  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:46:03  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:46:03  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:03  [INFO]  Removed file: C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:03  [INFO]  Renaming C:\QSTAF\QSTAF_Tool.exe.tmp → C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:03  [INFO]  Direct replacement succeeded.
-2025-06-01 11:46:03  [INFO]  Removed file: C:\QSTAF\QSTAF_Tool.exe.backup
-2025-06-01 11:46:03  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
-2025-06-01 11:46:47  [INFO]  Launching updater...
-2025-06-01 11:46:48  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.1)
-2025-06-01 11:46:48  [INFO]  Newer version detected. Downloading & replacing...
-2025-06-01 11:46:48  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
-2025-06-01 11:46:48  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:46:50  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
-2025-06-01 11:46:50  [INFO]  Attempting direct replacement of C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:50  [INFO]  Removed file: C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:50  [INFO]  Renaming C:\QSTAF\QSTAF_Tool.exe.tmp → C:\QSTAF\QSTAF_Tool.exe
-2025-06-01 11:46:50  [INFO]  Direct replacement succeeded.
-2025-06-01 11:46:50  [INFO]  Removed file: C:\QSTAF\QSTAF_Tool.exe.backup
-2025-06-01 11:46:50  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
-2025-06-01 11:47:09  [INFO]  Launching updater...
-2025-06-01 11:47:10  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.3)
-2025-06-01 11:47:10  [INFO]  Already up to date. Launching existing EXE.
-2025-06-01 11:47:10  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
-2025-06-01 11:47:42  [INFO]  Launching updater...
-2025-06-01 11:47:42  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.3)
-2025-06-01 11:47:42  [INFO]  Already up to date. Launching existing EXE.
-2025-06-01 11:47:42  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-02 21:11:42  [INFO]  Launching updater...
+2025-06-02 21:11:42  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.0)
+2025-06-02 21:11:42  [INFO]  Newer version detected. Downloading & replacing...
+2025-06-02 21:11:42  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-02 21:11:42  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:11:45  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:11:45  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-02 21:11:45  [INFO]  Launching batch helper in a detached console …
+2025-06-02 21:11:46  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-02 21:12:27  [INFO]  Launching updater...
+2025-06-02 21:12:28  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.0)
+2025-06-02 21:12:28  [INFO]  Newer version detected. Downloading & replacing...
+2025-06-02 21:12:28  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-02 21:12:28  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:12:30  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:12:30  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-02 21:12:30  [INFO]  Launching batch helper in a detached console …
+2025-06-02 21:12:31  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-02 21:12:48  [INFO]  Launching updater...
+2025-06-02 21:12:48  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.0)
+2025-06-02 21:12:48  [INFO]  Newer version detected. Downloading & replacing...
+2025-06-02 21:12:48  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-02 21:12:48  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:12:50  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:12:50  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-02 21:12:50  [INFO]  Launching batch helper in a detached console …
+2025-06-02 21:12:51  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-02 21:13:30  [INFO]  Launching updater...
+2025-06-02 21:13:31  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.0)
+2025-06-02 21:13:31  [INFO]  Newer version detected. Downloading & replacing...
+2025-06-02 21:13:31  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-02 21:13:31  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:13:33  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:13:33  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-02 21:13:33  [INFO]  Launching batch helper in a detached console …
+2025-06-02 21:13:34  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-02 21:14:32  [INFO]  Launching updater...
+2025-06-02 21:14:32  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.2)
+2025-06-02 21:14:32  [INFO]  Already up to date. Launching existing EXE.
+2025-06-02 21:14:32  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-02 21:14:58  [INFO]  Launching updater...
+2025-06-02 21:14:58  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.2)
+2025-06-02 21:14:58  [INFO]  Already up to date. Launching existing EXE.
+2025-06-02 21:14:58  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-02 21:27:56  [INFO]  Launching updater...
+2025-06-02 21:27:56  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.2)
+2025-06-02 21:27:56  [INFO]  Already up to date. Launching existing EXE.
+2025-06-02 21:27:56  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-02 21:29:14  [INFO]  Launching updater...
+2025-06-02 21:29:15  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.2)
+2025-06-02 21:29:15  [INFO]  Already up to date. Launching existing EXE.
+2025-06-02 21:29:15  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-02 21:29:31  [INFO]  Launching updater...
+2025-06-02 21:29:32  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.1)
+2025-06-02 21:29:32  [INFO]  Newer version detected. Downloading & replacing...
+2025-06-02 21:29:32  [INFO]  Created backup: C:\QSTAF\QSTAF_Tool.exe.backup
+2025-06-02 21:29:32  [INFO]  Downloading asset to temp file: C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:29:34  [INFO]  Finished download of C:\QSTAF\QSTAF_Tool.exe.tmp
+2025-06-02 21:29:34  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
+2025-06-02 21:29:34  [INFO]  Launching batch helper in a detached console …
+2025-06-02 21:29:35  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-02 21:29:54  [INFO]  Launching updater...
+2025-06-02 21:29:55  [INFO]  Latest GitHub release: 1.2.2 (local: 1.2.3)
+2025-06-02 21:29:55  [INFO]  Already up to date. Launching existing EXE.
+2025-06-02 21:29:55  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates

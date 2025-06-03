@@ -165,42 +165,29 @@ def launch_updated_exe():
     else:
         print(f"Cannot find EXE at {exe_path}. Continuing with current version.")
 
-def run_app():
-    # 1) Ensure running with administrative privileges
-     ensure_admin()
+def run_app() -> None:
+    """Entry‑point called by QSTAF_Tool.exe"""
+    # 1) Require admin
+    ensure_admin()
 
-     # 2) If the user did NOT pass "--skip-updates", check for updates
-     '''
-     if "--skip-updates" not in sys.argv:
-         if is_running_as_exe():
-             # Running as EXE - do integrated update check
-             if check_for_updates_integrated():
-                 # Update was found and applied, new version will launch
-                 return
-         else:
-             # Running as Python script - try to launch Check_updates.py
-             try:
-                 this_folder = get_executable_dir()
-                 updater_script = os.path.join(this_folder, "Check_updates.py")
-                 if os.path.exists(updater_script):
-                     subprocess.Popen([
-                         "cmd.exe", "/c", "start",
-                         sys.executable,
-                         updater_script
-                     ], shell=False)
-                     sys.exit(0)
-                 else:
-                     print("Check_updates.py not found, skipping update check")
-             except Exception as e:
-                 print(f"Failed to launch updater: {e}")
- '''
-    # 3) Launch the GUI
-    #gui.launch_gui()
-     # 3) At this point, run_app has done all update/log work. Now elevate if needed.
-    # ensure_admin()
- 
-     # 4) Launch the GUI
-     gui.launch_gui()
+    # 2) One‑time update check unless the flag is present
+    if "--skip-updates" not in sys.argv:
+        if is_running_as_exe():
+            if check_for_updates_integrated():
+                # New version will relaunch, so stop here
+                return
+        else:
+            # Running from .py – spawn updater in separate console
+            updater = os.path.join(get_executable_dir(), "Check_updates.py")
+            if os.path.exists(updater):
+                subprocess.Popen(
+                    ["cmd", "/c", "start", "", sys.executable, updater],
+                    shell=False
+                )
+                sys.exit(0)
+
+    # 3) Fire up the GUI
+    gui.launch_gui()
 
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)

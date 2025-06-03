@@ -13,8 +13,6 @@ import data_monitor_controller
 
 def launch_gui() -> None:
     """Construct and run the UI.  All business logic lives in main_controller."""
-    # ── Admin check ───────────────────────────────────────────────────────────
-    main_controller.ensure_admin()
 
     # ── Window setup ──────────────────────────────────────────────────────────
     root = tk.Tk()

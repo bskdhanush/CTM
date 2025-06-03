@@ -131,29 +131,6 @@ def download_asset_to_temp(asset_api_url: str, asset_name: str) -> str:
     log_info(f"Finished download of {temp_path}")
     return temp_path
 
-def safe_remove_file(file_path: str, max_retries: int = 3, retry_delay: float = 1.0) -> bool:
-    """
-    Attempt to delete file_path up to max_retries. Returns True if gone, False otherwise.
-    """
-    if not os.path.isfile(file_path):
-        return True
-
-    for attempt in range(max_retries):
-        try:
-            os.remove(file_path)
-            log_info(f"Removed file: {file_path}")
-            return True
-        except PermissionError as pe:
-            log_warn(f"Permission denied removing {file_path} (attempt {attempt+1}/{max_retries}): {pe}")
-            if attempt < max_retries-1:
-                time.sleep(retry_delay)
-            else:
-                log_error(f"Give up removing {file_path} after {max_retries} attempts.")
-                return False
-        except OSError as oe:
-            log_error(f"OS error removing {file_path}: {oe}")
-            return False
-    return False
 
 def create_backup(source_path: str, backup_path: str) -> bool:
     """
@@ -296,96 +273,67 @@ del "%~f0" >nul 2>&1
 
 
 def download_and_replace(asset_api_url: str, asset_name: str):
-    """
-    1) Backup current EXE
-    2) Download new EXE to a .tmp
-    3) Attempt a direct os.replace; if it works, immediately launch via launch_updated_exe().
-    4) If replace is blocked, generate the batch helper and launch it in its own console,
-       then exit Python so the batch can proceed.
+    r"""
+    Always use the batch‑file helper to swap the running EXE.
+
+    Steps
+    -----
+    1. Back up the existing EXE (if present).
+    2. Download the new EXE to <DOWNLOAD_DIR>\<asset_name>.tmp.
+    3. Generate update_helper.bat that:
+          • waits for the updater to exit,
+          • moves the new file into place,
+          • shows “Update is complete”,
+          • launches the fresh EXE in a new console,
+          • self‑deletes.
+    4. Launch the .bat in a detached console and quit Python so the file
+       lock on the old EXE is released.
     """
     backup_created = False
-    temp_path = None
+    temp_path      = None
 
     try:
-        # (A) Backup existing EXE if it exists
+        # 1) optional backup
         if os.path.isfile(EXE_PATH):
             backup_created = create_backup(EXE_PATH, EXE_BACKUP)
 
-        # (B) Download the asset into a temp file
+        # 2) download to temp
         temp_path = download_asset_to_temp(asset_api_url, asset_name)
 
-        # (C) Try direct replacement in‐process (if the EXE isn't locked)
-        if os.path.isfile(EXE_PATH):
-            log_info(f"Attempting direct replacement of {EXE_PATH}")
-            if safe_remove_file(EXE_PATH, max_retries=2, retry_delay=1.0):
-                log_info(f"Renaming {temp_path} → {EXE_PATH}")
-                os.replace(temp_path, EXE_PATH)
-                log_info("Direct replacement succeeded.")
+        # 3) batch helper
+        batch_script = create_update_script(
+            temp_path,
+            EXE_PATH,
+            EXE_BACKUP if backup_created else ""
+        )
 
-                # Clean up backup if desired
-                if backup_created and os.path.isfile(EXE_BACKUP):
-                    safe_remove_file(EXE_BACKUP)
+        log_info("Launching batch helper in a detached console …")
+        subprocess.Popen(
+            ["cmd.exe", "/c", "start", "", batch_script],
+            shell=False
+        )
 
-                # Immediately launch the updated EXE and exit
-                launch_updated_exe()
-                return
-
-        # (D) If direct replacement failed (file lock), fall back to batch script
-        log_info("Direct replacement failed; falling back to batch script approach.")
-        batch_script = create_update_script(temp_path, EXE_PATH, EXE_BACKUP if backup_created else "")
-
-        log_info("Launching batch helper in a new, detached console and exiting Python...")
-        log_info(f"Batch script: {batch_script}")
-        log_info(f"Temp file: {temp_path}")
-        log_info(f"Target file: {EXE_PATH}")
-
-        if not os.path.isfile(batch_script):
-            raise RuntimeError(f"Batch script not found: {batch_script}")
-        if not os.path.isfile(temp_path):
-            raise RuntimeError(f"Temp file not found: {temp_path}")
-
-        # ── Launch the BAT in its own console window ───────────────────────────────
-        try:
-            subprocess.Popen(
-                ["cmd.exe", "/c", "start", "", batch_script],
-                shell=False
-            )
-            log_info("Batch script launched via 'start'.")
-        except Exception as start_exc:
-            log_error(f"Failed to launch batch script via start: {start_exc}")
-            # Fallback to CREATE_NEW_CONSOLE if needed
-            try:
-                subprocess.Popen(
-                    [batch_script],
-                    shell=True,
-                    creationflags=subprocess.CREATE_NEW_CONSOLE
-                )
-                log_info("Batch script launched via CREATE_NEW_CONSOLE fallback.")
-            except Exception as fallback_exc:
-                log_error(f"Fallback launch also failed: {fallback_exc}")
-
-        # Give the batch a moment to start, then exit Python so the .exe lock is freed
+        # 4) give the .bat a moment to start, then exit updater
         time.sleep(1)
-        log_info("Exiting Python updater to let batch do its work.")
+        log_info("Updater exiting so batch script can replace the EXE.")
         sys.exit(0)
 
-    except Exception as e:
-        log_error(f"Error during download_and_replace: {e}")
+    except Exception as exc:
+        log_error(f"download_and_replace failed: {exc}")
 
-        # Clean up temp if it exists
+        # tidy up temp
         if temp_path and os.path.isfile(temp_path):
             try:
                 os.remove(temp_path)
-                log_info(f"Removed temp file: {temp_path}")
-            except:
+            except OSError:
                 pass
 
-        # If we backed up and EXE is gone, restore it
+        # try to put the backup back if we nuked the original
         if backup_created and not os.path.isfile(EXE_PATH):
-            log_info("Attempting to restore from backup...")
             restore_from_backup(EXE_BACKUP, EXE_PATH)
 
         raise
+
 
 
 def launch_updated_exe():

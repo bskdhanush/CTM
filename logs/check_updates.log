@@ -85,3 +85,33 @@
 2025-06-02 21:45:16  [INFO]  Created update helper script: C:\QSTAF\update_helper.bat
 2025-06-02 21:45:16  [INFO]  Launching batch helper in a detached console …
 2025-06-02 21:45:17  [INFO]  Updater exiting so batch script can replace the EXE.
+2025-06-03 17:51:08  [INFO]  Launching updater...
+2025-06-03 17:51:08  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 17:51:08  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 17:51:08  [WARNING]  EXE not found at C:\QSTAF\QSTAF_Tool.exe; attempting restore from backup...
+2025-06-03 17:51:08  [INFO]  Restored from backup: C:\QSTAF\QSTAF_Tool.exe
+2025-06-03 17:51:08  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 19:37:15  [INFO]  Launching updater...
+2025-06-03 19:37:15  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 19:37:15  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 19:37:15  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 19:38:55  [INFO]  Launching updater...
+2025-06-03 19:38:55  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 19:38:55  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 19:38:55  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 19:40:19  [INFO]  Launching updater...
+2025-06-03 19:40:20  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 19:40:20  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 19:40:20  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 19:40:48  [INFO]  Launching updater...
+2025-06-03 19:40:49  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 19:40:49  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 19:40:49  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 19:44:15  [INFO]  Launching updater...
+2025-06-03 19:44:16  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 19:44:16  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 19:44:16  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates
+2025-06-03 20:04:16  [INFO]  Launching updater...
+2025-06-03 20:04:17  [INFO]  Latest GitHub release: 1.2.3 (local: 1.2.3)
+2025-06-03 20:04:17  [INFO]  Already up to date. Launching existing EXE.
+2025-06-03 20:04:17  [INFO]  Launching updated EXE: C:\QSTAF\QSTAF_Tool.exe --skip-updates

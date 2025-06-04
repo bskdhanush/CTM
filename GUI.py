@@ -200,7 +200,7 @@ def launch_gui() -> None:
     dropdown.pack(padx=20, pady=10)
 
     ttk.Button(select_config, text="Set config",
-               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current())
+               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current(),"")
                ).pack(fill="x", **PADDING)
     
 
@@ -209,6 +209,24 @@ def launch_gui() -> None:
     Testing_page.grid(row=0, column=0, sticky="nsew")
     pages["Testing_page"]=Testing_page
     _add_nav("Field Testing ","Testing_page")
+    
+    choices = ("3 SLO", "2G SLO + 5G-6G MLO")
+    select_config_test_page= ttk.LabelFrame(Testing_page, text=" Select config Type")
+    select_config_test_page.pack(fill="x", **PADDING)
+    dropdown=ttk.Combobox(select_config_test_page, values=choices, state="readonly")
+    dropdown.current(0)                                              # pre‑select first ite
+    dropdown.pack(padx=20, pady=10)
+    
+    
+    ttk.Button(select_config_test_page, text="Set Test SSID",
+               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current(),"_")
+               ).pack(fill="x", **PADDING)
+    ttk.Button(select_config_test_page, text="Set Default SSID",
+               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current(),"")
+               ).pack(fill="x", **PADDING)
+    
+  
+    
 
 
   # ── Data Monitoring PAGE ────────────────────────────────────────────────────────────

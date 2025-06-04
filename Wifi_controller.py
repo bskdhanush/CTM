@@ -69,18 +69,21 @@ def run_dmcli_commands(commands):
         run_command(f"adb wait-for-device shell {command}")
         time.sleep(1)
 
-def update_3_slo_config():
+def update_3_slo_config(Config):
+    ssid_suffix =''
     adb_id = get_adb_id()
-    slo_2g_ssid = f'QSTAF_2G_SLO_{adb_id}'
-    slo_5g_ssid = f'QSTAF_5G_SLO_{adb_id}'
-    slo_6g_ssid = f'QSTAF_6G_SLO_{adb_id}'
+    if Config!="":
+        ssid_suffix='_Test'
+    slo_2g_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
+    slo_5g_ssid = f'QSTAF_5G_SLO_{adb_id}{ssid_suffix}'
+    slo_6g_ssid = f'QSTAF_6G_SLO_{adb_id}{ssid_suffix}'     
     run_command("adb root")
     commands = [
         # Break 5G+6G MLO -> into SLO links
         "dmcli eRT setv Device.WiFi.SSID.2.MLDUnit int -1",
         "dmcli eRT setv Device.WiFi.SSID.17.MLDUnit int -1",
         "dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true",
-        "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
+        "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true",
 
         # Rename SSID names,
         f"dmcli eRT setv Device.WiFi.SSID.1.SSID string {slo_2g_ssid}",
@@ -92,9 +95,11 @@ def update_3_slo_config():
     ]
     run_dmcli_commands(commands)
 
-def update_2g_slo_5g6g_mlo_config():
+def update_2g_slo_5g6g_mlo_config(Config):
+    ssid_suffix =''
     adb_id = get_adb_id()
-    ssid_suffix = ''
+    if Config!="":
+        ssid_suffix = '_test'
     slo_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
     mlo_ssid = f'QSTAF_MLO_{adb_id}{ssid_suffix}'
     commands = [
@@ -117,7 +122,7 @@ def update_6g_slo_2g5g_mlo_config():
 def update_3_mlo_config():
     pass
 
-def update_cpe_wifi_config(wifi_config):
+def update_cpe_wifi_config(wifi_config,config):
     # Read Meta
     try:
         meta = get_meta_build_info()
@@ -128,9 +133,9 @@ def update_cpe_wifi_config(wifi_config):
         # RDKB, use dmcli commands
 
         if wifi_config == 0:
-            update_3_slo_config()
+            update_3_slo_config(config)
         elif wifi_config == 1:
-            update_2g_slo_5g6g_mlo_config()
+            update_2g_slo_5g6g_mlo_config(config)
 
     elif meta and 'LE.1.2' in meta:
         # LE.1.2 - QCMAP_CLI

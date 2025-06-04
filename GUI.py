@@ -200,7 +200,7 @@ def launch_gui() -> None:
     dropdown.pack(padx=20, pady=10)
 
     ttk.Button(select_config, text="Set config",
-               command=lambda: Wifi_controller.update_cpe_wifi_config(dropdown.current(),"")
+               command=lambda: main_controller.set_wifi_config(dropdown.current())
                ).pack(fill="x", **PADDING)
     
 

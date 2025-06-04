@@ -9,6 +9,7 @@ import Kill_process
 import Check_updates
 import Start_testCase
 import Quts_controller
+import Wifi_controller
 import GUI as gui
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
@@ -119,6 +120,13 @@ def restart_quts_pcat_qxdm():
     def show_status(msg: str):
         print(msg)
     Quts_controller.restart_quts_pcat_qxdm(callback=show_status)
+    
+def set_wifi_config(dropDown_value):
+   # print(dropDown_value)
+    Wifi_controller.connectBackhall()
+    Wifi_controller.update_cpe_wifi_config(dropDown_value,"")
+    Wifi_controller.setpassword_bandwiths()
+    
 
 def check_for_updates_integrated():
     """

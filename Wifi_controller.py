@@ -4,6 +4,9 @@ import re
 
 adb_id = None
 
+
+
+
 def run_command(command):
     output = None
     stderr = None
@@ -69,6 +72,19 @@ def run_dmcli_commands(commands):
         run_command(f"adb wait-for-device shell {command}")
         time.sleep(1)
 
+
+def connectBackhall():
+    run_command("adb root")
+    commands = [
+	"dmcli eRT setv Device.Cellular.AccessPoint.1.Apn string fast.t-mobile.com",
+    "sleep 2",
+	"dmcli eRT setv Device.Cellular.AccessPoint.1.X_QCOM.ConnectBackHaul bool true",
+	"sleep 2",
+	"dmcli eRT setv Device.Cellular.X_QCOM.AutoConnect bool true",
+	"sleep 2"
+    ]
+    run_dmcli_commands(commands)
+    
 def update_3_slo_config(Config):
     ssid_suffix =''
     adb_id = get_adb_id()
@@ -112,6 +128,40 @@ def update_2g_slo_5g6g_mlo_config(Config):
     ]
     run_dmcli_commands(commands)
 
+def setpassword_bandwiths():
+    commands = [
+    'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+
+    'dmcli eRT setv Device.WiFi.AccessPoint.2.Security.SAEPassphrase string "12345678"',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+
+    'dmcli eRT setv Device.WiFi.AccessPoint.17.Security.SAEPassphrase string "12345678"',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+
+    # ── bandwidth configuration ────────────────────────────
+    'dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+
+    'dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 160MHz',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+
+    'dmcli eRT setv Device.WiFi.Radio.3.OperatingChannelBandwidth string 320MHz',
+    'sleep 2',
+    'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
+    'sleep 2',
+    ]
+    run_dmcli_commands(commands)
 
 def update_5g_slo_2g6g_mlo_config():
     pass

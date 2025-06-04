@@ -4,7 +4,6 @@ import subprocess
 import time
 import ctypes
 from tkinter import messagebox
-import logging
 
 import Kill_process 
 import Check_updates
@@ -24,24 +23,22 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 
-r'''
+import logging
+import traceback
+
 # Set up logging for debugging EXE issues
-if getattr(sys, "frozen", False):               # running as packaged EXE
-    log_root = r"C:\QSTAF"
-    log_dir  = os.path.join(log_root, "logs")
-    os.makedirs(log_dir, exist_ok=True)         # create …\logs if missing
-
-    debug_log  = os.path.join(log_dir, "app_debug.log")
-    error_log  = os.path.join(log_dir, "app_errors.log")
-
+if getattr(sys, 'frozen', False):
+    # Running as EXE - log to file
+    log_dir = r"C:\QSTAF"
+    os.makedirs(log_dir, exist_ok=True)
     logging.basicConfig(
-        filename=debug_log,
+        filename=os.path.join(log_dir, "app_debug.log"),
         level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s"
+        format='%(asctime)s - %(levelname)s - %(message)s'
     )
-
-    # redirect stderr so unhandled tracebacks land in app_errors.log
-    sys.stderr = open(error_log, "w", buffering=1)  
+    
+    # Redirect stderr to log file for debugging
+    sys.stderr = open(os.path.join(log_dir, "app_errors.log"), "w")
 
 def log_exception(exc_type, exc_value, exc_traceback):
     """Log uncaught exceptions"""
@@ -53,7 +50,7 @@ def log_exception(exc_type, exc_value, exc_traceback):
     
 sys.excepthook = log_exception
 
-'''
+
 
 
 def get_executable_dir():
@@ -173,9 +170,9 @@ def run_app() -> None:
     # 1) Require admin
     ensure_admin()
     #commont the below line and uncomment step 2 to check for updates
-    #gui.launch_gui()
+    gui.launch_gui()
 
-
+'''
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -194,7 +191,7 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-
+'''
 
 
 def start_Pact_QXDM():

@@ -54,8 +54,10 @@ def log_exception(exc_type, exc_value, exc_traceback):
     
 sys.excepthook = log_exception
 
-
-
+def get_meta_mpss():
+    meta=Wifi_controller.get_meta_build_info()
+    mpss=Wifi_controller.get_mpss_build_info()
+    return meta,mpss
 
 def get_executable_dir():
     """Get the directory where the executable is located, works for both .py and .exe"""
@@ -201,8 +203,6 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-
-
 
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)

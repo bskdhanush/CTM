@@ -17,7 +17,7 @@ def launch_gui() -> None:
     # ── Window setup ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("600x600")
+    root.geometry("900x800")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -38,21 +38,38 @@ def launch_gui() -> None:
               background=[("active", "#FF6B6B"), ("pressed", "#EA4242")])
 
     PADDING = {"padx": 12, "pady": 8}
+   
 
-    # ── Header (NEW) ──────────────────────────────────────────────────────────
+    # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
-    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-    ttk.Label(
-    header_frame,
-    text='Band Info',
-    font=("Segoe UI", 12, "bold")).pack(side="left", anchor="w", padx=12, pady=(6, 4))
+    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
     
-    # right‑hand column = its own frame
-    right_col = ttk.Frame(header_frame)
-    right_col.pack(side="right", padx=15, pady=(6, 4))   # << packed as a single block
+    header_frame.columnconfigure(0, weight=1)   # left column can grow
+    header_frame.columnconfigure(1, weight=0)   # button – fixed
+    header_frame.columnconfigure(2, weight=1)  
     
-    ttk.Label(right_col, text="Crash Count :‑").pack(anchor="e",padx=15)      # top
-    ttk.Label(right_col, text="RDKB :‑").pack(anchor="e", pady=(2,0), padx=15)  # bottom
+    def refresh_meta_mpss():
+        meta, mpss = main_controller.get_meta_mpss()
+        meta_var.set(f"Meta : {meta}")
+        mpss_var.set(f"MPSS : {mpss}")
+    
+    meta_var = tk.StringVar(value="Meta : ")
+    mpss_var = tk.StringVar(value="MPSS : ")
+    
+    ttk.Label(header_frame, textvariable=meta_var, anchor="w") \
+    .grid(row=0, column=0, sticky="w", padx=15)
+    ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
+    .grid(row=1, column=0, sticky="w", padx=15)
+    
+    refresh_meta_mpss()
+    ttk.Button(
+    header_frame, text="Get info",
+    command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
+    
+    ttk.Label(header_frame, text="Crash Count :‑", anchor="e") \
+    .grid(row=0, column=2, sticky="e", padx=15)
+    ttk.Label(header_frame, text="RDKB :‑", anchor="e") \
+    .grid(row=1, column=2, sticky="e", padx=15)
     
     
 

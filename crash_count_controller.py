@@ -1,101 +1,164 @@
 # ── crashdump_utils.py ─────────────────────────────────────────────────────────
+"""
+Single shot use:   python crashdump_utils.py
+Watch mode:        python crashdump_utils.py --watch   (needs `watchdog`)
+All logic lives in this file so a single PyInstaller build can bundle it.
+"""
+
 from __future__ import annotations
 
+import argparse
 import json
+import time
+from datetime import datetime, time as dtime, timedelta
 from pathlib import Path
-from datetime import datetime, time, timedelta
 from typing import Optional, Tuple
+import watchdog
+
+import sys
+if hasattr(sys.stdout, "reconfigure"):        # Py ≥ 3.7
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except ValueError:
+        pass 
+# ── optional watchdog imports (lazy loaded) ────────────────────────────────
+try:
+    from watchdog.observers import Observer  # type: ignore
+    from watchdog.events import (
+        FileSystemEventHandler,
+        EVENT_TYPE_CREATED,
+    )  # type: ignore
+except ImportError:  # not installed → None
+    Observer = FileSystemEventHandler = EVENT_TYPE_CREATED = None  # type: ignore
 
 # ───────────────────────── CONFIGURATION ──────────────────────────────────
-CRASHDUMP_ROOT = Path(r"C:\QSTAF\crashDump")
-COUNTER_FILE   = CRASHDUMP_ROOT / "crash_counters.json"
+CRASHDUMP_ROOT  = Path(r"C:\QSTAF\crashDump")
+COUNTER_FILE    = CRASHDUMP_ROOT / "crash_counters.json"
 
-DAY_START  = time(9, 0)       # 09:00
-DAY_END    = time(18, 0)      # 18:00  (exclusive)
-NIGHT_END  = time(8, 45)      # 08:45  (exclusive) – night shift ends
+DAY_START       = dtime(9, 0)
+DAY_END         = dtime(18, 0)                        # exclusive
+NIGHT_END       = dtime(8, 45)                        # exclusive
+SIZE_THRESHOLD  = int(1.5 * 1024**3)                  # 1.5 GB
 # ──────────────────────────────────────────────────────────────────────────
 
 
-# ── helpers to locate newest folders ──────────────────────────────────────
-def newest_child(dir_path: Path) -> Optional[Tuple[Path, datetime]]:
-    """Return newest *direct* child directory of *dir_path* (path, mtime)."""
+# ── helper: newest directory in a folder ──────────────────────────────────
+def newest_child(parent: Path) -> Optional[Tuple[Path, datetime]]:
     try:
-        child = max((p for p in dir_path.iterdir() if p.is_dir()),
-                    key=lambda p: p.stat().st_mtime, default=None)
-        return (child,
-                datetime.fromtimestamp(child.stat().st_mtime)) if child else None
+        sub = max(
+            (p for p in parent.iterdir() if p.is_dir()),
+            key=lambda p: p.stat().st_mtime,
+            default=None,
+        )
+        if sub:
+            return sub, datetime.fromtimestamp(sub.stat().st_mtime)
     except FileNotFoundError:
-        return None
+        pass
+    return None
 
 
 def newest_top_level(root: Path = CRASHDUMP_ROOT) -> Optional[Tuple[Path, datetime]]:
-    """Newest folder directly under CRASHDUMP_ROOT (path, mtime) or None."""
     return newest_child(root)
+
+
+# ── name / size gates ─────────────────────────────────────────────────────
+def is_valid_child(p: Path) -> bool:
+    name = p.name
+    return len(name) >= 4 and name[:4].isdigit() and not name.lower().endswith(".zip")
+
+
+def dir_size(path: Path) -> int:
+    total = 0
+    for f in path.rglob("*"):
+        if f.is_file():
+            try:
+                total += f.stat().st_size
+            except FileNotFoundError:
+                pass
+    return total
+
+
+def valid_children(parent: Path, after: datetime) -> list[Tuple[Path, datetime]]:
+    """All sub folders newer than *after* that pass name + size rules."""
+    out: list[Tuple[Path, datetime]] = []
+    for p in parent.iterdir():
+        if not is_valid_child(p):
+            continue
+        ts = datetime.fromtimestamp(p.stat().st_mtime)
+        if ts <= after:
+            continue                           # already processed
+        if dir_size(p) >= SIZE_THRESHOLD:
+            out.append((p, ts))
+    out.sort(key=lambda x: x[1])               # oldest → newest
+    return out
 
 
 # ── ShiftCounters ─────────────────────────────────────────────────────────
 class ShiftCounters:
-    """Tracks day/night counts; resets at 09 :00 / 18 :00 and on new dump root."""
+    """Day/night counters with auto reset and persistence."""
+
     def __init__(self, store: Path = COUNTER_FILE) -> None:
         self.store = store
-        self.day   = 0
-        self.night = 0
-        self.last_day_reset   = datetime.min
+        self.day = self.night = 0
+        self.last_day_reset = datetime.min
         self.last_night_reset = datetime.min
         self.last_parent_path = ""
-        self.last_child_path  = ""
-        self.last_child_ts    = datetime.min
+        self.last_child_path = ""
+        self.last_child_ts = datetime.min
         self._load()
 
-    # ── persistence helpers ───────────────────────────────────────────
+    # ---------- persistence -------------------------------------------
     def _load(self) -> None:
         if self.store.exists():
             try:
                 d = json.loads(self.store.read_text())
-                self.day               = d["day"]
-                self.night             = d["night"]
-                self.last_day_reset    = datetime.fromisoformat(d["last_day_reset"])
-                self.last_night_reset  = datetime.fromisoformat(d["last_night_reset"])
-                self.last_parent_path  = d["last_parent_path"]
-                self.last_child_path   = d["last_child_path"]
-                self.last_child_ts     = datetime.fromisoformat(d["last_child_ts"])
+                self.day = d["day"]
+                self.night = d["night"]
+                self.last_day_reset = datetime.fromisoformat(d["last_day_reset"])
+                self.last_night_reset = datetime.fromisoformat(d["last_night_reset"])
+                self.last_parent_path = d["last_parent_path"]
+                self.last_child_path = d["last_child_path"]
+                self.last_child_ts = datetime.fromisoformat(d["last_child_ts"])
                 return
             except Exception:
-                pass   # Corrupted JSON -> start fresh
+                pass
         now = datetime.now()
         self.last_day_reset = self.last_night_reset = now
         self._save()
 
     def _save(self) -> None:
-        """Safely write counters to disk; create folder if necessary."""
         try:
             self.store.parent.mkdir(parents=True, exist_ok=True)
             tmp = self.store.with_suffix(".tmp")
-            tmp.write_text(json.dumps({
-                "day":  self.day,
-                "night": self.night,
-                "last_day_reset":   self.last_day_reset.isoformat(),
-                "last_night_reset": self.last_night_reset.isoformat(),
-                "last_parent_path": self.last_parent_path,
-                "last_child_path":  self.last_child_path,
-                "last_child_ts":    self.last_child_ts.isoformat(),
-            }, indent=2))
+            tmp.write_text(
+                json.dumps(
+                    {
+                        "day": self.day,
+                        "night": self.night,
+                        "last_day_reset": self.last_day_reset.isoformat(),
+                        "last_night_reset": self.last_night_reset.isoformat(),
+                        "last_parent_path": self.last_parent_path,
+                        "last_child_path": self.last_child_path,
+                        "last_child_ts": self.last_child_ts.isoformat(),
+                    },
+                    indent=2,
+                )
+            )
             tmp.replace(self.store)
         except Exception as exc:
             print(f"[ERROR] Failed to update {self.store}: {exc}")
 
-    # ── shift utilities ───────────────────────────────────────────────
+    # ---------- shift helpers -----------------------------------------
     @staticmethod
-    def _is_day(ts: datetime) -> bool:
-        return DAY_START <= ts.time() < DAY_END
+    def _is_day(t: datetime) -> bool:
+        return DAY_START <= t.time() < DAY_END
 
     @staticmethod
-    def _is_night(ts: datetime) -> bool:
-        t = ts.time()
-        return (t >= DAY_END) or (t < NIGHT_END)
+    def _is_night(t: datetime) -> bool:
+        tt = t.time()
+        return tt >= DAY_END or tt < NIGHT_END
 
     def _maybe_reset_daily(self) -> None:
-        """Reset counters at 09 :00 and 18 :00 each day."""
         now = datetime.now()
         changed = False
         if now.time() >= DAY_START and self.last_day_reset.date() != now.date():
@@ -109,47 +172,43 @@ class ShiftCounters:
         if changed:
             self._save()
 
-    # ── helper: switch parent ───────────────────────────────────────────
     def _switch_parent(self, parent: Path) -> None:
-        """Reset counters & remember the new top‑level dump folder."""
         self.day = self.night = 0
         self.last_parent_path = parent.as_posix()
-        self.last_child_path  = ""
-        self.last_child_ts    = datetime.min
+        self.last_child_path = ""
+        self.last_child_ts = datetime.min
         self._save()
 
-    # ── public API ─────────────────────────────────────────────────────
+    # ---------- public API --------------------------------------------
     def count_if_new(self, parent: Path, child: Path, child_ts: datetime) -> None:
-        """
-        Increment counters only if *child* is new and belongs to current shift.
-        Also handles parent‑folder switches and writes JSON on change.
-        """
+        """Increment counters if child is new and in current shift."""
         self._maybe_reset_daily()
 
-        # New parent folder?
+        # parent swap?
         if parent.as_posix() != self.last_parent_path:
             self._switch_parent(parent)
 
-        # Same child as last run?
+        # already counted?
         if child.as_posix() == self.last_child_path and child_ts == self.last_child_ts:
             return
 
         now = datetime.now()
-        incremented = False
-
+        inc = False
         if self._is_day(now):
             if self._is_day(child_ts) and child_ts.date() == now.date():
                 self.day += 1
-                incremented = True
+                inc = True
         elif self._is_night(now):
-            night_start = now.date() if now.time() >= DAY_END else (now - timedelta(days=1)).date()
+            night_start = (
+                now.date() if now.time() >= DAY_END else (now - timedelta(days=1)).date()
+            )
             if self._is_night(child_ts) and child_ts.date() == night_start:
                 self.night += 1
-                incremented = True
+                inc = True
 
-        if incremented:
+        if inc:
             self.last_child_path = child.as_posix()
-            self.last_child_ts   = child_ts
+            self.last_child_ts = child_ts
             self._save()
 
     def snapshot(self) -> Tuple[int, int]:
@@ -157,28 +216,73 @@ class ShiftCounters:
         return self.day, self.night
 
 
-# ── MAIN ─────────────────────────────────────────────────────────────────
-if __name__ == "__main__":
+# ── single shot driver (catch up capable) ────────────────────────────────
+def run_once() -> None:
     counters = ShiftCounters()
 
     top = newest_top_level()
     if top is None:
-        print("[WARN] No crash‑dump folders found.")
-        exit()
+        print("[WARN] No crash dump folders found.")
+        return
 
     parent_dir, parent_ts = top
-    print(f"[INFO] Newest dump dir   -> {parent_dir.name} "
-          f"({parent_ts:%Y-%m-%d %H:%M:%S})")
+    print(
+        f"[INFO] Newest dump dir   -> {parent_dir.name} "
+        f"({parent_ts:%Y-%m-%d %H:%M:%S})"
+    )
 
-    child = newest_child(parent_dir)
-    if child is None:
-        print("       (no sub folders yet)")
-        counters._switch_parent(parent_dir)       # ensure JSON reflects new root
+    children = valid_children(parent_dir, counters.last_child_ts)
+
+    if not children:
+        print("       (no qualifying new sub folders)")
+        if parent_dir.as_posix() != counters.last_parent_path:
+            counters._switch_parent(parent_dir)
     else:
-        child_dir, child_ts = child
-        print(f"       Newest sub folder -> {child_dir.name} "
-              f"({child_ts:%Y-%m-%d %H:%M:%S})")
-        counters.count_if_new(parent_dir, child_dir, child_ts)
+        for child_dir, child_ts in children:
+            sizeGb = dir_size(child_dir) / 1024**3
+            print(
+                f"       Processing       -> {child_dir.name} "
+                f"({child_ts:%Y-%m-%d %H:%M:%S}, {sizeGb:.2f} GB)"
+            )
+            counters.count_if_new(parent_dir, child_dir, child_ts)
 
-    day_cnt, night_cnt = counters.snapshot()
-    print(f"       Counters          -> day={day_cnt}  night={night_cnt}")
+    d, n = counters.snapshot()
+    print(f"       Counters          -> day={d}  night={n}")
+
+
+# ── optional watchdog wrapper (zero polling load) ────────────────────────
+class _DumpHandler(FileSystemEventHandler):
+    def on_any_event(self, event):
+        if event.event_type == EVENT_TYPE_CREATED and event.is_directory:
+            try:
+                run_once()
+            except Exception as exc:
+                print("[ERROR] handler:", exc)
+
+
+def run_watch() -> None:
+    if Observer is None:
+        print("[ERROR] watchdog not installed. Run `pip install watchdog`.")
+        return
+    obs = Observer()
+    obs.schedule(_DumpHandler(), str(CRASHDUMP_ROOT), recursive=True)
+    obs.start()
+    print("[INFO] Watching", CRASHDUMP_ROOT, "…  (Ctrl C to stop)")
+    try:
+        while True:
+            time.sleep(60)
+    except KeyboardInterrupt:
+        obs.stop()
+    obs.join()
+
+
+# ── CLI entry point ──────────────────────────────────────────────────────
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description="Crash dump day/night counter")
+    ap.add_argument("--watch", action="store_true", help="use watchdog instead of polling")
+    args = ap.parse_args()
+
+    if args.watch:
+        run_watch()
+    else:
+        run_once()

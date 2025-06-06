@@ -11,7 +11,7 @@ import Start_testCase
 import Quts_controller
 import Wifi_controller
 import GUI as gui
-
+import crash_count_controller 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
 import os
@@ -26,6 +26,9 @@ BAT_FILE_AWS     = "aws_s3_uploder.bat"
 
 import logging
 import traceback
+
+
+#crash_count_controller.run_watch()
 
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):

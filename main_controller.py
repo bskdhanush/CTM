@@ -55,6 +55,7 @@ def log_exception(exc_type, exc_value, exc_traceback):
 sys.excepthook = log_exception
 
 def get_meta_mpss():
+    Wifi_controller.run_command("adb root")
     meta=Wifi_controller.get_meta_build_info()
     mpss=Wifi_controller.get_mpss_build_info()
     return meta,mpss

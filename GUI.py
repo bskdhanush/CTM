@@ -49,7 +49,9 @@ def launch_gui() -> None:
     header_frame.columnconfigure(2, weight=1)  
     
     def refresh_meta_mpss():
-        meta, mpss = main_controller.get_meta_mpss()
+        meta="test"
+        mpss="test"
+      #  meta, mpss = main_controller.get_meta_mpss()
         meta_var.set(f"Meta : {meta}")
         mpss_var.set(f"MPSS : {mpss}")
     

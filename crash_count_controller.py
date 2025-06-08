@@ -255,6 +255,7 @@ class _DumpHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.event_type == EVENT_TYPE_CREATED and event.is_directory:
             try:
+                time.sleep(30)
                 run_once()
             except Exception as exc:
                 print("[ERROR] handler:", exc)
@@ -275,7 +276,7 @@ def run_watch() -> None:
         obs.stop()
     obs.join()
 
-
+'''
 # ── CLI entry point ──────────────────────────────────────────────────────
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Crash dump day/night counter")
@@ -286,3 +287,4 @@ if __name__ == "__main__":
         run_watch()
     else:
         run_once()
+'''

@@ -184,8 +184,8 @@ def run_app() -> None:
     # 1) Require admin
     ensure_admin()
     #commont the below line and uncomment step 2 to check for updates
-    #gui.launch_gui()
-
+    gui.launch_gui()
+'''
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -204,7 +204,7 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-
+'''
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
     Quts_controller.start_app(Quts_controller.QXDM_PATH)
@@ -213,6 +213,24 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
-
+'''
 if __name__ == "__main__":
     run_app()
+    crash_count_controller.run_watch()
+    
+ '''   
+import threading
+
+def main() -> None:
+    # 1️⃣  Start the watcher in a daemon thread
+    t = threading.Thread(
+        target=crash_count_controller.run_watch,
+        daemon=True        # auto‑stops when the main program exits
+    )
+    t.start()
+
+    # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
+    run_app()
+
+if __name__ == "__main__":
+    main()

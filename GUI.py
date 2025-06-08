@@ -9,7 +9,8 @@ import Wifi_controller
 import aws_scheduler as aws
 import main_controller
 import Quts_controller
-import data_monitor_controller
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import data_monitor_controller as dmc 
 
 def launch_gui() -> None:
     """Construct and run the UI.  All business logic lives in main_controller."""
@@ -272,22 +273,20 @@ def launch_gui() -> None:
     vscroll.pack(side="right", fill="y", padx=(0, 0))
 
     # populate dynamically --------------------------------------------------
-    thumbs = []                       # keep references so Tk doesn’t GC them
-    size   = (400, 200)
-
-    for path in data_monitor_controller.get_pic_paths():
-        try:
-            img = Image.open(path).resize(size, Image.LANCZOS)
-        except Exception:
-            from PIL import Image as _Img
-            img = _Img.new("RGB", size, "grey")  # fallback if image missing
-
-        ph = ImageTk.PhotoImage(img)
-        ttk.Label(
-            list_fr, image=ph, text=path.name,
-            compound="top", padding=6
-        ).pack(anchor="center")
-        thumbs.append(ph)
+    size        = (400, 200)
+    thumb_refs  = []
+    
+    for path in dmc.get_data_paths():
+        pil_img = dmc.make_plot_thumbnail(path, size)   # ← you’d need this helper
+        photo   = ImageTk.PhotoImage(pil_img)
+        
+        ttk.Label(list_fr,
+              image=photo,
+              text=path.stem,
+              compound="top",
+              padding=6
+             ).pack(anchor="center")
+    thumb_refs.append(photo)
 
 
 

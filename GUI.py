@@ -262,6 +262,27 @@ def launch_gui() -> None:
     canvas   = tk.Canvas(Data_page, borderwidth=0, highlightthickness=0)
     vscroll  = ttk.Scrollbar(Data_page, orient="vertical", command=canvas.yview)
     list_fr  = ttk.Frame(canvas)
+    
+    def _on_mousewheel(event: tk.Event) -> None:
+        """Scroll 1 unit per wheel notch (Windows/macOS) or per Button‑4/5 (X11)."""
+        if event.num == 4 or event.delta > 0:        # wheel up
+            canvas.yview_scroll(-1, "units")
+        else:                                        # wheel down
+            canvas.yview_scroll(+1, "units")
+
+    def _bind_to_mousewheel(_: tk.Event) -> None:
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)   # Windows / macOS
+        canvas.bind_all("<Button-4>",  _on_mousewheel)    # Linux scroll up
+        canvas.bind_all("<Button-5>",  _on_mousewheel)    # Linux scroll down
+
+    def _unbind_from_mousewheel(_: tk.Event) -> None:
+        canvas.unbind_all("<MouseWheel>")
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
+    
+    # bind when pointer enters/leaves the scrollable area
+    list_fr.bind("<Enter>",  _bind_to_mousewheel)
+    list_fr.bind("<Leave>",  _unbind_from_mousewheel)    
 
     # keep the canvas’ scrollregion in sync with its inner frame size
     list_fr.bind("<Configure>",

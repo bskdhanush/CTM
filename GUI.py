@@ -9,7 +9,8 @@ import Wifi_controller
 import aws_scheduler as aws
 import main_controller
 import Quts_controller
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
 import data_monitor_controller as dmc 
 
 def launch_gui() -> None:
@@ -273,20 +274,20 @@ def launch_gui() -> None:
     vscroll.pack(side="right", fill="y", padx=(0, 0))
 
     # populate dynamically --------------------------------------------------
-    size        = (400, 200)
-    thumb_refs  = []
+    plot_refs = []                     # keep references to canvases & figures
     
-    for path in dmc.get_data_paths():
-        pil_img = dmc.make_plot_thumbnail(path, size)   # ← you’d need this helper
-        photo   = ImageTk.PhotoImage(pil_img)
+    for path in dmc.get_data_paths():          # → C:\QSTAF\logs\temp_data.csv
+        fig = dmc.make_plot_figure(path, figsize=(7, 2))   # 4×2 inches @ default dpi
+        canv = FigureCanvasTkAgg(fig, master=list_fr)       # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
         
-        ttk.Label(list_fr,
-              image=photo,
-              text=path.stem,
-              compound="top",
-              padding=6
-             ).pack(anchor="center")
-    thumb_refs.append(photo)
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+    # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
 
 
 

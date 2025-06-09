@@ -11,7 +11,7 @@ import Start_testCase
 import Quts_controller
 import Wifi_controller
 import GUI as gui
-
+import crash_count_controller 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
 import os
@@ -26,6 +26,9 @@ BAT_FILE_AWS     = "aws_s3_uploder.bat"
 
 import logging
 import traceback
+
+
+#crash_count_controller.run_watch()
 
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
@@ -51,8 +54,11 @@ def log_exception(exc_type, exc_value, exc_traceback):
     
 sys.excepthook = log_exception
 
-
-
+def get_meta_mpss():
+    Wifi_controller.run_command("adb root")
+    meta=Wifi_controller.get_meta_build_info()
+    mpss=Wifi_controller.get_mpss_build_info()
+    return meta,mpss
 
 def get_executable_dir():
     """Get the directory where the executable is located, works for both .py and .exe"""
@@ -178,8 +184,8 @@ def run_app() -> None:
     # 1) Require admin
     ensure_admin()
     #commont the below line and uncomment step 2 to check for updates
-    #gui.launch_gui()
-
+    gui.launch_gui()
+'''
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -198,9 +204,7 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-
-
-
+'''
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
     Quts_controller.start_app(Quts_controller.QXDM_PATH)
@@ -209,6 +213,24 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
-
+'''
 if __name__ == "__main__":
     run_app()
+    crash_count_controller.run_watch()
+    
+ '''   
+import threading
+
+def main() -> None:
+    # 1️⃣  Start the watcher in a daemon thread
+    t = threading.Thread(
+        target=crash_count_controller.run_watch,
+        daemon=True        # auto‑stops when the main program exits
+    )
+    t.start()
+
+    # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
+    run_app()
+
+if __name__ == "__main__":
+    main()

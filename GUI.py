@@ -9,7 +9,9 @@ import Wifi_controller
 import aws_scheduler as aws
 import main_controller
 import Quts_controller
-import data_monitor_controller
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg, NavigationToolbar2Tk)
+import data_monitor_controller as dmc 
 
 def launch_gui() -> None:
     """Construct and run the UI.  All business logic lives in main_controller."""
@@ -17,7 +19,7 @@ def launch_gui() -> None:
     # ── Window setup ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("600x600")
+    root.geometry("900x800")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -38,21 +40,40 @@ def launch_gui() -> None:
               background=[("active", "#FF6B6B"), ("pressed", "#EA4242")])
 
     PADDING = {"padx": 12, "pady": 8}
+   
 
-    # ── Header (NEW) ──────────────────────────────────────────────────────────
+    # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
-    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-    ttk.Label(
-    header_frame,
-    text='Band Info',
-    font=("Segoe UI", 12, "bold")).pack(side="left", anchor="w", padx=12, pady=(6, 4))
+    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
     
-    # right‑hand column = its own frame
-    right_col = ttk.Frame(header_frame)
-    right_col.pack(side="right", padx=15, pady=(6, 4))   # << packed as a single block
+    header_frame.columnconfigure(0, weight=1)   # left column can grow
+    header_frame.columnconfigure(1, weight=0)   # button – fixed
+    header_frame.columnconfigure(2, weight=1)  
     
-    ttk.Label(right_col, text="Crash Count :‑").pack(anchor="e",padx=15)      # top
-    ttk.Label(right_col, text="RDKB :‑").pack(anchor="e", pady=(2,0), padx=15)  # bottom
+    def refresh_meta_mpss():
+        meta="test"
+        mpss="test"
+      #  meta, mpss = main_controller.get_meta_mpss()
+        meta_var.set(f"Meta : {meta}")
+        mpss_var.set(f"MPSS : {mpss}")
+    
+    meta_var = tk.StringVar(value="Meta : ")
+    mpss_var = tk.StringVar(value="MPSS : ")
+    
+    ttk.Label(header_frame, textvariable=meta_var, anchor="w") \
+    .grid(row=0, column=0, sticky="w", padx=15)
+    ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
+    .grid(row=1, column=0, sticky="w", padx=15)
+    
+    refresh_meta_mpss()
+    ttk.Button(
+    header_frame, text="Get info",
+    command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
+    
+    ttk.Label(header_frame, text="Crash Count :‑", anchor="e") \
+    .grid(row=0, column=2, sticky="e", padx=15)
+    ttk.Label(header_frame, text="RDKB :‑", anchor="e") \
+    .grid(row=1, column=2, sticky="e", padx=15)
     
     
 
@@ -241,6 +262,27 @@ def launch_gui() -> None:
     canvas   = tk.Canvas(Data_page, borderwidth=0, highlightthickness=0)
     vscroll  = ttk.Scrollbar(Data_page, orient="vertical", command=canvas.yview)
     list_fr  = ttk.Frame(canvas)
+    
+    def _on_mousewheel(event: tk.Event) -> None:
+        """Scroll 1 unit per wheel notch (Windows/macOS) or per Button‑4/5 (X11)."""
+        if event.num == 4 or event.delta > 0:        # wheel up
+            canvas.yview_scroll(-1, "units")
+        else:                                        # wheel down
+            canvas.yview_scroll(+1, "units")
+
+    def _bind_to_mousewheel(_: tk.Event) -> None:
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)   # Windows / macOS
+        canvas.bind_all("<Button-4>",  _on_mousewheel)    # Linux scroll up
+        canvas.bind_all("<Button-5>",  _on_mousewheel)    # Linux scroll down
+
+    def _unbind_from_mousewheel(_: tk.Event) -> None:
+        canvas.unbind_all("<MouseWheel>")
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
+    
+    # bind when pointer enters/leaves the scrollable area
+    list_fr.bind("<Enter>",  _bind_to_mousewheel)
+    list_fr.bind("<Leave>",  _unbind_from_mousewheel)    
 
     # keep the canvas’ scrollregion in sync with its inner frame size
     list_fr.bind("<Configure>",
@@ -253,22 +295,20 @@ def launch_gui() -> None:
     vscroll.pack(side="right", fill="y", padx=(0, 0))
 
     # populate dynamically --------------------------------------------------
-    thumbs = []                       # keep references so Tk doesn’t GC them
-    size   = (400, 200)
+    plot_refs = []                     # keep references to canvases & figures
+    
+    for path in dmc.get_data_paths():          # → C:\QSTAF\logs\temp_data.csv
+        fig = dmc.make_plot_figure(path, figsize=(7, 2))   # 4×2 inches @ default dpi
+        canv = FigureCanvasTkAgg(fig, master=list_fr)       # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
+        
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
 
-    for path in data_monitor_controller.get_pic_paths():
-        try:
-            img = Image.open(path).resize(size, Image.LANCZOS)
-        except Exception:
-            from PIL import Image as _Img
-            img = _Img.new("RGB", size, "grey")  # fallback if image missing
-
-        ph = ImageTk.PhotoImage(img)
-        ttk.Label(
-            list_fr, image=ph, text=path.name,
-            compound="top", padding=6
-        ).pack(anchor="center")
-        thumbs.append(ph)
+    # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
 
 
 

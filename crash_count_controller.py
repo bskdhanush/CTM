@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from datetime import datetime, time as dtime, timedelta
 from pathlib import Path
@@ -32,8 +33,9 @@ except ImportError:  # not installed → None
     Observer = FileSystemEventHandler = EVENT_TYPE_CREATED = None  # type: ignore
 
 # ───────────────────────── CONFIGURATION ──────────────────────────────────
-CRASHDUMP_ROOT  = Path(r"C:\QSTAF\crashDump")
-COUNTER_FILE    = CRASHDUMP_ROOT / "crash_counters.json"
+CRASHDUMP_ROOT  = Path(r"C:\QSTAF")
+COUNTER_FILE    = CRASHDUMP_ROOT / "app_config.json"
+CONFIG_FILE  = os.path.join(CRASHDUMP_ROOT, "app_config.json")
 
 DAY_START       = dtime(9, 0)
 DAY_END         = dtime(18, 0)                        # exclusive
@@ -77,6 +79,17 @@ def dir_size(path: Path) -> int:
                 pass
     return total
 
+def load_day_count() -> int:
+    """Return the current 'day' counter (0 if file or key is missing)."""
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            return json.load(f).get("day", 0)
+    except FileNotFoundError:
+        # file hasn't been created yet
+        return 0
+    except (json.JSONDecodeError, PermissionError) as exc:
+        print(f"[WARN] Could not read {CONFIG_FILE} ({exc}); defaulting to 0")
+        return 0
 
 def valid_children(parent: Path, after: datetime) -> list[Tuple[Path, datetime]]:
     """All sub folders newer than *after* that pass name + size rules."""
@@ -255,7 +268,7 @@ class _DumpHandler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.event_type == EVENT_TYPE_CREATED and event.is_directory:
             try:
-                time.sleep(30)
+                time.sleep(5)   # wait spcified time befor checking the file conditios
                 run_once()
             except Exception as exc:
                 print("[ERROR] handler:", exc)
@@ -271,7 +284,7 @@ def run_watch() -> None:
     print("[INFO] Watching", CRASHDUMP_ROOT, "…  (Ctrl C to stop)")
     try:
         while True:
-            time.sleep(60)
+            time.sleep(5) 
     except KeyboardInterrupt:
         obs.stop()
     obs.join()

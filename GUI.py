@@ -4,7 +4,7 @@ import sv_ttk
 import datetime
 from PIL import Image, ImageTk  
 
-#Modules import 
+import crash_count_controller
 import Wifi_controller
 import aws_scheduler as aws
 import main_controller
@@ -70,8 +70,14 @@ def launch_gui() -> None:
     header_frame, text="Get info",
     command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
     
+    # day crash counter
     ttk.Label(header_frame, text="Crash Count :‑", anchor="e") \
-    .grid(row=0, column=2, sticky="e", padx=15)
+    .grid(row=0, column=2, sticky="e")
+    day_crash_var = tk.StringVar(value=str(crash_count_controller.load_day_count()))
+    ttk.Label(header_frame, textvariable=day_crash_var, anchor="w") \
+    .grid(row=0, column=3, sticky="w",padx=15)
+    
+    
     ttk.Label(header_frame, text="RDKB :‑", anchor="e") \
     .grid(row=1, column=2, sticky="e", padx=15)
     

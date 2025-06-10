@@ -213,6 +213,7 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
+    
 '''
 if __name__ == "__main__":
     run_app()
@@ -231,6 +232,7 @@ def main() -> None:
 
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
+    
 
 if __name__ == "__main__":
     main()

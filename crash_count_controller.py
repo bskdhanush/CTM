@@ -270,6 +270,7 @@ class _DumpHandler(FileSystemEventHandler):
             try:
                 time.sleep(5)   # wait spcified time befor checking the file conditios
                 run_once()
+                
             except Exception as exc:
                 print("[ERROR] handler:", exc)
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+import json
 
 
 def get_latest_folder_by_depth(root: Path, depth: int) -> Optional[tuple[Path, str]]:
@@ -30,33 +31,52 @@ def get_latest_folder_by_depth(root: Path, depth: int) -> Optional[tuple[Path, s
     return get_latest_folder_by_depth(latest_sub, depth - 1)
 
 
-def get_unseen_folders_since(root: Path, last_seen_datetime_str: str) -> list[tuple[Path, float, str]]:
+def get_unseen_folders_since(root: Path, last_seen_datetime_str: str, crashType: str) -> list[tuple[Path, float, str]]:
     """
-    Return a list of folders under *root* modified after *last_seen_datetime*.
-    Each result is (Path, mtime, formatted_datetime).
+    Return unseen folders under *root* that:
+    - start with 4 digits
+    - contain at least one file meeting crashType-specific size threshold
+    - are newer than *last_seen_datetime_str*
     """
     if not root.exists() or not root.is_dir():
         return []
 
+    # Time parsing
     try:
         last_seen_dt = datetime.strptime(last_seen_datetime_str, "%Y-%m-%d %H:%M:%S.%f")
     except ValueError:
-        print("[WARN] Invalid datetime format in tracker. Defaulting to epoch.")
+        print("[WARN] Invalid datetime format. Defaulting to epoch.")
         last_seen_dt = datetime.fromtimestamp(0)
+
+    # CrashType-specific thresholds
+    min_size_bytes = 2 * 1024**3 if crashType.lower() == "normal" else 5 * 1024**2  # 2GB or 5MB
 
     unseen = []
     for p in root.iterdir():
-        if p.is_dir():
+        if (
+            p.is_dir()
+            and p.name[:4].isdigit()
+            and not p.name.endswith(".zip")
+        ):
             mtime = p.stat().st_mtime
             mtime_dt = datetime.fromtimestamp(mtime)
-            if mtime_dt > last_seen_dt:
-                formatted_time = mtime_dt.strftime("%Y-%m-%d %H:%M:%S")
-                unseen.append((p, mtime, formatted_time))
+
+            if mtime_dt <= last_seen_dt:
+                continue
+
+            # Check for large-enough file inside this folder
+            folder_size = sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+
+            if folder_size < min_size_bytes:
+                print(f"[SKIP] {p.name} → folder size = {folder_size / 1024**2:.2f} MB (< {min_size_bytes / 1024**2:.1f} MB)")
+                continue
+
+            # Folder passed all checks
+            formatted_time = mtime_dt.strftime("%Y-%m-%d %H:%M:%S.%f")
+            unseen.append((p, mtime, formatted_time))
 
     return sorted(unseen, key=lambda x: x[1])
 
-
-import json
 
 def ensure_tracker(tracker_file: Path, crashType: str) -> dict:
     """
@@ -105,7 +125,6 @@ def update_tracker(tracker_file: Path, latest_time: float, latest_folder: str, p
         "first_child_path": str(parent_path),
         "DIR_Counter":0,
         "OVN_Counter":0
-
     }
 
     with tracker_file.open("w") as f:
@@ -132,7 +151,7 @@ def get_latest_dir_update_json(root,depth,tracker_file,crashType):
 
     # Step 3: Check for unseen folders in that path
     parent_path = first_child_path.parent
-    new_folders = get_unseen_folders_since(parent_path, last_seen_dt_str)
+    new_folders = get_unseen_folders_since(parent_path, last_seen_dt_str,crashType)
 
 
     if not new_folders:

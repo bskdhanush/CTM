@@ -102,7 +102,10 @@ def update_tracker(tracker_file: Path, latest_time: float, latest_folder: str, p
     data[crashType] = {
         "last_seen_datetime": datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d %H:%M:%S.%f"),
         "last_seen_folder": latest_folder,
-        "first_child_path": str(parent_path)
+        "first_child_path": str(parent_path),
+        "DIR_Counter":0,
+        "OVN_Counter":0
+
     }
 
     with tracker_file.open("w") as f:
@@ -116,6 +119,7 @@ def get_latest_dir_update_json(root,depth,tracker_file,crashType):
     # Step 1: Load tracker
     tracker = ensure_tracker(tracker_file,crashType)
     last_seen_dt_str = tracker.get("last_seen_datetime", "1970-01-01 00:00:00.000000")
+    print(last_seen_dt_str)
 
     # Step 2: Get the first child folder (depth=1)
     first_child_result = get_latest_folder_by_depth(root, depth)

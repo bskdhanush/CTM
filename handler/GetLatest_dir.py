@@ -58,33 +58,88 @@ def get_unseen_folders_since(root: Path, last_seen_datetime_str: str) -> list[tu
 
 import json
 
-def ensure_tracker(tracker_file: Path) -> dict:
+def ensure_tracker(tracker_file: Path, crashType: str) -> dict:
     """
-    Ensure the tracker file exists and return its content as a dict.
-    If missing or corrupted, initialize with default values.
+    Ensure tracker file exists and return the crashType's sub-dictionary.
     """
     if not tracker_file.exists():
         with tracker_file.open("w") as f:
-            json.dump({"last_seen_time": 0.0}, f, indent=2)
+            json.dump({crashType: {"last_seen_datetime": "1970-01-01 00:00:00.000000"}}, f, indent=2)
 
     try:
         with tracker_file.open("r") as f:
-            return json.load(f)
+            data = json.load(f)
     except json.JSONDecodeError:
         with tracker_file.open("w") as f:
-            json.dump({"last_seen_time": 0.0}, f, indent=2)
-        return {"last_seen_time": 0.0}
+            json.dump({crashType: {"last_seen_datetime": "1970-01-01 00:00:00.000000"}}, f, indent=2)
+        return {crashType: {"last_seen_datetime": "1970-01-01 00:00:00.000000"}}
+
+    # Ensure crashType key exists
+    if crashType not in data:
+        data[crashType] = {"last_seen_datetime": "1970-01-01 00:00:00.000000"}
+        with tracker_file.open("w") as f:
+            json.dump(data, f, indent=2)
+
+    return data.get(crashType, {})
 
 
-def update_tracker(tracker_file: Path, latest_time: float, latest_folder: str, parent_path: Path):
+
+def update_tracker(tracker_file: Path, latest_time: float, latest_folder: str, parent_path: Path, crashType: str):
     """
-    Update the tracker file with latest folder's time and name.
+    Update tracker JSON using nested structure per crashType.
     """
-    data = {
+    if tracker_file.exists():
+        try:
+            with tracker_file.open("r") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            print("[WARN] Tracker file corrupt. Resetting...")
+            data = {}
+    else:
+        data = {}
+
+    # Update nested block
+    data[crashType] = {
         "last_seen_datetime": datetime.fromtimestamp(latest_time).strftime("%Y-%m-%d %H:%M:%S.%f"),
         "last_seen_folder": latest_folder,
         "first_child_path": str(parent_path)
     }
+
     with tracker_file.open("w") as f:
-        print("method called")
         json.dump(data, f, indent=2)
+        print(f"[INFO] Tracker updated for {crashType}")
+
+
+
+
+def get_latest_dir_update_json(root,depth,tracker_file,crashType):
+    # Step 1: Load tracker
+    tracker = ensure_tracker(tracker_file,crashType)
+    last_seen_dt_str = tracker.get("last_seen_datetime", "1970-01-01 00:00:00.000000")
+
+    # Step 2: Get the first child folder (depth=1)
+    first_child_result = get_latest_folder_by_depth(root, depth)
+    if not first_child_result:
+        print("[WARN] Could not determine first child folder.")
+        return
+
+    first_child_path, readable_time = first_child_result
+    print(f"[INFO] First child path: {first_child_path} (discovered at {readable_time})")
+
+    # Step 3: Check for unseen folders in that path
+    parent_path = first_child_path.parent
+    new_folders = get_unseen_folders_since(parent_path, last_seen_dt_str)
+
+
+    if not new_folders:
+        print("[INFO] No new folders found.")
+    else:
+        print(f"[INFO] Found {len(new_folders)} new folder(s):")
+        for folder, ts, formatted_time in new_folders:
+            print(f"  - {folder.name} (modified: {datetime.fromtimestamp(ts)})")
+            # Your processing logic here
+
+        # Step 4: Update tracker with latest folder info
+        latest_folder, latest_time, _ = new_folders[-1]
+        update_tracker(tracker_file, latest_time, latest_folder.name, parent_path,crashType)
+        print(f"[INFO] Tracker updated with timestamp: {latest_time}")

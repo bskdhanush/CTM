@@ -110,60 +110,23 @@ def process_dir(root: Path,
     save_config(cfg)
     return cfg[day_k], cfg[night_k]
 
-from pathlib import Path
-
-def _is_level(event_path: str, root: Path, depth: int) -> bool:
-    '''
-    Return True if *event_path* is exactly *depth* levels below *root*.
-    depth = 1  →  C:\root\child
-    depth = 2  →  C:\root\child\grandchild
-    '''
-    try:
-        rel_parts = Path(event_path).resolve().relative_to(root).parts
-        return len(rel_parts) == depth
-    except ValueError:               # not under *root*
-        return False
-
-
 class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
-        if not e.is_directory:
-            return
-        if not _is_level(e.src_path, CRASHDUMP_ROOT, depth=2):
-            return                      # ignore dev3 itself & any deeper dirs
-
-        # Give the dumper a moment to finish writing
-        threading.Timer(
-            10,
-            lambda: self._tally()
-        ).start()
-
-    def _tally(self):
-        d, n = process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE)
-        log.info("Crash  → Day:%d Night:%d", d, n)
-
+        time.sleep(10)
+        if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT)):
+            d,n = process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE) # type: ignore
+            log.info("Crash → Day:%d Night:%d", d, n)
 
 class RdkbHandler(FileSystemEventHandler):
     def on_created(self, e):
-        if not e.is_directory:
-            return
-        if not _is_level(e.src_path, RDKBCRASH_ROOT, depth=1):
-            return                      # ignore sub-folders of a log
-
-        threading.Timer(
-            10,
-            lambda: self._tally()
-        ).start()
-
-    def _tally(self):
-        d, n = process_dir(RDKBCRASH_ROOT, 'rdkbcrash',
-                           MIN_RDKBCRASH_SIZE, scan_root=True)
-        log.info("RDKB   → Day:%d Night:%d", d, n)
-
+        time.sleep(10)
+        if e.is_directory and e.src_path.startswith(str(RDKBCRASH_ROOT)):
+            d,n = process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
+            log.info("RDKB  → Day:%d Night:%d", d, n)
 
 def schedule_resets():
-    schedule.every().day.at("09:00")  .do(lambda: process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE))
-    schedule.every().day.at("17:59") .do(lambda: process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE))
+    schedule.every().day.at("09:00")  .do(lambda: process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE)) # type: ignore
+    schedule.every().day.at("17:59") .do(lambda: process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE)) # type: ignore
     schedule.every().day.at("09:00")  .do(lambda: process_dir(RDKBCRASH_ROOT,'rdkbcrash',MIN_RDKBCRASH_SIZE, scan_root=True))
     schedule.every().day.at("17:59") .do(lambda: process_dir(RDKBCRASH_ROOT,'rdkbcrash',MIN_RDKBCRASH_SIZE, scan_root=True))
     while True:
@@ -171,7 +134,7 @@ def schedule_resets():
         time.sleep(30)
 
 def run_watchdog():
-    process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE)
+    process_dir(CRASHDUMP_ROOT, 'crash',    MIN_CRASH_SIZE) # type: ignore
     process_dir(RDKBCRASH_ROOT,'rdkbcrash',MIN_RDKBCRASH_SIZE, scan_root=True)
 
     threading.Thread(target=schedule_resets, daemon=True).start()

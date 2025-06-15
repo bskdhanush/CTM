@@ -76,9 +76,8 @@ def get_unseen_folders_since(
     except ValueError:
         last_seen_dt = datetime.fromtimestamp(0)
 
-    min_sz = 2 * 1024**2 if crash_type.lower() == "normal" else 5 * 1024**2
+    min_sz = 1.7 * 1024**3 if crash_type.lower() == "normal" else 5 * 1024**2
     unseen: list[tuple[Path, float, str]] = []
-
     for p in root.iterdir():
         if p.is_dir() and p.name[:4].isdigit() and not p.name.endswith(".zip"):
             mtime = p.stat().st_mtime

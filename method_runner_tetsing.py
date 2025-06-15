@@ -49,8 +49,10 @@ class _BaseHandler(FileSystemEventHandler):
 
     # ── heavy work (runs in its own short-lived thread) -----------------------
     def _process_change(self):
+        delay=10 if self.section_key.lower() == "normal" else 5
+        print(delay)
         try:
-            time.sleep(self._DEBOUNCE_SEC)
+            time.sleep(delay)
             gd.get_latest_dir_update_json(
                 self.root,
                 self.depth,
@@ -98,8 +100,8 @@ def main() -> None:
     tracker_file = Path(r"C:\QSTAF\app_config.json")
 
     # initial catch-up so counters are correct before live watching
-    gd.get_latest_dir_update_json(normalroot,   depth, tracker_file, "normal")
-    gd.get_latest_dir_update_json(rdkcrashroot, 0,    tracker_file, "rdkb")
+    #gd.get_latest_dir_update_json(normalroot,   depth, tracker_file, "normal")
+    #gd.get_latest_dir_update_json(rdkcrashroot, 0,    tracker_file, "rdkb")
 
     # two fully independent observers
     normal_obs = _start_observer(normalroot,   NormalHandler(normalroot, depth, tracker_file))

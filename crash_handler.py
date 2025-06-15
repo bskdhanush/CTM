@@ -3,14 +3,10 @@ from __future__ import annotations
 
 import threading, time
 from pathlib import Path
-from watchdog.observers      import Observer
-from watchdog.events         import (
-    FileSystemEventHandler,
-    EVENT_TYPE_CREATED,
-    EVENT_TYPE_MOVED,
-)
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler,EVENT_TYPE_CREATED,EVENT_TYPE_MOVED
 
-import crash_controller as gd # your get_latest_dir_update_json() lives here
+import crash_count_controller as gd # your get_latest_dir_update_json() lives here
 
 
 # ── base handler ──────────────────────────────────────────────────────────────

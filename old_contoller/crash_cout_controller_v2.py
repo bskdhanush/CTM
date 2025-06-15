@@ -67,6 +67,8 @@ def process_dir(root: Path,
         cfg[night_k] = 0
         cfg[prev_k]  = None
         cfg[base_k]  = base_str
+        cfg["rdkbcrash_day_counter"]=0
+        cfg["rdkbcrash_night_counter"]=0
         log.info(f"{prefix.upper()} base changed → counters reset")
 
     # daily resets at 09:00 and 17:59

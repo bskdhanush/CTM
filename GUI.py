@@ -19,7 +19,7 @@ def launch_gui() -> None:
     # ── Window setup ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("900x800")
+    root.geometry("1920x1080")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -51,9 +51,9 @@ def launch_gui() -> None:
     header_frame.columnconfigure(2, weight=1)  
     
     def refresh_meta_mpss():
-        meta="test"
-        mpss="test"
-      #  meta, mpss = main_controller.get_meta_mpss()
+        meta = "UNKNOWN"
+        mpss = "UNKNOWN"
+        meta, mpss = main_controller.get_meta_mpss()
         meta_var.set(f"Meta : {meta}")
         mpss_var.set(f"MPSS : {mpss}")
     
@@ -297,23 +297,57 @@ def launch_gui() -> None:
     # populate dynamically --------------------------------------------------
     plot_refs = []                     # keep references to canvases & figures
     
-    for path in dmc.get_data_paths():          # → C:\QSTAF\logs\temp_data.csv
-        fig = dmc.make_plot_figure(path, figsize=(7, 2))   # 4×2 inches @ default dpi
-        canv = FigureCanvasTkAgg(fig, master=list_fr)       # embed in Tk
+    fig = dmc.process_traffic_csv(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
         canv.draw()
         canv.get_tk_widget().pack(anchor="center", pady=6)
-        
+
         toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
         toolbar.update()
         toolbar.pack(anchor="center", pady=(0, 6))
 
-    # Retain references so nothing is garbage‑collected
+        # Retain references so nothing is garbage‑collected
         plot_refs.append((fig, canv))
 
+    fig = dmc.ipa_thruput_plot(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
 
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
 
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
 
+    fig = dmc.plot_wifi_clients(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
 
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
+
+    fig = dmc.channel_conditions_plot(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
+
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
     # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")
     root.mainloop()

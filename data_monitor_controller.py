@@ -12,6 +12,7 @@ import os
 import glob
 import re
 from pathlib import Path
+from typing import Literal
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -58,7 +59,7 @@ def get_df(csv_type):
     return df
 
 # RSRP / SNR plot
-def channel_conditions_plot(figsize: (7, 4)):
+def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
     'RSRP and SNR plots from QSH_FR_MODE csv'
 
     df = get_df('\\*QSH_FR_MODE.csv')
@@ -88,7 +89,7 @@ def channel_conditions_plot(figsize: (7, 4)):
             pass
     return fig
 
-def ipa_thruput_plot(figsize: (7, 4)):
+def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
     """IPA Thruput plot from QSH_ENL2"""
 
     df = get_df('\\*QSH_ENL2.csv')
@@ -113,7 +114,7 @@ def ipa_thruput_plot(figsize: (7, 4)):
 
 
 ################### TRAFFIC CSV PROCESSING END #######################################
-def process_traffic_csv(figsize: (7, 4)):
+def process_traffic_csv(figsize: tuple[Literal[7], Literal[4]]):
     df_all = {}
     csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
 
@@ -205,7 +206,7 @@ def traffic_indexing(csv_name, df_csv):
 #     df.to_csv(indexing_csv, index=False)
 #     print(f'CSV Created: {indexing_csv}')
 
-def hist_plot(figsize: (7, 4), df_indexing_all=None):
+def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=""):
     """Generates Histogram plots based on df_all (based on Indexing.csv)"""
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
@@ -228,7 +229,7 @@ def hist_plot(figsize: (7, 4), df_indexing_all=None):
 
 ################### TRAFFIC CSV PROCESSING END #######################################
 
-def plot_wifi_clients(figsize:(7,4)):
+def plot_wifi_clients(figsize:tuple[Literal[7], Literal[4]]):
     """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""
 
     conn_dev_csv_files = glob.glob(LOG_DIR + '\\*qstaf_monitor_connected_devices.csv', recursive=True)
@@ -267,7 +268,7 @@ def plot_wifi_clients(figsize:(7,4)):
         pass
     return fig
 
-def rf_band_table(figsize: (7, 4)):
+def rf_band_table(figsize: tuple[Literal[7], Literal[4]]):
     df = get_df('\\*RFBandInfo.csv')
 
     try:

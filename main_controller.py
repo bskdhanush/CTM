@@ -11,7 +11,7 @@ import Start_testCase
 import Quts_controller
 import Wifi_controller
 import GUI as gui
-import crash_count_controller 
+import crash_handler
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
 import os
@@ -213,24 +213,26 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
+    
 '''
 if __name__ == "__main__":
     run_app()
-    crash_count_controller.run_watch()
+    #crash_count_controller.run_watch()
     
- '''   
+'''   
 import threading
 
 def main() -> None:
     # 1️⃣  Start the watcher in a daemon thread
     t = threading.Thread(
-        target=crash_count_controller.run_watch,
+        target=crash_handler.main,
         daemon=True        # auto‑stops when the main program exits
     )
     t.start()
 
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
+    
 
 if __name__ == "__main__":
     main()

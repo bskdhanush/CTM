@@ -1,290 +1,286 @@
-# ── crashdump_utils.py ─────────────────────────────────────────────────────────
-"""
-Single shot use:   python crashdump_utils.py
-Watch mode:        python crashdump_utils.py --watch   (needs `watchdog`)
-All logic lives in this file so a single PyInstaller build can bundle it.
-"""
-
-from __future__ import annotations
-
-import argparse
-import json
-import time
-from datetime import datetime, time as dtime, timedelta
+# ── GetLatest_dir.py ───────────────────────────────────────────────────────────
 from pathlib import Path
-from typing import Optional, Tuple
-import watchdog
+from datetime import datetime, time, timedelta
+from typing import Iterable, Literal, Optional, Tuple
+import json
 
-import sys
-if hasattr(sys.stdout, "reconfigure"):        # Py ≥ 3.7
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except ValueError:
-        pass 
-# ── optional watchdog imports (lazy loaded) ────────────────────────────────
-try:
-    from watchdog.observers import Observer  # type: ignore
-    from watchdog.events import (
-        FileSystemEventHandler,
-        EVENT_TYPE_CREATED,
-    )  # type: ignore
-except ImportError:  # not installed → None
-    Observer = FileSystemEventHandler = EVENT_TYPE_CREATED = None  # type: ignore
+# ──────────────────────────────────────────────────────────────────────────────
+#  Helpers for latest-folder discovery
+# ──────────────────────────────────────────────────────────────────────────────
+def get_latest_folder_by_depth(root: Path, depth: int) -> Optional[tuple[Path, str]]:
+    """
+    Return the latest folder at *depth* below *root*.
+    depth = 0 → latest sub-folder inside *root* (not root itself)
+    """
+    if not root.exists() or depth < 0:
+        return None
 
-# ───────────────────────── CONFIGURATION ──────────────────────────────────
-CRASHDUMP_ROOT  = Path(r"C:\QSTAF\crashDump")
-COUNTER_FILE    = CRASHDUMP_ROOT / "crash_counters.json"
+    subdirs = [d for d in root.iterdir() if d.is_dir()]
+    if not subdirs:
+        return None
 
-DAY_START       = dtime(9, 0)
-DAY_END         = dtime(18, 0)                        # exclusive
-NIGHT_END       = dtime(8, 45)                        # exclusive
-SIZE_THRESHOLD  = int(1.5 * 1024**3)                  # 1.5 GB
-# ──────────────────────────────────────────────────────────────────────────
+    latest_sub = max(subdirs, key=lambda d: d.stat().st_mtime)
+    if depth == 0:
+        ts = datetime.fromtimestamp(latest_sub.stat().st_mtime)
+        return latest_sub, ts.strftime("%Y-%m-%d %H:%M:%S")
+
+    return get_latest_folder_by_depth(latest_sub, depth - 1)
 
 
-# ── helper: newest directory in a folder ──────────────────────────────────
-def newest_child(parent: Path) -> Optional[Tuple[Path, datetime]]:
-    try:
-        sub = max(
-            (p for p in parent.iterdir() if p.is_dir()),
-            key=lambda p: p.stat().st_mtime,
-            default=None,
-        )
-        if sub:
-            return sub, datetime.fromtimestamp(sub.stat().st_mtime)
-    except FileNotFoundError:
-        pass
+# ──────────────────────────────────────────────────────────────────────────────
+#  Rules for counting
+# ──────────────────────────────────────────────────────────────────────────────
+DAY_START  = time(9, 0)
+DAY_END    = time(18, 0)          # inclusive
+NIGHT_END  = time(8, 59)          # inclusive
+NIGHT_START = time(18, 1)         # first minute after the day window
+
+
+def classify_window(ts: datetime, today: datetime.date) -> Literal["day", "night", None]: # type: ignore
+    """
+    Return "day", "night", or None for the folder timestamp *ts* according to:
+      • day   -> ts.date() == today   and 09:00 ≤ ts.time() ≤ 18:00
+      • night -> (ts.date() == today     and ts.time() ≥ 18:01)  OR
+                 (ts.date() == today+1   and ts.time() ≤ 08:59)
+    """
+    if ts.date() == today:
+        if DAY_START <= ts.time() <= DAY_END:
+            return "day"
+        elif ts.time() >= NIGHT_START:
+            return "night"
+    elif ts.date() == today + timedelta(days=1) and ts.time() <= NIGHT_END:
+        return "night"
     return None
 
 
-def newest_top_level(root: Path = CRASHDUMP_ROOT) -> Optional[Tuple[Path, datetime]]:
-    return newest_child(root)
+# ──────────────────────────────────────────────────────────────────────────────
+#  Folder-filtering helpers
+# ──────────────────────────────────────────────────────────────────────────────
+def get_unseen_folders_since(
+    root: Path,
+    last_seen_datetime_str: str,
+    crash_type: str,
+) -> list[tuple[Path, float, str]]:
+    """
+    Return folders newer than *last_seen_datetime_str* that:
+      • start with 4 digits
+      • meet the size threshold (2 MB for normal, 5 MB for rdkb)
+    """
+    if not root.exists() or not root.is_dir():
+        return []
+
+    try:
+        last_seen_dt = datetime.strptime(
+            last_seen_datetime_str, "%Y-%m-%d %H:%M:%S.%f"
+        )
+    except ValueError:
+        last_seen_dt = datetime.fromtimestamp(0)
+
+    min_sz = 1.7 * 1024**3 if crash_type.lower() == "normal" else 5 * 1024**2
+    unseen: list[tuple[Path, float, str]] = []
+    for p in root.iterdir():
+        if p.is_dir() and p.name[:4].isdigit() and not p.name.endswith(".zip"):
+            mtime = p.stat().st_mtime
+            m_dt  = datetime.fromtimestamp(mtime)
+            if m_dt <= last_seen_dt:
+                continue
+            folder_sz = sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+            if folder_sz < min_sz:
+                continue
+            unseen.append((p, mtime, m_dt.strftime("%Y-%m-%d %H:%M:%S.%f")))
+
+    return sorted(unseen, key=lambda x: x[1])
 
 
-# ── name / size gates ─────────────────────────────────────────────────────
-def is_valid_child(p: Path) -> bool:
-    name = p.name
-    return len(name) >= 4 and name[:4].isdigit() and not name.lower().endswith(".zip")
+# ──────────────────────────────────────────────────────────────────────────────
+#  Counter-reset utilities
+# ──────────────────────────────────────────────────────────────────────────────
+def should_reset_24(last_reset_str: str, now: datetime, reset_hour: int) -> bool:
+    """
+    Return True once per 24 h window starting at *reset_hour*.
+    """
+    try:
+        last_reset = datetime.strptime(last_reset_str, "%Y-%m-%d %H:%M:%S.%f")
+    except ValueError:
+        last_reset = datetime.fromtimestamp(0)
+
+    today_reset = now.replace(hour=reset_hour, minute=0, second=0, microsecond=0)
+    return now >= today_reset and last_reset < today_reset
 
 
-def dir_size(path: Path) -> int:
-    total = 0
-    for f in path.rglob("*"):
-        if f.is_file():
-            try:
-                total += f.stat().st_size
-            except FileNotFoundError:
-                pass
-    return total
+def _maybe_reset_counters(
+    dir_cnt: int,
+    ovn_cnt: int,
+    last_day_reset: str,
+    last_night_reset: str,
+    now: datetime,
+) -> Tuple[int, int, str, str]:
+    """
+    Apply 09:00 / 18:00 resets if needed and return updated counters + timestamps.
+    """
+    if should_reset_24(last_day_reset, now, 9):
+        dir_cnt = 0
+        last_day_reset = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
+    if should_reset_24(last_night_reset, now, 18):
+        ovn_cnt = 0
+        last_night_reset = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
-def valid_children(parent: Path, after: datetime) -> list[Tuple[Path, datetime]]:
-    """All sub folders newer than *after* that pass name + size rules."""
-    out: list[Tuple[Path, datetime]] = []
-    for p in parent.iterdir():
-        if not is_valid_child(p):
-            continue
-        ts = datetime.fromtimestamp(p.stat().st_mtime)
-        if ts <= after:
-            continue                           # already processed
-        if dir_size(p) >= SIZE_THRESHOLD:
-            out.append((p, ts))
-    out.sort(key=lambda x: x[1])               # oldest → newest
-    return out
+    return dir_cnt, ovn_cnt, last_day_reset, last_night_reset
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  Rest all counters
+# ──────────────────────────────────────────────────────────────────────────────
+def reset_all_counters(
+    tracker_file: Path,
+    crash_types: Optional[Iterable[str]] = None,
+    stamp_now: bool = True,
+) -> None:
+    """
+    Set both counters to 0 for every crash-type in *tracker_file*.
 
-# ── ShiftCounters ─────────────────────────────────────────────────────────
-class ShiftCounters:
-    """Day/night counters with auto reset and persistence."""
-
-    def __init__(self, store: Path = COUNTER_FILE) -> None:
-        self.store = store
-        self.day = self.night = 0
-        self.last_day_reset = datetime.min
-        self.last_night_reset = datetime.min
-        self.last_parent_path = ""
-        self.last_child_path = ""
-        self.last_child_ts = datetime.min
-        self._load()
-
-    # ---------- persistence -------------------------------------------
-    def _load(self) -> None:
-        if self.store.exists():
-            try:
-                d = json.loads(self.store.read_text())
-                self.day = d["day"]
-                self.night = d["night"]
-                self.last_day_reset = datetime.fromisoformat(d["last_day_reset"])
-                self.last_night_reset = datetime.fromisoformat(d["last_night_reset"])
-                self.last_parent_path = d["last_parent_path"]
-                self.last_child_path = d["last_child_path"]
-                self.last_child_ts = datetime.fromisoformat(d["last_child_ts"])
-                return
-            except Exception:
-                pass
-        now = datetime.now()
-        self.last_day_reset = self.last_night_reset = now
-        self._save()
-
-    def _save(self) -> None:
-        try:
-            self.store.parent.mkdir(parents=True, exist_ok=True)
-            tmp = self.store.with_suffix(".tmp")
-            tmp.write_text(
-                json.dumps(
-                    {
-                        "day": self.day,
-                        "night": self.night,
-                        "last_day_reset": self.last_day_reset.isoformat(),
-                        "last_night_reset": self.last_night_reset.isoformat(),
-                        "last_parent_path": self.last_parent_path,
-                        "last_child_path": self.last_child_path,
-                        "last_child_ts": self.last_child_ts.isoformat(),
-                    },
-                    indent=2,
-                )
-            )
-            tmp.replace(self.store)
-        except Exception as exc:
-            print(f"[ERROR] Failed to update {self.store}: {exc}")
-
-    # ---------- shift helpers -----------------------------------------
-    @staticmethod
-    def _is_day(t: datetime) -> bool:
-        return DAY_START <= t.time() < DAY_END
-
-    @staticmethod
-    def _is_night(t: datetime) -> bool:
-        tt = t.time()
-        return tt >= DAY_END or tt < NIGHT_END
-
-    def _maybe_reset_daily(self) -> None:
-        now = datetime.now()
-        changed = False
-        if now.time() >= DAY_START and self.last_day_reset.date() != now.date():
-            self.day = 0
-            self.last_day_reset = now
-            changed = True
-        if now.time() >= DAY_END and self.last_night_reset.date() != now.date():
-            self.night = 0
-            self.last_night_reset = now
-            changed = True
-        if changed:
-            self._save()
-
-    def _switch_parent(self, parent: Path) -> None:
-        self.day = self.night = 0
-        self.last_parent_path = parent.as_posix()
-        self.last_child_path = ""
-        self.last_child_ts = datetime.min
-        self._save()
-
-    # ---------- public API --------------------------------------------
-    def count_if_new(self, parent: Path, child: Path, child_ts: datetime) -> None:
-        """Increment counters if child is new and in current shift."""
-        self._maybe_reset_daily()
-
-        # parent swap?
-        if parent.as_posix() != self.last_parent_path:
-            self._switch_parent(parent)
-
-        # already counted?
-        if child.as_posix() == self.last_child_path and child_ts == self.last_child_ts:
-            return
-
-        now = datetime.now()
-        inc = False
-        if self._is_day(now):
-            if self._is_day(child_ts) and child_ts.date() == now.date():
-                self.day += 1
-                inc = True
-        elif self._is_night(now):
-            night_start = (
-                now.date() if now.time() >= DAY_END else (now - timedelta(days=1)).date()
-            )
-            if self._is_night(child_ts) and child_ts.date() == night_start:
-                self.night += 1
-                inc = True
-
-        if inc:
-            self.last_child_path = child.as_posix()
-            self.last_child_ts = child_ts
-            self._save()
-
-    def snapshot(self) -> Tuple[int, int]:
-        self._maybe_reset_daily()
-        return self.day, self.night
-
-
-# ── single shot driver (catch up capable) ────────────────────────────────
-def run_once() -> None:
-    counters = ShiftCounters()
-
-    top = newest_top_level()
-    if top is None:
-        print("[WARN] No crash dump folders found.")
+    Parameters
+    ----------
+    tracker_file : Path
+        Path to the JSON tracker.
+    crash_types : Iterable[str] | None
+        • None  → reset ALL crash-types present.  
+        • list → reset only those keys (e.g. ["normal", "rdkb"]).
+    stamp_now : bool
+        If True, overwrite `last_reset_day` & `last_reset_night` with
+        the current timestamp; otherwise leave them unchanged.
+    """
+    if not tracker_file.exists():
+        print(f"[WARN] {tracker_file} not found — nothing to reset.")
         return
 
-    parent_dir, parent_ts = top
-    print(
-        f"[INFO] Newest dump dir   -> {parent_dir.name} "
-        f"({parent_ts:%Y-%m-%d %H:%M:%S})"
+    try:
+        data = json.loads(tracker_file.read_text())
+    except json.JSONDecodeError:
+        print(f"[ERROR] Tracker JSON malformed — aborting reset.")
+        return
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    targets = crash_types if crash_types is not None else data.keys()
+
+    for ctype in targets:
+        node = data.get(ctype)
+        if node is None:
+            print(f"[INFO] crash-type '{ctype}' not present — skipped.")
+            continue
+        node["DIR_Counter"] = 0
+        node["OVN_Counter"] = 0
+        if stamp_now:
+            node["last_reset_day"]   = now_str
+            node["last_reset_night"] = now_str
+
+    tracker_file.write_text(json.dumps(data, indent=2))
+    print(f"[INFO] Counters reset for: {', '.join(targets)}")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  JSON tracker helpers
+# ──────────────────────────────────────────────────────────────────────────────
+def _load_tracker_node(tracker_file: Path, crash_type: str) -> dict:
+    """
+    Ensure *tracker_file* exists and return its crash-type node.
+    """
+    if not tracker_file.exists():
+        tracker_file.parent.mkdir(parents=True, exist_ok=True)
+        tracker_file.write_text("{}")
+
+    try:
+        data = json.loads(tracker_file.read_text())
+    except json.JSONDecodeError:
+        data = {}
+    if crash_type not in data:
+        data[crash_type] = {
+            "last_seen_datetime": "1970-01-01 00:00:00.000000",
+            "DIR_Counter": 0,
+            "OVN_Counter": 0,
+            "last_reset_day": "1970-01-01 00:00:00.000000",
+            "last_reset_night": "1970-01-01 00:00:00.000000",
+        }
+    return data[crash_type]
+
+
+def _persist_tracker(
+    tracker_file: Path,
+    crash_type: str,
+    node: dict,
+) -> None:
+    try:
+        data = json.loads(tracker_file.read_text())
+    except json.JSONDecodeError:
+        data = {}
+    data[crash_type] = node
+    tracker_file.write_text(json.dumps(data, indent=2))
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  Main entry -- update counters & JSON
+# ──────────────────────────────────────────────────────────────────────────────
+def get_latest_dir_update_json(
+    root: Path,
+    depth: int,
+    tracker_file: Path,
+    crash_type: str,
+) -> None:
+    """
+    Update *tracker_file* for *crash_type* based on unseen folders under *root*.
+    """
+    now          = datetime.now()
+    today        = now.date()
+    node         = _load_tracker_node(tracker_file, crash_type)
+
+    # ── 0. 24-hour resets ────────────────────────────────────────────────
+    dir_cnt, ovn_cnt, last_day_reset, last_night_reset = _maybe_reset_counters(
+        node["DIR_Counter"],
+        node["OVN_Counter"],
+        node["last_reset_day"],
+        node["last_reset_night"],
+        now,
     )
 
-    children = valid_children(parent_dir, counters.last_child_ts)
-
-    if not children:
-        print("       (no qualifying new sub folders)")
-        if parent_dir.as_posix() != counters.last_parent_path:
-            counters._switch_parent(parent_dir)
-    else:
-        for child_dir, child_ts in children:
-            sizeGb = dir_size(child_dir) / 1024**3
-            print(
-                f"       Processing       -> {child_dir.name} "
-                f"({child_ts:%Y-%m-%d %H:%M:%S}, {sizeGb:.2f} GB)"
-            )
-            counters.count_if_new(parent_dir, child_dir, child_ts)
-
-    d, n = counters.snapshot()
-    print(f"       Counters          -> day={d}  night={n}")
-
-
-# ── optional watchdog wrapper (zero polling load) ────────────────────────
-class _DumpHandler(FileSystemEventHandler):
-    def on_any_event(self, event):
-        if event.event_type == EVENT_TYPE_CREATED and event.is_directory:
-            try:
-                time.sleep(30)
-                run_once()
-            except Exception as exc:
-                print("[ERROR] handler:", exc)
-
-
-def run_watch() -> None:
-    if Observer is None:
-        print("[ERROR] watchdog not installed. Run `pip install watchdog`.")
+    # ── 1. Folder discovery ──────────────────────────────────────────────
+    first_child = get_latest_folder_by_depth(root, depth)
+    if not first_child:
+        print("[WARN] No first-child folder found.")
         return
-    obs = Observer()
-    obs.schedule(_DumpHandler(), str(CRASHDUMP_ROOT), recursive=True)
-    obs.start()
-    print("[INFO] Watching", CRASHDUMP_ROOT, "…  (Ctrl C to stop)")
-    try:
-        while True:
-            time.sleep(60)
-    except KeyboardInterrupt:
-        obs.stop()
-    obs.join()
 
-'''
-# ── CLI entry point ──────────────────────────────────────────────────────
-if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Crash dump day/night counter")
-    ap.add_argument("--watch", action="store_true", help="use watchdog instead of polling")
-    args = ap.parse_args()
+    first_child_path, _ = first_child
+    parent_path = first_child_path.parent
 
-    if args.watch:
-        run_watch()
-    else:
-        run_once()
-'''
+    unseen = get_unseen_folders_since(
+        parent_path,
+        node["last_seen_datetime"],
+        crash_type,
+    )
+
+    # ── 2. Classify & count ───────────────────────────────────────────────
+    for folder, ts, _ in unseen:
+        ts_dt = datetime.fromtimestamp(ts)
+        bucket = classify_window(ts_dt, today)
+        if bucket == "day":
+            dir_cnt += 1
+        elif bucket == "night":
+            ovn_cnt += 1
+        # else: outside the defined windows – recorded but not counted
+
+    # ── 3. Persist tracker ────────────────────────────────────────────────
+    if unseen:
+        latest_folder, latest_ts, _ = unseen[-1]
+        node["last_seen_datetime"] = datetime.fromtimestamp(
+            latest_ts
+        ).strftime("%Y-%m-%d %H:%M:%S.%f")
+        node["last_seen_folder"]   = latest_folder.name
+    # even if *unseen* is empty we still record path & counter resets
+    node["first_child_path"] = str(parent_path)
+    node["DIR_Counter"]      = dir_cnt
+    node["OVN_Counter"]      = ovn_cnt
+    node["last_reset_day"]   = last_day_reset
+    node["last_reset_night"] = last_night_reset
+
+    _persist_tracker(tracker_file, crash_type, node)
+    print(f"[INFO] Tracker updated for '{crash_type}'. "
+          f"Dir={dir_cnt}, Night={ovn_cnt}")

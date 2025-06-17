@@ -20,7 +20,7 @@ GITHUB_REPO   = "QC_stuff"
 GITHUB_PAT    = os.getenv("GITHUB_PAT") or "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"
 
 # Bump this on each new build/exe you generate:
-LOCAL_VERSION = "1.2.4"
+LOCAL_VERSION = "1.2.5"
 
 DOWNLOAD_DIR  = r"C:\QSTAF"
 EXE_NAME      = "QSTAF_Tool.exe"

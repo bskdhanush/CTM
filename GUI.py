@@ -30,7 +30,7 @@ import Wifi_controller
 import Quts_controller
 import aws_scheduler as aws
 import data_monitor_controller as dmc
-
+import crash_handler 
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ def launch_gui() -> None:
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("1920x1080")
+    root.geometry("900x800")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -98,15 +98,60 @@ def launch_gui() -> None:
     ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    refresh_meta_mpss()
+    #refresh_meta_mpss()
     ttk.Button(
     header_frame, text="Get info",
     command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
 
-    ttk.Label(header_frame, text="Crash Count :‑", anchor="e") \
-    .grid(row=0, column=2, sticky="e", padx=15)
-    ttk.Label(header_frame, text="RDKB :‑", anchor="e") \
-    .grid(row=1, column=2, sticky="e", padx=15)
+    n_dir_var  = tk.StringVar(value="—")
+    n_ovn_var  = tk.StringVar(value="—")
+    r_dir_var  = tk.StringVar(value="—")
+    r_ovn_var  = tk.StringVar(value="—")
+    APP_CFG = Path(r"C:\QSTAF\app_config.json")
+
+    # labels (two rows keeps width sensible)
+    ttk.Label(header_frame, text="Crash DIR :", anchor="e") \
+        .grid(row=0, column=2, sticky="e", padx=8)
+    ttk.Label(header_frame, textvariable=n_dir_var, anchor="w") \
+        .grid(row=0, column=3, sticky="w")
+
+    ttk.Label(header_frame, text="OVN :", anchor="e") \
+        .grid(row=0, column=4, sticky="e", padx=(10, 5))
+    ttk.Label(header_frame, textvariable=n_ovn_var, anchor="w") \
+        .grid(row=0, column=5, sticky="w")
+
+    ttk.Label(header_frame, text="RDKB DIR :", anchor="e") \
+        .grid(row=1, column=2, sticky="e", padx=8)
+    ttk.Label(header_frame, textvariable=r_dir_var, anchor="w") \
+        .grid(row=1, column=3, sticky="w")
+
+    ttk.Label(header_frame, text="OVN :", anchor="e") \
+        .grid(row=1, column=4, sticky="e", padx=(10, 5))
+    ttk.Label(header_frame, textvariable=r_ovn_var, anchor="w") \
+        .grid(row=1, column=5, sticky="w", padx=(0,10))
+
+    # ­—----- start the JSON watcher ­-----—
+    mon = main_controller.AppConfigMonitor(APP_CFG)
+
+    def _apply(payload: dict[str, int | None]) -> None:
+        # back on Tk thread
+        def _set():
+            n_dir_var.set(_fmt(payload["normal_DIR"]))
+            n_ovn_var.set(_fmt(payload["normal_OVN"]))
+            r_dir_var.set(_fmt(payload["rdkb_DIR"]))
+            r_ovn_var.set(_fmt(payload["rdkb_OVN"]))
+        root.after_idle(_set)
+
+    def _fmt(x): return "—" if x is None else str(x)
+
+    mon.add_listener(_apply)
+    mon.start()
+
+    # tidy shutdown
+    def _on_close():
+        mon.stop()
+        root.destroy()
+    root.protocol("WM_DELETE_WINDOW", _on_close)
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content
@@ -368,7 +413,7 @@ def launch_gui() -> None:
 
     # populate dynamically --------------------------------------------------
     plot_refs = []                     # keep references to canvases & figures
-    
+    """
     fig = dmc.process_traffic_csv(figsize=(7, 4))
     if fig:
         canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
@@ -420,6 +465,7 @@ def launch_gui() -> None:
 
         # Retain references so nothing is garbage‑collected
         plot_refs.append((fig, canv))
+"""        
     # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")
     root.mainloop()

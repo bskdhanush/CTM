@@ -1,9 +1,13 @@
 # main_controller.py
+from __future__ import annotations
 import sys
 import subprocess
 import time
 import ctypes
 from tkinter import messagebox
+import json, threading, time
+from pathlib import Path
+from typing import Callable, Any
 
 import Kill_process 
 import Check_updates
@@ -169,6 +173,86 @@ def check_for_updates_integrated():
         print(f"Update check failed: {exc}")
         return False
 
+
+# ─crash_counter_monitor.py ──────────────────────────────────────────────
+
+Json = dict[str, Any]
+
+class AppConfigMonitor:
+    """
+    Poll C:\\QSTAF\\app_config.json every *interval* seconds and call each
+    listener with a dictionary like
+
+        {
+            "normal_DIR":  3,
+            "normal_OVN":  1,
+            "rdkb_DIR":    0,
+            "rdkb_OVN":    5
+        }
+
+    If the file is missing or malformed the values become None.
+    """
+
+    def __init__(self, path: str | Path, interval: float = 1.0) -> None:
+        self.path      = Path(path)
+        self.interval  = interval
+        self._stop_evt = threading.Event()
+        self._thread   = threading.Thread(target=self._loop, daemon=True)
+        self._last_mtime: float | None = None
+        self._listeners: list[Callable[[dict[str, int | None]], None]] = []
+
+    # –– public API –– --------------------------------------------------
+    def add_listener(self, fn: Callable[[dict[str, int | None]], None]) -> None:
+        self._listeners.append(fn)
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def stop(self, timeout: float = 3) -> None:
+        self._stop_evt.set()
+        self._thread.join(timeout)
+
+    # –– internal –– ----------------------------------------------------
+    def _loop(self) -> None:
+        while not self._stop_evt.is_set():
+            self._check()
+            time.sleep(self.interval)
+
+    def _check(self) -> None:
+        try:
+            mtime = self.path.stat().st_mtime
+        except FileNotFoundError:
+            self._notify(self._empty(None))
+            return
+
+        if self._last_mtime is None or mtime != self._last_mtime:
+            self._last_mtime = mtime
+            self._notify(self._read())
+
+    def _read(self) -> dict[str, int | None]:
+        try:
+            with self.path.open(encoding="utf-8") as f:
+                cfg: Json = json.load(f)
+            return {
+                "normal_DIR": int(cfg["normal"]["DIR_Counter"]),
+                "normal_OVN": int(cfg["normal"]["OVN_Counter"]),
+                "rdkb_DIR":   int(cfg["rdkb"]["DIR_Counter"]),
+                "rdkb_OVN":   int(cfg["rdkb"]["OVN_Counter"]),
+            }
+        except Exception:            # any KeyError / JSON error
+            return self._empty(None)
+
+    @staticmethod
+    def _empty(val: int | None) -> dict[str, int | None]:
+        return {k: val for k in
+                ("normal_DIR", "normal_OVN", "rdkb_DIR", "rdkb_OVN")}
+
+    def _notify(self, payload: dict[str, int | None]) -> None:
+        for fn in self._listeners:
+            fn(payload)
+
+
+
 def launch_updated_exe():
     """Launch the updated executable"""
     exe_path = Check_updates.EXE_PATH
@@ -184,8 +268,8 @@ def run_app() -> None:
     # 1) Require admin
     ensure_admin()
     #commont the below line and uncomment step 2 to check for updates
-    gui.launch_gui()
-'''
+    #gui.launch_gui()
+
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -204,7 +288,7 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-'''
+
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
     Quts_controller.start_app(Quts_controller.QXDM_PATH)

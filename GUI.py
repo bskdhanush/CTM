@@ -84,25 +84,29 @@ def launch_gui() -> None:
     header_frame.columnconfigure(2, weight=1)  
     
     def refresh_meta_mpss():
-        meta="test"
-        mpss="test"
-      #  meta, mpss = main_controller.get_meta_mpss()
+        meta = "UNKNOWN"
+        mpss = "UNKNOWN"
+        meta, mpss = main_controller.get_meta_mpss()
         meta_var.set(f"Meta : {meta}")
         mpss_var.set(f"MPSS : {mpss}")
 
-    ttk.Label(header, textvariable=meta_var).grid(row=0, column=0, sticky="w", padx=15)
-    ttk.Label(header, textvariable=mpss_var).grid(row=1, column=0, sticky="w", padx=15)
+    meta_var = tk.StringVar(value="Meta : ")
+    mpss_var = tk.StringVar(value="MPSS : ")
 
-    ttk.Button(header, text="Get info", command=refresh_meta_mpss, width=12).grid(
-        row=0, column=1, rowspan=2, pady=2
-    )
-
-    ttk.Label(header, text="Crash Count :-").grid(row=0, column=2, sticky="e")
-    ttk.Label(header, text="0").grid(row=0, column=3, sticky="w", padx=15)
-
-    ttk.Label(header, text="RDKB :-").grid(row=1, column=2, sticky="e", padx=15)
+    ttk.Label(header_frame, textvariable=meta_var, anchor="w") \
+    .grid(row=0, column=0, sticky="w", padx=15)
+    ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
+    .grid(row=1, column=0, sticky="w", padx=15)
 
     refresh_meta_mpss()
+    ttk.Button(
+    header_frame, text="Get info",
+    command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
+
+    ttk.Label(header_frame, text="Crash Count :‑", anchor="e") \
+    .grid(row=0, column=2, sticky="e", padx=15)
+    ttk.Label(header_frame, text="RDKB :‑", anchor="e") \
+    .grid(row=1, column=2, sticky="e", padx=15)
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content

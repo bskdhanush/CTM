@@ -43,7 +43,7 @@ def launch_gui() -> None:
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("QSTAF System Manager")
-    root.geometry("900x800")
+    root.geometry("1920x1080")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
 
@@ -75,20 +75,18 @@ def launch_gui() -> None:
         background=[("active", "#FF6B6B"), ("pressed", "#EA4242")],
     )
 
-    # ── Header (mini) ────────────────────────────────────────────────────
-    header = ttk.Frame(root)
-    header.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
-
-    header.columnconfigure(0, weight=1)
-    header.columnconfigure(1, weight=0)
-    header.columnconfigure(2, weight=1)
-
-    meta_var = tk.StringVar(value="Meta : —")
-    mpss_var = tk.StringVar(value="MPSS : —")
-
-    def refresh_meta_mpss() -> None:
-        # meta, mpss = main_controller.get_meta_mpss()
-        meta, mpss = "test", "test"
+    # ── header (mini) ───────────────────────────────────────────────────────
+    header_frame = ttk.Frame(root)
+    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
+    
+    header_frame.columnconfigure(0, weight=1)   # left column can grow
+    header_frame.columnconfigure(1, weight=0)   # button – fixed
+    header_frame.columnconfigure(2, weight=1)  
+    
+    def refresh_meta_mpss():
+        meta="test"
+        mpss="test"
+      #  meta, mpss = main_controller.get_meta_mpss()
         meta_var.set(f"Meta : {meta}")
         mpss_var.set(f"MPSS : {mpss}")
 
@@ -364,22 +362,61 @@ def launch_gui() -> None:
     canvas.pack(side="left", fill="both", expand=True)
     scroll.pack(side="right", fill="y")
 
-    # plots ---------------------------------------------------------------
-    plot_refs: list[tuple] = []
-
-    for path in dmc.get_data_paths():     # e.g. C:\QSTAF\logs\*.csv
-        fig = dmc.make_plot_figure(Path(path), figsize=(7, 2))
-        canv = FigureCanvasTkAgg(fig, master=list_fr)
+    # populate dynamically --------------------------------------------------
+    plot_refs = []                     # keep references to canvases & figures
+    
+    fig = dmc.process_traffic_csv(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
         canv.draw()
         canv.get_tk_widget().pack(anchor="center", pady=6)
 
-        tb = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)  # type: ignore[attr-defined]
-        tb.update()
-        tb.pack(anchor="center", pady=(0, 6))
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
 
-        plot_refs.append((fig, canv))      # keep refs
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
 
-    # ── launch -----------------------------------------------------------
+    fig = dmc.ipa_thruput_plot(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
+
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
+
+    fig = dmc.plot_wifi_clients(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
+
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
+
+    fig = dmc.channel_conditions_plot(figsize=(7, 4))
+    if fig:
+        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
+        canv.draw()
+        canv.get_tk_widget().pack(anchor="center", pady=6)
+
+        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
+        toolbar.update()
+        toolbar.pack(anchor="center", pady=(0, 6))
+
+        # Retain references so nothing is garbage‑collected
+        plot_refs.append((fig, canv))
+    # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")
     root.mainloop()
 

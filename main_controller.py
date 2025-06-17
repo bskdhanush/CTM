@@ -37,7 +37,7 @@ import traceback
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
     # Running as EXE - log to file
-    log_dir = r"C:\QSTAF"
+    log_dir = r"C:\QSTAF\crashDump"
     os.makedirs(log_dir, exist_ok=True)
     logging.basicConfig(
         filename=os.path.join(log_dir, "app_debug.log"),

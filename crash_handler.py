@@ -45,7 +45,7 @@ class _BaseHandler(FileSystemEventHandler):
 
     # ── heavy work (runs in its own short-lived thread) -----------------------
     def _process_change(self):
-        delay=10 if self.section_key.lower() == "normal" else 5
+        delay=120 if self.section_key.lower() == "normal" else 60
         print(delay)
         try:
             time.sleep(delay)

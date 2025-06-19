@@ -320,7 +320,8 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
-#---------to collect logs to txt
+    
+#---------to collect logs to txt------------------------
 LOG_DIR.mkdir(parents=True, exist_ok=True) 
 LOG_PATH = LOG_DIR / "qstaf_tool.log" 
 logging.basicConfig(

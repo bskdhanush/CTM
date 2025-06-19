@@ -117,7 +117,7 @@ def delete_old_csv():
                 file_time_stamp = m.group(1)
                 file_time = datetime.strptime(file_time_stamp, "%Y%m%d%H%M%S")
                 file_time_dict.update({csv : file_time})
-        if file_time_dict.get(csv) and (int((current_time - file_time_dict.get(csv)).total_seconds()) > del_timeout):
+        if file_time_dict.get(csv) and (int((current_time - file_time_dict.get(csv)).total_seconds()) > del_timeout): # type: ignore
             del_csv_list.append(csv)
     for del_csv in del_csv_list:
         os.remove(del_csv)

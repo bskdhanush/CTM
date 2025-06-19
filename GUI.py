@@ -12,6 +12,8 @@ from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
 import datetime as dt
+
+from matplotlib import pyplot as plt
 import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
@@ -30,7 +32,7 @@ import Wifi_controller
 import Quts_controller
 import aws_scheduler as aws
 import data_monitor_controller as dmc
-import crash_handler 
+import plot_dynamic_render as rdp
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -381,7 +383,7 @@ def launch_gui() -> None:
     data_pg.grid(row=0, column=0, sticky="nsew")
     pages["Data"] = data_pg
     add_nav("CPE Data Monitor", "Data")
-
+    
     # scrollable canvas ---------------------------------------------------
     canvas   = tk.Canvas(data_pg, borderwidth=0, highlightthickness=0)
     scroll   = ttk.Scrollbar(data_pg, orient="vertical", command=canvas.yview)
@@ -412,60 +414,12 @@ def launch_gui() -> None:
     scroll.pack(side="right", fill="y")
 
     # populate dynamically --------------------------------------------------
-    plot_refs = []                     # keep references to canvases & figures
-    """
-    fig = dmc.process_traffic_csv(figsize=(7, 4))
-    if fig:
-        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
-        canv.draw()
-        canv.get_tk_widget().pack(anchor="center", pady=6)
 
-        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
-        toolbar.update()
-        toolbar.pack(anchor="center", pady=(0, 6))
+    # draw the first plot immediately
+    rdp.draw_all_plots(list_fr)
+    # then kick off the background refresher
+    rdp.periodic_refresh(list_fr)
 
-        # Retain references so nothing is garbage‑collected
-        plot_refs.append((fig, canv))
-
-    fig = dmc.ipa_thruput_plot(figsize=(7, 4))
-    if fig:
-        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
-        canv.draw()
-        canv.get_tk_widget().pack(anchor="center", pady=6)
-
-        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
-        toolbar.update()
-        toolbar.pack(anchor="center", pady=(0, 6))
-
-        # Retain references so nothing is garbage‑collected
-        plot_refs.append((fig, canv))
-
-    fig = dmc.plot_wifi_clients(figsize=(7, 4))
-    if fig:
-        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
-        canv.draw()
-        canv.get_tk_widget().pack(anchor="center", pady=6)
-
-        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
-        toolbar.update()
-        toolbar.pack(anchor="center", pady=(0, 6))
-
-        # Retain references so nothing is garbage‑collected
-        plot_refs.append((fig, canv))
-
-    fig = dmc.channel_conditions_plot(figsize=(7, 4))
-    if fig:
-        canv = FigureCanvasTkAgg(fig, master=list_fr)  # embed in Tk
-        canv.draw()
-        canv.get_tk_widget().pack(anchor="center", pady=6)
-
-        toolbar = NavigationToolbar2Tk(canv, list_fr, pack_toolbar=False)
-        toolbar.update()
-        toolbar.pack(anchor="center", pady=(0, 6))
-
-        # Retain references so nothing is garbage‑collected
-        plot_refs.append((fig, canv))
-"""        
     # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")
     root.mainloop()

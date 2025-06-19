@@ -1,16 +1,8 @@
 # ── data_monitor_controller.py ───────────────────────────────────────────────
-"""
-Business‑logic helpers for the Data‑Monitor page.
-
-What’s new?
------------
-• get_data_paths() now returns *all* CSV / Excel files in C:\QSTAF\logs
-• make_plot_figure() auto‑chooses bar, scatter, or line based on columns
-"""
-
 import os
 import glob
 import re
+from typing import Literal
 import pandas as pd
 from matplotlib.figure import Figure
 
@@ -19,19 +11,6 @@ LOG_DIR   = r"C:\QSTAF\logs"               # root of your log folder
 _PATTERNS = ("*.csv", "*.xls*", "*.xlsx")        # recognised file types
 
 # ----------------------------------------------------------------- helpers
-								   
-	   
-																		 
-	   
-						  
-						 
-									   
-
-												
-																			
-									 
-								
-												 
 
 def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
@@ -179,19 +158,6 @@ def traffic_indexing(csv_name, df_csv):
         pass
     return df
 
-
-# def create_csv_from_df(id, df):
-#     """Create CSV from df"""
-#     if not isinstance(df, pd.DataFrame):
-#         return
-#     if df.empty:
-#         return
-#     indexing_csv = os.path.join(LOG_DIR, f'indexing_{id}.csv')
-#     if os.path.exists(indexing_csv):
-#         os.remove(indexing_csv)
-#     df.to_csv(indexing_csv, index=False)
-#     print(f'CSV Created: {indexing_csv}')
-
 def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
     """Generates Histogram plots based on df_all (based on Indexing.csv)"""
     fig = Figure(figsize, dpi=100)
@@ -234,7 +200,7 @@ def plot_wifi_clients(figsize:tuple[Literal[7], Literal[4]]):
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
     try:
-        df = df.sort_values(by=['TIMESTAMP'])
+        df = df.sort_values(by=['TIMESTAMP']) # type: ignore
 
         # Group the data by the 'color' column
         for label, group in df.groupby('SSID'):

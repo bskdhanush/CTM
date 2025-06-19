@@ -11,10 +11,7 @@ What’s new?
 import os
 import glob
 import re
-from pathlib import Path
-from typing import Literal
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 # ----------------------------------------------------------------- constants
@@ -29,17 +26,6 @@ _PATTERNS = ("*.csv", "*.xls*", "*.xlsx")        # recognised file types
 						  
 						 
 									   
-
-# def get_csv_files():
-#     csv_files = glob.glob(LOG_DIR + '\\*.csv')
-#     return csv_files
-#
-# def get_csv(csv_name):
-#     for csv_file in get_csv_files():
-#         if csv_name in csv_file:
-#             return os.path.join(os.path.join(LOG_DIR, csv_file))
-#     else:
-#         return None
 
 												
 																			
@@ -206,24 +192,26 @@ def traffic_indexing(csv_name, df_csv):
 #     df.to_csv(indexing_csv, index=False)
 #     print(f'CSV Created: {indexing_csv}')
 
-def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=""):
+def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
     """Generates Histogram plots based on df_all (based on Indexing.csv)"""
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
 
-    x_indices = range(len(df_indexing_all['COMMAND']))
+    if isinstance(df_indexing_all, pd.DataFrame) and df_indexing_all.shape[0] > 0:
 
-    ax[0].bar(x_indices, df_indexing_all['TOTAL'], width=0.4, label='Total', color='#330C73', align='center')
-    ax[0].bar(x_indices, df_indexing_all['PASS'], width=0.4, label='Pass', color='#EB89B5', align='edge')
+        x_indices = range(len(df_indexing_all['COMMAND']))
 
-    ax[0].set_xticks(x_indices)
-    ax[0].set_xticklabels(df_indexing_all['COMMAND'], rotation=45)
+        ax[0].bar(x_indices, df_indexing_all['TOTAL'], width=0.4, label='Total', color='#330C73', align='center')
+        ax[0].bar(x_indices, df_indexing_all['PASS'], width=0.4, label='Pass', color='#EB89B5', align='edge')
 
-    ax[0].set_xlabel('COMMAND')
-    ax[0].set_ylabel('TRAFFIC')
-    ax[0].set_title('TOTAL and PASS per TC')
-    ax[0].legend()
-    fig.tight_layout()
+        ax[0].set_xticks(x_indices)
+        ax[0].set_xticklabels(df_indexing_all['COMMAND'], rotation=45)
+
+        ax[0].set_xlabel('COMMAND')
+        ax[0].set_ylabel('TRAFFIC')
+        ax[0].set_title('TOTAL and PASS per TC')
+        ax[0].legend()
+        fig.tight_layout()
 
     return fig
 

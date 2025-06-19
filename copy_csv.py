@@ -1,0 +1,139 @@
+import os
+import re
+import glob
+import shutil
+from datetime import datetime
+
+LOG_DIR = r'C:\QSTAF\logs'
+QSTAF_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy'
+CONTROL_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Control')
+TRAFFIC_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Traffic')
+file_time_dict = {}
+
+timeout = 2 * 60 * 60  # 2 hours
+del_timeout = (2 * 60 * 60) + 30
+# timeout = 40000
+
+def get_sorted_dirs(base):
+    sorted_dirs = []
+    if os.path.exists(base):
+        sorted_dirs = sorted([d for d in os.listdir(base)])
+    return sorted_dirs
+
+
+def get_base(CONTROL_BASE):
+    base_dir_list = []
+    dirs = get_sorted_dirs(CONTROL_BASE)
+    print(dirs)
+    for dir in dirs:
+        if os.path.exists(os.path.join(CONTROL_BASE, dir, 'old_data.txt')):
+            continue
+
+        csv_files = glob.glob(os.path.join(CONTROL_BASE, dir) + '\\**\\*.csv', recursive=True)
+        for csv in csv_files:
+            csv_name = csv.split('\\')[-1]
+            m = re.search(r'\[(\d+)\].*csv', csv_name)
+            if m:
+                date_str = m.group(1)
+                date = datetime.strptime(date_str, "%Y%m%d%H%M%S")
+                now = datetime.now()
+                delta = now - date
+                print(delta)
+                if int((now-date).total_seconds()) < timeout:
+                    base_dir_list.append(os.path.join(CONTROL_BASE, dir))
+                    break
+        else:
+            open(os.path.join(CONTROL_BASE, dir, "old_data.txt"), "w").close()
+    return base_dir_list
+
+# Initial tool launch
+# add logic to get all folders which have the csv files from last 2 hours -->> CONTROL_OUTPUT_BASE_LIST
+
+
+def get_copy_csv_list(base_dir, csv_patterns):
+    csv_copy_list = []
+    control_base_list = get_base(base_dir)
+
+    for control_base_dir in control_base_list:
+        for csv_pattern in csv_patterns:
+            csv_files = glob.glob(control_base_dir + csv_pattern, recursive=True)
+
+            current_time = datetime.now()
+            for csv in csv_files:
+                csv_name = csv.split('\\')[-1]
+                # extract
+                m = re.search(r'\[(\d+)\]', csv_name)
+                if m:
+                    file_time_stamp = m.group(1)
+                    file_time = datetime.strptime(file_time_stamp, "%Y%m%d%H%M%S")
+                    if int((current_time - file_time).total_seconds()) < timeout:
+                        csv_copy_list.append(csv)
+    # print(csv_copy_list)
+    return csv_copy_list
+
+def get_total_copy_csv_list():
+    csv_copy_list = []
+    control_csv_patterns = ['\\**\\*RFBandInfo.csv', '\\**\\*QSH.csv', '\\**\\*QSH_DL_STATS.csv',
+                            '\\**\\*QSH_FR_MODE.csv',
+                            '\\**\\*QSH_ENL2.csv']
+    traffic_csv_patterns = ['\\**\\*Ping.csv', '\\**\\*Zoomcall.csv', '\\**\\*BrowseUrl.csv',
+                            '\\**\\*SpeedTest.csv',
+                            '\\**\\*HttpDownload.csv', '\\**\\*ftpUpload.csv', '\\**\\*ftpDownload.csv',
+                            '\\**\\*GoogleMaps.csv']
+    try:
+        csv_copy_list = get_copy_csv_list(CONTROL_BASE, control_csv_patterns)
+    except Exception as e:
+        print(f'Exception during get_control_copy_csv_list: {e}')
+
+    try:
+        csv_copy_list.extend(get_copy_csv_list(TRAFFIC_BASE, traffic_csv_patterns))
+    except Exception as e:
+        print(f'Exception during get_control_copy_csv_list: {e}')
+
+    return csv_copy_list
+
+
+def copy_latest_csv():
+
+    total_csv_copy_list = get_total_copy_csv_list()
+    for csv in total_csv_copy_list:
+        print(f'Copying {csv}')
+        shutil.copy(csv, LOG_DIR)
+
+# Every 2min, find latest folder.. And trigger watchdog on that folder, looking for modified files.
+# If not modified, continue (dont copy)
+# If modified, copy modified file, and triggger plot re-generation
+
+# Delete old files from LOG_DIR, every 60mins
+def delete_old_csv():
+    del_csv_list = []
+    csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
+    current_time = datetime.now()
+    for csv in csv_files:
+        if csv not in file_time_dict:
+            csv_name = csv.split('\\')[-1]
+            m = re.search(r'\[(\d+)\]', csv_name)
+            if m:
+                file_time_stamp = m.group(1)
+                file_time = datetime.strptime(file_time_stamp, "%Y%m%d%H%M%S")
+                file_time_dict.update({csv : file_time})
+        if file_time_dict.get(csv) and (int((current_time - file_time_dict.get(csv)).total_seconds()) > del_timeout):
+            del_csv_list.append(csv)
+    for del_csv in del_csv_list:
+        os.remove(del_csv)
+
+
+def copy_csv_main():
+    try:
+        copy_latest_csv()
+    except Exception as e:
+        print(f'Exception during copy_latest_csv: {e}')
+
+    try:
+        delete_old_csv()
+    except Exception as e:
+        print(f'Exception during delete_old_csv: {e}')
+
+
+if __name__ == '__main__':
+    copy_csv_main()

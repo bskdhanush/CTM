@@ -325,6 +325,9 @@ if __name__ == "__main__":
 import threading
 
 def main() -> None:
+
+    run_app()
+
     # 1️⃣  Start the watcher in a daemon thread
     t = threading.Thread(
         target=crash_handler.main,
@@ -338,7 +341,7 @@ def main() -> None:
     )
     # t2.start()
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
-    run_app()
+   
     
 
 if __name__ == "__main__":

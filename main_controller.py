@@ -59,10 +59,18 @@ def log_exception(exc_type, exc_value, exc_traceback):
 sys.excepthook = log_exception
 
 def get_meta_mpss():
-    Wifi_controller.run_command("adb root")
-    meta=Wifi_controller.get_meta_build_info()
-    mpss=Wifi_controller.get_mpss_build_info()
-    return meta,mpss
+    meta = "UNKNOWN"
+    mpss = "UNKNOWN"
+    try:
+        meta = Wifi_controller.get_meta_build_info()
+    except Exception as e:
+        print(f'Exception while reading Meta: {e}')
+    try:
+        mpss = Wifi_controller.get_mpss_build_info()
+    except Exception as e:
+        print(f'Exception while reading MPSS: {e}')
+
+    return meta, mpss
 
 def get_executable_dir():
     """Get the directory where the executable is located, works for both .py and .exe"""
@@ -267,8 +275,12 @@ def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
     # 1) Require admin
     ensure_admin()
+    copy_csv.copy_csv_main()
     #commont the below line and uncomment step 2 to check for updates
     #gui.launch_gui()
+
+
+
 
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
@@ -289,6 +301,12 @@ def run_app() -> None:
     # 3) Fire up the GUI
     gui.launch_gui()
 
+def update_csv_plots():
+    while True:
+        time.sleep(120)
+        copy_csv.copy_csv_main()
+        # render_dynamic_part()
+        
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
     Quts_controller.start_app(Quts_controller.QXDM_PATH)
@@ -317,6 +335,11 @@ def main() -> None:
     )
     t.start()
 
+    t2 = threading.Thread(
+        target=update_csv_plots,
+        daemon=True  # auto‑stops when the main program exits
+    )
+    # t2.start()
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
    
     

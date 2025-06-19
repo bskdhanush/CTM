@@ -11,6 +11,7 @@ What’s new?
 import os
 import glob
 import re
+from typing import Literal
 import pandas as pd
 from matplotlib.figure import Figure
 
@@ -19,19 +20,6 @@ LOG_DIR   = r"C:\QSTAF\logs"               # root of your log folder
 _PATTERNS = ("*.csv", "*.xls*", "*.xlsx")        # recognised file types
 
 # ----------------------------------------------------------------- helpers
-								   
-	   
-																		 
-	   
-						  
-						 
-									   
-
-												
-																			
-									 
-								
-												 
 
 def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
@@ -234,7 +222,7 @@ def plot_wifi_clients(figsize:tuple[Literal[7], Literal[4]]):
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
     try:
-        df = df.sort_values(by=['TIMESTAMP'])
+        df = df.sort_values(by=['TIMESTAMP']) # type: ignore
 
         # Group the data by the 'color' column
         for label, group in df.groupby('SSID'):

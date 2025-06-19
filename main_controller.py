@@ -8,6 +8,9 @@ from tkinter import messagebox
 import json, threading, time
 from pathlib import Path
 from typing import Callable, Any
+import logging
+from pathlib import Path
+import builtins
 
 import Kill_process 
 import Check_updates
@@ -16,6 +19,7 @@ import Quts_controller
 import Wifi_controller
 import GUI as gui
 import crash_handler
+
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
 import os
@@ -27,9 +31,8 @@ CMD_DIR_TRAFFIC  = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows"
 BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
+LOG_DIR  = Path(r"C:\QSTAF\logs") 
 
-import logging
-import traceback
 
 
 #crash_count_controller.run_watch()
@@ -275,13 +278,12 @@ def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
     # 1) Require admin
     ensure_admin()
-    copy_csv.copy_csv_main()
+
     #commont the below line and uncomment step 2 to check for updates
-    #gui.launch_gui()
+    gui.launch_gui()
 
 
-
-
+    '''
     # 2) One‑time update check unless the flag is present
     if "--skip-updates" not in sys.argv:
         if is_running_as_exe():
@@ -300,12 +302,15 @@ def run_app() -> None:
 
     # 3) Fire up the GUI
     gui.launch_gui()
-
+    '''
+'''
 def update_csv_plots():
     while True:
-        time.sleep(120)
+        time.sleep(20)
         copy_csv.copy_csv_main()
-        # render_dynamic_part()
+        
+'''      
+        
         
 def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
@@ -315,18 +320,23 @@ def stop_all_tools_Framework():
     stop_all()
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
-    
-'''
-if __name__ == "__main__":
-    run_app()
-    #crash_count_controller.run_watch()
-    
-'''   
-import threading
+#---------to collect logs to txt
+LOG_DIR.mkdir(parents=True, exist_ok=True) 
+LOG_PATH = LOG_DIR / "qstaf_tool.log" 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        logging.StreamHandler()          # still prints to console if visible
+    ],
+)
+log = logging.getLogger(__name__)
+builtins.print = lambda *a, **kw: log.info(" ".join(map(str, a)))
+
 
 def main() -> None:
 
-    run_app()
 
     # 1️⃣  Start the watcher in a daemon thread
     t = threading.Thread(
@@ -334,15 +344,15 @@ def main() -> None:
         daemon=True        # auto‑stops when the main program exits
     )
     t.start()
-
+    '''
     t2 = threading.Thread(
         target=update_csv_plots,
         daemon=True  # auto‑stops when the main program exits
     )
-    # t2.start()
+    t2.start()
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
-   
-    
+    '''
+    run_app()
 
 if __name__ == "__main__":
     main()

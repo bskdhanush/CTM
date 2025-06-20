@@ -5,6 +5,7 @@ import re
 from typing import Literal
 import pandas as pd
 from matplotlib.figure import Figure
+import matplotlib.dates as mdates
 
 # ----------------------------------------------------------------- constants
 LOG_DIR   = r"C:\QSTAF\logs"               # root of your log folder
@@ -57,67 +58,68 @@ def get_df(csv_type):
                 df = pd.read_csv(csv_file, index_col=False)
             else:
                 df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
+			 
+
+				 
+																	
+											 
+
+									 
+			  
+					  
+			
+										  
+									   
+									   
+
+    if isinstance(df, pd.DataFrame) and 'TIMESTAMP' in df:
+        df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
+																				   
+																				 
+
+													
+																						
+											 
+										
+												
+																					   
+
+													
+																					   
+											 
+									   
+											   
+																					   
+
+							  
+							  
+				
+			  
+
+															 
+										
+
+								  
+			  
+														
+			
+																				
+
+										  
+									   
+															
+																								
+											 
+												  
+												 
+																							   
+
+							  
+							  
+				
+			  
+
     return df
-
-# RSRP / SNR plot
-def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
-    'RSRP and SNR plots from QSH_FR_MODE csv'
-
-    df = get_df('\\*QSH_FR_MODE.csv')
-    fig = None
-    if df is not None:
-        try:
-            fig = Figure(figsize, dpi=100)
-            ax = [fig.add_subplot(211),
-                  fig.add_subplot(212)]
-
-            rsrp_median = df['RSRP'].median()
-            snr_median = df['SNR'].median()
-            df['RSRP'] = df['RSRP'].where(df['RSRP'].between(-140, 0), rsrp_median)
-            df['SNR'] = df['RSRP'].where(df['RSRP'].between(-25, 50), snr_median)
-
-            for cc_id, group in df.groupby('CC_ID'):
-                ax[0].scatter(group['TIMESTAMP'], group['RSRP'], label=f'CC_ID {cc_id}')
-                ax[0].set_xlabel('TIMESTAMP')
-                ax[0].set_ylabel('RSRP')
-                ax[0].set_title('RSRP by CC_ID')
-                ax[0].legend(title='CC_ID', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-            for cc_id, group in df.groupby('CC_ID'):
-                ax[1].scatter(group['TIMESTAMP'], group['SNR'], label=f'CC_ID {cc_id}')
-                ax[1].set_xlabel('TIMESTAMP')
-                ax[1].set_ylabel('SNR')
-                ax[1].set_title('SNR by CC_ID')
-                ax[1].legend(title='CC_ID', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-            fig.tight_layout()
-        except Exception as e:
-            pass
-    return fig
-
-def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
-    """IPA Thruput plot from QSH_ENL2"""
-
-    df = get_df('\\*QSH_ENL2.csv')
-    fig = None
-    if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
-        try:
-            df['DL_UL'] = df['DIRECTION'].apply(lambda x: 0 if x == 'DL' else 1)
-
-            fig = Figure(figsize, dpi=100)
-            ax = [fig.add_subplot(111)]
-            for direction, group in df.groupby('DIRECTION'):
-                ax[0].scatter(group['TIMESTAMP'], group['IPA_THROUGHPUT'], label=f'{direction}')
-                ax[0].set_xlabel('TIMESTAMP')
-                ax[0].set_ylabel('IPA_THROUGHPUT')
-                ax[0].set_title('IPA_THROUGHPUT')
-                ax[0].legend(title='DL_UL Thruput', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-            fig.tight_layout()
-        except Exception as e:
-            pass
-    return fig
-
 
 ################### TRAFFIC CSV PROCESSING END #######################################
 def process_traffic_csv(figsize: tuple[Literal[7], Literal[4]]):
@@ -127,8 +129,9 @@ def process_traffic_csv(figsize: tuple[Literal[7], Literal[4]]):
     for csv_file in csv_files:
         csv_name = csv_file.split('\\')[-1]
 
-        # Skip indexing and consolidated CSVs
+											 
         m = re.search(r'.*vpid.*(Ping|Zoomcall|BrowseUrl|SpeedTest|HttpDownload|ftpUpload|ftpDownload|GoogleMaps)', csv_name)
+        # Skip index and consolidated CSVs, if any
         if not m or csv_name.startswith('index') or csv_name.startswith('consolidated'):
             continue
 
@@ -156,8 +159,8 @@ def traffic_indexing(csv_name, df_csv):
         df['TOTAL'] = df_csv.shape[0]
         df['PASS'] = df_csv[df_csv['result'] == 'Pass'].shape[0]
         df['FAIL'] = df_csv[df_csv['result'] == 'Fail'].shape[0]
-						  
-												   
+		
+			   
 
         if 'ZoomCall' in csv_name:
             partial_pass = 0
@@ -193,10 +196,10 @@ def traffic_indexing(csv_name, df_csv):
 
         df['COMMAND'] = csv_name.strip('.csv')
 
-        # create_csv_from_df(csv_name, df)
+										  
     except Exception as e:
-        # print(f'Exception: {e}')
-        pass
+        print(f'Exception: {e}')
+			
     return df
 
 def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
@@ -224,6 +227,157 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
 
 ################### TRAFFIC CSV PROCESSING END #######################################
 
+															 
+																									
+														 
+
+								  
+							   
+		
+																					 
+															
+
+											  
+											   
+					   
+								   
+									   
+							
+						   
+							 
+			 
+
+							  
+									  
+									 
+										 
+								  
+
+						  
+			
+			  
+
+																
+									   
+			  
+														
+			
+										  
+									   
+
+																									
+										 
+											   
+											  
+																							 
+
+							  
+							  
+				
+			  
+
+
+############################ RF BAND PLOT START ######################################
+def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
+    df = get_df('\\*RFBandInfo.csv')
+    fig = None
+
+    try:
+        df.columns = df.columns.str.upper()
+        df = df.sort_values(by=['TIMESTAMP'])
+        df_rf_indexed = get_rfband_df(df)
+
+	  
+        fig = Figure(figsize, dpi=100)
+        ax = [fig.add_subplot(111)]
+
+        ax[0].scatter(data=df_rf_indexed, x='TIMESTAMP', y='BAND')
+        ax[0].set(title='RF BAND TRANSITIONS', ylabel='BAND')
+        ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+        fig.autofmt_xdate()
+        fig.tight_layout()
+
+    except Exception as e:
+        print('Exception during rf_band_plot')
+
+    return fig
+
+
+def get_rfband_df(df=None):
+													  
+
+    if df is not None:
+
+        df["NR_CC_BAND"] = df["NR_CC_BAND"].apply(lambda x: 'N' + str(x).strip())
+        df['LTE_BANDS'] = df['LTE_BANDS'].apply(
+            lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(
+                'Bnan', ''))
+
+			  
+							  
+
+        df1 = pd.DataFrame(df, columns=["PARSING_INDEX", "CONNECTIVITY_MODE", "LTE_BANDS", "NR_CC_BAND", "TIMESTAMP"])
+        df1["NR_BW"] = df["NR_CC_DL_BW"]
+
+        df2 = pd.concat(
+            [df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
+             df1.groupby("PARSING_INDEX")["NR_CC_BAND"].transform(lambda x: "+".join(x)),
+             df1.groupby("PARSING_INDEX")["NR_BW"].transform(lambda x: "+".join(x)),
+             df1['TIMESTAMP']],
+            axis=1)
+
+		 
+        df2_l = pd.concat([df1['CONNECTIVITY_MODE'], df1['NR_CC_BAND'],
+                           df2['LTE_BANDS'].where(df2['LTE_BANDS'].shift() != df2['LTE_BANDS']),
+                           df1['TIMESTAMP']],
+                          axis=1).dropna()
+
+        df2_n = pd.concat([df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
+                   df2['NR_CC_BAND'].where(df2['NR_CC_BAND'].shift() != df2['NR_CC_BAND']), df1['TIMESTAMP']],
+			
+                  axis=1).dropna()
+
+        df2 = pd.concat([df2_l, df2_n], axis=0).dropna()
+        df2.sort_values(by=['TIMESTAMP'])
+        df2['ORIG_TIMESTAMP'] = df2['TIMESTAMP']
+        df2['TIMESTAMP'] = pd.to_datetime(df2['TIMESTAMP']).dt.strftime('%H:%M:%S')
+
+						
+        df2["BAND"] = (df2['LTE_BANDS'] + '+' + df2["NR_CC_BAND"]).apply(lambda x: x.strip('+'))
+        df2["BAND"] = df2["BAND"].replace(r'(N\d{3})(\+N\d{3}){7}', r"\1" + 'M', regex=True)
+        df2["BAND"] = df2['CONNECTIVITY_MODE'] + '_' + df2["BAND"]
+
+        return df2
+    return df
+
+############################ RF BAND PLOT END #####################################
+
+
+def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
+    """IPA Thruput plot from QSH_ENL2"""
+
+    df = get_df('\\*QSH_ENL2.csv')
+    fig = None
+    if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
+        try:
+            df['DL_UL'] = df['DIRECTION'].apply(lambda x: 0 if x == 'DL' else 1)
+
+            fig = Figure(figsize, dpi=100)
+            ax = [fig.add_subplot(111)]
+            for direction, group in df.groupby('DIRECTION'):
+                ax[0].scatter(group['TIMESTAMP'], group['IPA_THROUGHPUT'], label=f'{direction}')
+                # ax[0].set_xlabel('TIMESTAMP')
+                # ax[0].set_ylabel('IPA_THROUGHPUT')
+                ax[0].set_title('IPA_THROUGHPUT')
+                ax[0].legend(title='DL_UL Thruput', bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+            fig.autofmt_xdate()
+            fig.tight_layout()
+        except Exception as e:
+            pass
+    return fig
+
+
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
     """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""																				  
     df = get_df('\\*qstaf_monitor_connected_devices.csv')
@@ -249,6 +403,8 @@ def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
         ax[0].set_xlabel('TIMESTAMP')
         ax[0].set_ylabel('NO_OF_CLIENTS')
         ax[0].legend(title='SSID')
+        ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+        fig.autofmt_xdate()
 
     except Exception as e:
         pass
@@ -259,87 +415,58 @@ def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
     fig = None
     if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
         try:
+            df['IPV4_DATACALL_STATUS'] = df['IPV4_DATACALL_STATUS'].str.replace(r'ipv4_datacall_status:\s*', '', regex=True)
+            df.rename(columns={'IPV4_DATACALL_STATUS': 'BACKHAUL_STATE'}, inplace=True)
+
             fig = Figure(figsize, dpi=100)
             ax = [fig.add_subplot(111)]
 
-            ax[0].scatter(df['TIMESTAMP'], df['IPV4_DATACALL_STATUS'], label='IPV4_DATACALL_STATUS')
-            ax[0].set_xlabel('TIMESTAMP')
-            ax[0].set_ylabel('DATA_CALL_STATE')
-            ax[0].set_title('DATA_CALL_STATE')
-            ax[0].legend(title='DATA_CALL_STATE', bbox_to_anchor=(1.05, 1), loc='upper left')
-
+            ax[0].scatter(df['TIMESTAMP'], df['BACKHAUL_STATE'])
+            ax[0].set_title('BACKHAUL_STATE')
+            ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+            fig.autofmt_xdate()
             fig.tight_layout()
         except Exception as e:
             pass
     return fig
 
 
-def rf_band_table(figsize: tuple[Literal[7], Literal[4]]):
-    df = get_df('\\*RFBandInfo.csv')
+# RSRP / SNR plot
+def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
+    'RSRP and SNR plots from QSH_FR_MODE csv'
+
+    df = get_df('\\*QSH_FR_MODE.csv')
     fig = None
-
-    try:
-        df.columns = df.columns.str.upper() # type: ignore
-        df = df.sort_values(by=['TIMESTAMP']) # type: ignore
-        rf_indexed = create_rfband_csv(df)
-
-				  
-        fig = Figure(figsize, dpi=100)
-        ax = [fig.add_subplot(111)]
-
-        ax[0].scatter(data=rf_indexed, x='TIMESTAMP', y='BAND', label='RF BAND TRANSITIONS')
-        ax[0].set(title='RF BAND TRANSITIONS', ylabel='BAND')
-        ax[0].legend()
-
-        fig.tight_layout()
-    except Exception as e:
-        pass
-
-    return fig
-
-
-def create_rfband_csv(df=None):
-    rf_csv = os.path.join(LOG_DIR, "index_RFBand.csv")
-
     if df is not None:
+        try:
+            fig = Figure(figsize, dpi=100)
+            ax = [fig.add_subplot(211),
+                  fig.add_subplot(212)]
 
-        df["NR_CC_BAND"] = df["NR_CC_BAND"].apply(lambda x: 'N' + str(x).strip())
-        df['LTE_BANDS'] = df['LTE_BANDS'].apply(
-            lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(
-                'Bnan', ''))
+            rsrp_median = df['RSRP'].median()
+            snr_median = df['SNR'].median()
+            df['RSRP'] = df['RSRP'].where(df['RSRP'].between(-140, 0), rsrp_median)
+            df['SNR'] = df['RSRP'].where(df['RSRP'].between(-25, 50), snr_median)
 
-												  
-																												  
+            for cc_id, group in df.groupby('CC_ID'):
+                ax[0].scatter(group['TIMESTAMP'], group['RSRP'], label=f'CC_ID {cc_id}')
+                ax[0].set_xlabel('TIMESTAMP')
+                ax[0].set_ylabel('RSRP')
+                ax[0].set_title('RSRP by CC_ID')
+                ax[0].legend(title='CC_ID', bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
 
-        df1 = pd.DataFrame(df, columns=["PARSING_INDEX", "CONNECTIVITY_MODE", "LTE_BANDS", "NR_CC_BAND", "TIMESTAMP"])
-        df1["NR_BW"] = df["NR_CC_DL_BW"]
+            for cc_id, group in df.groupby('CC_ID'):
+                ax[1].scatter(group['TIMESTAMP'], group['SNR'], label=f'CC_ID {cc_id}')
+                ax[1].set_xlabel('TIMESTAMP')
+                ax[1].set_ylabel('SNR')
+                ax[1].set_title('SNR by CC_ID')
+                ax[1].legend(title='CC_ID', bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax[1].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
 
-        df2 = pd.concat(
-            [df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
-             df1.groupby("PARSING_INDEX")["NR_CC_BAND"].transform(lambda x: "+".join(x)),
-             df1.groupby("PARSING_INDEX")["NR_BW"].transform(lambda x: "+".join(x)),
-             df1['TIMESTAMP']],
-            axis=1)
-
-						   
-        df2_l = pd.concat([df1['CONNECTIVITY_MODE'], df1['NR_CC_BAND'],
-                           df2['LTE_BANDS'].where(df2['LTE_BANDS'].shift() != df2['LTE_BANDS']),
-                           df1['TIMESTAMP']],
-                          axis=1).dropna()
-
-        df2_n = pd.concat([df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
-                   df2['NR_CC_BAND'].where(df2['NR_CC_BAND'].shift() != df2['NR_CC_BAND']), df1['TIMESTAMP']],
-											 
-                  axis=1).dropna()
-
-        df2 = pd.concat([df2_l, df2_n], axis=0).dropna()
-        df.sort_values(by=['TIMESTAMP'])
-
-																							 
-        df2["BAND"] = (df2['LTE_BANDS'] + '+' + df2["NR_CC_BAND"]).apply(lambda x: x.strip('+'))
-        df2["BAND"] = df2["BAND"].replace(r'(N\d{3})(\+N\d{3}){7}', r"\1" + 'M', regex=True)
-        df2["BAND"] = df2['CONNECTIVITY_MODE'] + '_' + df2["BAND"]
-
-        return df2
-    return df
+            fig.autofmt_xdate()
+            fig.tight_layout()
+        except Exception as e:
+            pass
+    return fig
 

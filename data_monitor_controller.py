@@ -89,34 +89,46 @@ def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
         df_indexing = traffic_indexing(id, df_csv)
         df_indexing_all = pd.concat([df_indexing_all, df_indexing], axis=0)
 
-    return [hist_plot(figsize, df_indexing_all), traffic_timeline_plot(df_all, df_indexing_all)]
+    return [traffic_timeline_plot(df_all), hist_plot(figsize, df_indexing_all)]
 
-def traffic_timeline_plot(df_all, df_indexing_all):
+def traffic_timeline_plot(df_all):
     df = pd.DataFrame()
-    value = 0
+             
     for df_key, df_each in df_all.items():
         try:
             df_each['StartTime'] = pd.to_datetime(df_each['start_time'], format='%Y-%m-%d_%H_%M_%S')
             df_each['RESULT'] = df_each['result'].apply(lambda x: 10 if 'Pass' in x else 0)
-            df = pd.concat([df, pd.DataFrame({'RESULT': df_each['RESULT'] + value, 'TIME': df_each['StartTime'], 'command': df_key})],
+            df = pd.concat([df, pd.DataFrame({'RESULT': df_each['RESULT'], 'TIME': df_each['StartTime'], 'command': df_key})],
                            axis=0)
             df = df.sort_values(by=['TIME'])
-            value += 15
+                       
         except Exception as e:
             print(f'Exception: {e}')
 
     fig = None
     try:
-        if df is not None:
+        if df is not None and not df.empty:
             df.columns = df.columns.str.upper()
-            fig = Figure((7,4), dpi=100)
-            ax = [fig.add_subplot(111)]
+            num_commands = df['COMMAND'].nunique()
+            commands = df['COMMAND'].unique()
+            fig = Figure((7, num_commands), dpi=100)
+            ax = []
+            for i in range(1, num_commands+1):
+                ax.append(fig.add_subplot(int(f'{num_commands}1{i}')))
 
-            for label, group in df.groupby('COMMAND'):
-                ax[0].step(group['TIME'], group['RESULT'], where='post', label=label)
-            ax[0].set(title='TRAFFIC TIMELINE', ylabel='RESULT')
-            ax[0].legend(title='COMMAND', bbox_to_anchor=(1.05, 1), loc='upper left')
-            ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+            for i in range(len(commands)):
+                df_cmd = df[df['COMMAND'] == commands[i]]
+                ax[i].step(df_cmd['TIME'], df_cmd['RESULT'], where='post', label=df_cmd)
+                plot_command = commands[i]
+                m = re.search(r'vpid\d+_(.*)', commands[i])
+                if m:
+                    plot_command = m.group(1)
+                ax[i].set(title=plot_command)
+                ax[i].set_yticks([0, 10])
+                ax[i].set_yticklabels(['Fail', 'Pass'])
+                ax[i].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+
+            fig.suptitle("TRAFFIC TIMELINE", fontsize=16)
             fig.autofmt_xdate()
             fig.tight_layout()
 

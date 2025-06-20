@@ -51,7 +51,6 @@ def draw_all_plots(parent_frame):
 
                 plot_refs.append((fig_each, canv, toolbar))
 
-            plot_refs.append((fig, canv, toolbar))
         except Exception as e:
             print(f'Exception during {plot_fn}')
 

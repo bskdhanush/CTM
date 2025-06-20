@@ -41,7 +41,7 @@ def launch_gui() -> None:
 
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
-    root.title("QSTAF System Manager")
+    root.title("CPE Test Manager")
     root.geometry("1024x768")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")

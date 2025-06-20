@@ -7,11 +7,9 @@ import pandas as pd
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
-# ----------------------------------------------------------------- constants
-LOG_DIR   = r"C:\QSTAF\logs"               # root of your log folder
-_PATTERNS = ("*.csv", "*.xls*", "*.xlsx")        # recognised file types
+LOG_DIR   = r"C:\QSTAF\logs"
+_PATTERNS = ("*.csv", "*.xls*", "*.xlsx")
 
-# ----------------------------------------------------------------- helpers
 
 def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
@@ -58,78 +56,21 @@ def get_df(csv_type):
                 df = pd.read_csv(csv_file, index_col=False)
             else:
                 df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
-			 
-
-				 
-																	
-											 
-
-									 
-			  
-					  
-			
-										  
-									   
-									   
 
     if isinstance(df, pd.DataFrame) and 'TIMESTAMP' in df:
         df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
-																				   
-																				 
-
-													
-																						
-											 
-										
-												
-																					   
-
-													
-																					   
-											 
-									   
-											   
-																					   
-
-							  
-							  
-				
-			  
-
-															 
-										
-
-								  
-			  
-														
-			
-																				
-
-										  
-									   
-															
-																								
-											 
-												  
-												 
-																							   
-
-							  
-							  
-				
-			  
 
     return df
 
-################### TRAFFIC CSV PROCESSING END #######################################
-def process_traffic_csv(figsize: tuple[Literal[7], Literal[4]]):
+################### TRAFFIC CSV PROCESSING START #######################################
+
+def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
     df_all = {}
     csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
 
     for csv_file in csv_files:
         csv_name = csv_file.split('\\')[-1]
 
-											 
         m = re.search(r'.*vpid.*(Ping|Zoomcall|BrowseUrl|SpeedTest|HttpDownload|ftpUpload|ftpDownload|GoogleMaps)', csv_name)
         # Skip index and consolidated CSVs, if any
         if not m or csv_name.startswith('index') or csv_name.startswith('consolidated'):
@@ -148,7 +89,41 @@ def process_traffic_csv(figsize: tuple[Literal[7], Literal[4]]):
         df_indexing = traffic_indexing(id, df_csv)
         df_indexing_all = pd.concat([df_indexing_all, df_indexing], axis=0)
 
-    return hist_plot(figsize, df_indexing_all)
+    return [hist_plot(figsize, df_indexing_all), traffic_timeline_plot(df_all, df_indexing_all)]
+
+def traffic_timeline_plot(df_all, df_indexing_all):
+    df = pd.DataFrame()
+    value = 0
+    for df_key, df_each in df_all.items():
+        try:
+            df_each['StartTime'] = pd.to_datetime(df_each['start_time'], format='%Y-%m-%d_%H_%M_%S')
+            df_each['RESULT'] = df_each['result'].apply(lambda x: 10 if 'Pass' in x else 0)
+            df = pd.concat([df, pd.DataFrame({'RESULT': df_each['RESULT'] + value, 'TIME': df_each['StartTime'], 'command': df_key})],
+                           axis=0)
+            df = df.sort_values(by=['TIME'])
+            value += 15
+        except Exception as e:
+            print(f'Exception: {e}')
+
+    fig = None
+    try:
+        if df is not None:
+            df.columns = df.columns.str.upper()
+            fig = Figure((7,4), dpi=100)
+            ax = [fig.add_subplot(111)]
+
+            for label, group in df.groupby('COMMAND'):
+                ax[0].step(group['TIME'], group['RESULT'], where='post', label=label)
+            ax[0].set(title='TRAFFIC TIMELINE', ylabel='RESULT')
+            ax[0].legend(title='COMMAND', bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+            fig.autofmt_xdate()
+            fig.tight_layout()
+
+    except Exception as e:
+        print('Exception during traffic_timeline_plot')
+
+    return fig
 
 def traffic_indexing(csv_name, df_csv):
     """Reads Traffic CSV and Creates indexing CSV files"""
@@ -159,8 +134,6 @@ def traffic_indexing(csv_name, df_csv):
         df['TOTAL'] = df_csv.shape[0]
         df['PASS'] = df_csv[df_csv['result'] == 'Pass'].shape[0]
         df['FAIL'] = df_csv[df_csv['result'] == 'Fail'].shape[0]
-		
-			   
 
         if 'ZoomCall' in csv_name:
             partial_pass = 0
@@ -196,10 +169,8 @@ def traffic_indexing(csv_name, df_csv):
 
         df['COMMAND'] = csv_name.strip('.csv')
 
-										  
     except Exception as e:
         print(f'Exception: {e}')
-			
     return df
 
 def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
@@ -227,55 +198,6 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
 
 ################### TRAFFIC CSV PROCESSING END #######################################
 
-															 
-																									
-														 
-
-								  
-							   
-		
-																					 
-															
-
-											  
-											   
-					   
-								   
-									   
-							
-						   
-							 
-			 
-
-							  
-									  
-									 
-										 
-								  
-
-						  
-			
-			  
-
-																
-									   
-			  
-														
-			
-										  
-									   
-
-																									
-										 
-											   
-											  
-																							 
-
-							  
-							  
-				
-			  
-
 
 ############################ RF BAND PLOT START ######################################
 def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
@@ -287,7 +209,6 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
         df = df.sort_values(by=['TIMESTAMP'])
         df_rf_indexed = get_rfband_df(df)
 
-	  
         fig = Figure(figsize, dpi=100)
         ax = [fig.add_subplot(111)]
 
@@ -302,9 +223,7 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
 
     return fig
 
-
 def get_rfband_df(df=None):
-													  
 
     if df is not None:
 
@@ -312,9 +231,6 @@ def get_rfband_df(df=None):
         df['LTE_BANDS'] = df['LTE_BANDS'].apply(
             lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(
                 'Bnan', ''))
-
-			  
-							  
 
         df1 = pd.DataFrame(df, columns=["PARSING_INDEX", "CONNECTIVITY_MODE", "LTE_BANDS", "NR_CC_BAND", "TIMESTAMP"])
         df1["NR_BW"] = df["NR_CC_DL_BW"]
@@ -326,7 +242,6 @@ def get_rfband_df(df=None):
              df1['TIMESTAMP']],
             axis=1)
 
-		 
         df2_l = pd.concat([df1['CONNECTIVITY_MODE'], df1['NR_CC_BAND'],
                            df2['LTE_BANDS'].where(df2['LTE_BANDS'].shift() != df2['LTE_BANDS']),
                            df1['TIMESTAMP']],
@@ -334,7 +249,6 @@ def get_rfband_df(df=None):
 
         df2_n = pd.concat([df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
                    df2['NR_CC_BAND'].where(df2['NR_CC_BAND'].shift() != df2['NR_CC_BAND']), df1['TIMESTAMP']],
-			
                   axis=1).dropna()
 
         df2 = pd.concat([df2_l, df2_n], axis=0).dropna()
@@ -342,7 +256,6 @@ def get_rfband_df(df=None):
         df2['ORIG_TIMESTAMP'] = df2['TIMESTAMP']
         df2['TIMESTAMP'] = pd.to_datetime(df2['TIMESTAMP']).dt.strftime('%H:%M:%S')
 
-						
         df2["BAND"] = (df2['LTE_BANDS'] + '+' + df2["NR_CC_BAND"]).apply(lambda x: x.strip('+'))
         df2["BAND"] = df2["BAND"].replace(r'(N\d{3})(\+N\d{3}){7}', r"\1" + 'M', regex=True)
         df2["BAND"] = df2['CONNECTIVITY_MODE'] + '_' + df2["BAND"]

@@ -10,7 +10,7 @@ plot_refs: list[tuple[plt.Figure, FigureCanvasTkAgg, NavigationToolbar2Tk]] = []
 
 
 PLOT_FUNCS = [
-    dmc.process_traffic_csv,
+    dmc.traffic_plots,
     dmc.rf_band_plot,
     dmc.ipa_thruput_plot,
     dmc.wifi_clients_plot,
@@ -37,14 +37,19 @@ def draw_all_plots(parent_frame):
             fig = plot_fn(figsize=(7, 4))
             if not fig:
                 continue
+            if not isinstance(fig, list):
+                fig = [fig]
 
-            canv = FigureCanvasTkAgg(fig, master=parent_frame)
-            canv.draw()
-            canv.get_tk_widget().pack(anchor="center", pady=6)
+            for fig_each in fig:
+                canv = FigureCanvasTkAgg(fig_each, master=parent_frame)
+                canv.draw()
+                canv.get_tk_widget().pack(anchor="center", pady=6)
 
-            toolbar = NavigationToolbar2Tk(canv, parent_frame, pack_toolbar=False)
-            toolbar.update()
-            toolbar.pack(anchor="center", pady=(0, 6))
+                toolbar = NavigationToolbar2Tk(canv, parent_frame, pack_toolbar=False)
+                toolbar.update()
+                toolbar.pack(anchor="center", pady=(0, 6))
+
+                plot_refs.append((fig_each, canv, toolbar))
 
             plot_refs.append((fig, canv, toolbar))
         except Exception as e:

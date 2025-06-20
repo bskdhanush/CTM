@@ -12,7 +12,6 @@ file_time_dict = {}
 
 timeout = 2 * 60 * 60  # 2 hours
 del_timeout = (2 * 60 * 60) + 30
-# timeout = 40000
 
 def get_sorted_dirs(base):
     sorted_dirs = []
@@ -61,7 +60,9 @@ def get_copy_csv_list(base_dir, csv_patterns):
             current_time = datetime.now()
             for csv in csv_files:
                 csv_name = csv.split('\\')[-1]
-                # extract
+                if csv_name.startswith('indexing') or csv_name.startswith('consolidated'):
+                    continue
+                
                 m = re.search(r'\[(\d+)\]', csv_name)
                 if m:
                     file_time_stamp = m.group(1)
@@ -75,7 +76,8 @@ def get_total_copy_csv_list():
     csv_copy_list = []
     control_csv_patterns = ['\\**\\*RFBandInfo.csv', '\\**\\*QSH.csv', '\\**\\*QSH_DL_STATS.csv',
                             '\\**\\*QSH_FR_MODE.csv',
-                            '\\**\\*QSH_ENL2.csv']
+                            '\\**\\*QSH_ENL2.csv', '\\**\\*qstaf_monitor_connected_devices.csv',
+                            '\\**\\*qstaf_monitor.csv']
     traffic_csv_patterns = ['\\**\\*Ping.csv', '\\**\\*Zoomcall.csv', '\\**\\*BrowseUrl.csv',
                             '\\**\\*SpeedTest.csv',
                             '\\**\\*HttpDownload.csv', '\\**\\*ftpUpload.csv', '\\**\\*ftpDownload.csv',
@@ -112,6 +114,9 @@ def delete_old_csv():
     for csv in csv_files:
         if csv not in file_time_dict:
             csv_name = csv.split('\\')[-1]
+            if csv_name.startswith('index') or csv_name.startswith('consolidated'):
+                del_csv_list.append(csv)
+                continue
             m = re.search(r'\[(\d+)\]', csv_name)
             if m:
                 file_time_stamp = m.group(1)

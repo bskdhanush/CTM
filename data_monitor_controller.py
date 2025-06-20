@@ -16,11 +16,47 @@ def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
     csv_files = glob.glob(LOG_DIR + csv_type, recursive=True)
     df = pd.DataFrame()
-    for csv_file in csv_files:
-        if df.shape[0] == 0:
-            df = pd.read_csv(csv_file, index_col=False)
-        else:
-            df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
+
+    if 'RFBandInfo' in csv_type:
+        for csv_file in csv_files:
+            if (df.empty) or (df.get('Parsing_Index', None) is None):
+                current_index = 0
+            else:
+                current_index = int(df['Parsing_Index'].iloc[-1])
+
+            df_current = pd.read_csv(csv_file, index_col=False)
+            _flag = False
+            if 'NR_CC_Band' in df_current:
+                df_current['NR_CC_Band'] = df_current['NR_CC_Band'].astype(int)
+                _flag = True
+            if 'Parsing_Index' in df_current:
+                df_current['Parsing_Index'] = df_current['Parsing_Index'].apply(lambda x: str(int(x) + current_index))
+                _flag = True
+            if _flag and df_current.shape[0] > 0:
+                df = pd.concat([df, df_current], axis=0)
+
+    elif 'qstaf_monitor_connected_devices' in csv_type:
+        df = None
+        for csv_file in csv_files:
+            if df is None:
+                df = pd.read_csv(csv_file, header=None, usecols=[0, 2, 3],
+                                 names=['TIMESTAMP', 'SSID', 'NO_OF_CLIENTS'])
+            else:
+                df = pd.concat([df, pd.read_csv(csv_file, header=None, usecols=[0, 2, 3],
+                                                names=['TIMESTAMP', 'SSID', 'NO_OF_CLIENTS'])], ignore_index=True,
+                               axis=0)
+
+    elif 'qstaf_monitor' in csv_type:
+        for csv_file in csv_files:
+            df = pd.concat([df, pd.read_csv(csv_file, header=None,
+                                            names=['TIMESTAMP', 'IPV4_DATACALL_STATUS', 'IPV6_DATACALL_STATUS',
+                                                   'ETH_DATACALL_STATUS'])], ignore_index=True, axis=0)
+    else:
+        for csv_file in csv_files:
+            if df.empty:
+                df = pd.read_csv(csv_file, index_col=False)
+            else:
+                df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
     return df
 
 # RSRP / SNR plot
@@ -34,6 +70,11 @@ def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
             fig = Figure(figsize, dpi=100)
             ax = [fig.add_subplot(211),
                   fig.add_subplot(212)]
+
+            rsrp_median = df['RSRP'].median()
+            snr_median = df['SNR'].median()
+            df['RSRP'] = df['RSRP'].where(df['RSRP'].between(-140, 0), rsrp_median)
+            df['SNR'] = df['RSRP'].where(df['RSRP'].between(-25, 50), snr_median)
 
             for cc_id, group in df.groupby('CC_ID'):
                 ax[0].scatter(group['TIMESTAMP'], group['RSRP'], label=f'CC_ID {cc_id}')
@@ -183,23 +224,25 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
 
 ################### TRAFFIC CSV PROCESSING END #######################################
 
-def plot_wifi_clients(figsize:tuple[Literal[7], Literal[4]]):
+def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
     """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""
 
-    conn_dev_csv_files = glob.glob(LOG_DIR + '\\*qstaf_monitor_connected_devices.csv', recursive=True)
-    df = None
-    for csv_file in conn_dev_csv_files:
-        if df is None:
-            df = pd.read_csv(csv_file, header=None, usecols=[0, 2, 3],
-                        names=['TIMESTAMP', 'SSID', 'NO_OF_CLIENTS'])
-        else:
-            df = pd.concat([df, pd.read_csv(csv_file, header=None, usecols=[0, 2, 3],
-                            names=['TIMESTAMP', 'SSID', 'NO_OF_CLIENTS'])], ignore_index=True, axis=0)
+																									  
+			 
+									   
+					  
+																	  
+																	 
+			 
+																					 
+																									  
 
+    df = get_df('\\*qstaf_monitor_connected_devices.csv')
 
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
     try:
+        df = df[df['SSID'].str.contains('SLO|MLO|Ethernet', na=False)]
         df = df.sort_values(by=['TIMESTAMP']) # type: ignore
 
         # Group the data by the 'color' column
@@ -222,15 +265,36 @@ def plot_wifi_clients(figsize:tuple[Literal[7], Literal[4]]):
         pass
     return fig
 
+def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
+    df = get_df('\\*qstaf_monitor.csv')
+    fig = None
+    if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
+        try:
+            fig = Figure(figsize, dpi=100)
+            ax = [fig.add_subplot(111)]
+
+            ax[0].scatter(df['TIMESTAMP'], df['IPV4_DATACALL_STATUS'], label='IPV4_DATACALL_STATUS')
+            ax[0].set_xlabel('TIMESTAMP')
+            ax[0].set_ylabel('DATA_CALL_STATE')
+            ax[0].set_title('DATA_CALL_STATE')
+            ax[0].legend(title='DATA_CALL_STATE', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+            fig.tight_layout()
+        except Exception as e:
+            pass
+    return fig
+
+
 def rf_band_table(figsize: tuple[Literal[7], Literal[4]]):
     df = get_df('\\*RFBandInfo.csv')
+    fig = None
 
     try:
         df.columns = df.columns.str.upper()
         df = df.sort_values(by=['TIMESTAMP'])
         rf_indexed = create_rfband_csv(df)
 
-        fig = None
+				  
         fig = Figure(figsize, dpi=100)
         ax = [fig.add_subplot(111)]
 
@@ -255,8 +319,8 @@ def create_rfband_csv(df=None):
             lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(
                 'Bnan', ''))
 
-        # df['LTE_BANDS'] = df['LTE_BANDS'].apply(
-        #     lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')))
+												  
+																												  
 
         df1 = pd.DataFrame(df, columns=["PARSING_INDEX", "CONNECTIVITY_MODE", "LTE_BANDS", "NR_CC_BAND", "TIMESTAMP"])
         df1["NR_BW"] = df["NR_CC_DL_BW"]
@@ -264,34 +328,29 @@ def create_rfband_csv(df=None):
         df2 = pd.concat(
             [df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
              df1.groupby("PARSING_INDEX")["NR_CC_BAND"].transform(lambda x: "+".join(x)),
+             df1.groupby("PARSING_INDEX")["NR_BW"].transform(lambda x: "+".join(x)),
              df1['TIMESTAMP']],
             axis=1)
 
-        # df2.reset_index()
+						   
         df2_l = pd.concat([df1['CONNECTIVITY_MODE'], df1['NR_CC_BAND'],
-                           df2['LTE_BANDS'].loc[df2['LTE_BANDS'].shift() != df2['LTE_BANDS']],
+                           df2['LTE_BANDS'].where(df2['LTE_BANDS'].shift() != df2['LTE_BANDS']),
                            df1['TIMESTAMP']],
                           axis=1).dropna()
 
         df2_n = pd.concat([df1['CONNECTIVITY_MODE'], df1['LTE_BANDS'],
-                           df2['NR_CC_BAND'].loc[df2['NR_CC_BAND'].shift() != df2['NR_CC_BAND']],
-                           df1['TIMESTAMP']],
-                          axis=1).dropna()
+                   df2['NR_CC_BAND'].where(df2['NR_CC_BAND'].shift() != df2['NR_CC_BAND']), df1['TIMESTAMP']],
+											 
+                  axis=1).dropna()
 
         df2 = pd.concat([df2_l, df2_n], axis=0).dropna()
         df.sort_values(by=['TIMESTAMP'])
 
-        df2['NR_BW'] = df1.groupby("PARSING_INDEX")["NR_BW"].transform(lambda x: "+".join(x))
+																							 
         df2["BAND"] = (df2['LTE_BANDS'] + '+' + df2["NR_CC_BAND"]).apply(lambda x: x.strip('+'))
         df2["BAND"] = df2["BAND"].replace(r'(N\d{3})(\+N\d{3}){7}', r"\1" + 'M', regex=True)
         df2["BAND"] = df2['CONNECTIVITY_MODE'] + '_' + df2["BAND"]
 
-        # print(df2)
-        if os.path.exists(rf_csv):
-            os.remove(rf_csv)
-
-        df2.to_csv(rf_csv, index=False)
-        print(f'{rf_csv} created')
-        df = df2
+        return df2
     return df
 

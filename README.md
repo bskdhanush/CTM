@@ -1,6 +1,6 @@
-**To build the exe: ** pyinstaller main_controller.py  --name QSTAF_Tool   --noconfirm --onefile --console
+To build the exe: pyinstaller main_controller.py  --name QSTAF_Tool   --noconfirm --onefile --console
 
-**app_json format: **     
+app_json format:    
 {
     "aws_scheduler_enabled": true,
     "crash_day_counter": 0,

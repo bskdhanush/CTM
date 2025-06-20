@@ -10,8 +10,11 @@ plot_refs: list[tuple[plt.Figure, FigureCanvasTkAgg, NavigationToolbar2Tk]] = []
 
 
 PLOT_FUNCS = [
+    dmc.process_traffic_csv,
+    dmc.rf_band_table,
     dmc.ipa_thruput_plot,
-    dmc.plot_wifi_clients,
+    dmc.wifi_clients_plot,
+    dmc.data_call_state_plot,
     dmc.channel_conditions_plot,
 ]
 
@@ -28,6 +31,7 @@ def draw_all_plots(parent_frame):
     Runs each plot function in PLOT_FUNCS, embeds its Figure in parent_frame,
     and retains the (fig, canvas, toolbar) in plot_refs.
     """
+    copy_csv.copy_csv_main()
     for plot_fn in PLOT_FUNCS:
         fig = plot_fn(figsize=(7, 4))
         if not fig:
@@ -54,7 +58,6 @@ def periodic_refresh(parent_frame, interval_secs = 60):
     def _worker():
         while True:
             time.sleep(interval_secs)
-            copy_csv.copy_csv_main()
             parent_frame.after(0, clear_plots)
             parent_frame.after(0, lambda: draw_all_plots(parent_frame))
 

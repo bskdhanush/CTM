@@ -12,19 +12,14 @@ from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
 import datetime as dt
-
-from matplotlib import pyplot as plt
 import tkinter as tk
-from pathlib import Path
 from tkinter import ttk
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import threading
 
 # ── 3rd-party ──────────────────────────────────────────────────────────────
 import sv_ttk
-from PIL import Image, ImageTk                         # (future use)
-from matplotlib.backends.backend_tkagg import (        # type: ignore[attr-defined] ►
-    FigureCanvasTkAgg,
-    NavigationToolbar2Tk, # type: ignore
-)
 
 # ── local app modules ──────────────────────────────────────────────────────
 import main_controller
@@ -33,10 +28,12 @@ import Quts_controller
 import aws_scheduler as aws
 import data_monitor_controller as dmc
 import plot_dynamic_render as rdp
+import crash_cout_controller_v2 as cc
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
+
 
 
 def launch_gui() -> None:
@@ -80,11 +77,15 @@ def launch_gui() -> None:
     # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
     header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
-    
+    '''
     header_frame.columnconfigure(0, weight=1)   # left column can grow
     header_frame.columnconfigure(1, weight=0)   # button – fixed
     header_frame.columnconfigure(2, weight=1)  
-    
+    '''
+    for col in range(0, 7):
+        header_frame.columnconfigure(col, weight=0)
+    header_frame.columnconfigure(0, weight=1)
+
     def refresh_meta_mpss():
         meta = "UNKNOWN"
         mpss = "UNKNOWN"
@@ -102,58 +103,75 @@ def launch_gui() -> None:
 
     refresh_meta_mpss()
     ttk.Button(
-    header_frame, text="Get info",
-    command=refresh_meta_mpss, width=12).grid(row=0, column=1, rowspan=2, pady=2)
-
+        header_frame, text="Get info",
+        command=refresh_meta_mpss, width=12
+    ).grid(row=0, column=1, rowspan=2, padx=5)
+    ttk.Button(
+        header_frame, text="Reset Counter",
+        command=cc.rest_counter, width=12
+    ).grid(row=0, column=2, rowspan=2, padx=5)
+    
     n_dir_var  = tk.StringVar(value="—")
     n_ovn_var  = tk.StringVar(value="—")
     r_dir_var  = tk.StringVar(value="—")
     r_ovn_var  = tk.StringVar(value="—")
-    APP_CFG = Path(r"C:\QSTAF\app_config.json")
-
+   
     # labels (two rows keeps width sensible)
-    ttk.Label(header_frame, text="Crash DIR :", anchor="e") \
-        .grid(row=0, column=2, sticky="e", padx=8)
+    ttk.Label(header_frame, text="Crash:- DIR:", anchor="e") \
+        .grid(row=0, column=3, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=n_dir_var, anchor="w") \
-        .grid(row=0, column=3, sticky="w")
+        .grid(row=0, column=4, sticky="w")
 
-    ttk.Label(header_frame, text="OVN :", anchor="e") \
-        .grid(row=0, column=4, sticky="e", padx=(10, 5))
+    ttk.Label(header_frame, text="OVN:", anchor="e") \
+        .grid(row=0, column=5, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=n_ovn_var, anchor="w") \
-        .grid(row=0, column=5, sticky="w")
+        .grid(row=0, column=6, sticky="w" ,padx=10)
 
-    ttk.Label(header_frame, text="RDKB DIR :", anchor="e") \
-        .grid(row=1, column=2, sticky="e", padx=8)
+    # ─ RDKB counters ──────────────────────────────────────────────────────
+    ttk.Label(header_frame, text="RDKB:- DIR:", anchor="e") \
+        .grid(row=1, column=3, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=r_dir_var, anchor="w") \
-        .grid(row=1, column=3, sticky="w")
+        .grid(row=1, column=4, sticky="w")
 
-    ttk.Label(header_frame, text="OVN :", anchor="e") \
-        .grid(row=1, column=4, sticky="e", padx=(10, 5))
+    ttk.Label(header_frame, text="OVN:", anchor="e") \
+        .grid(row=1, column=5, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=r_ovn_var, anchor="w") \
-        .grid(row=1, column=5, sticky="w", padx=(0,10))
-
+        .grid(row=1, column=6, sticky="w" ,padx=10)
+    
     # ­—----- start the JSON watcher ­-----—
-    mon = main_controller.AppConfigMonitor(APP_CFG)
+    class ConfigHandler(FileSystemEventHandler):
+        def __init__(self, callback):
+            self.callback = callback
 
-    def _apply(payload: dict[str, int | None]) -> None:
-        # back on Tk thread
-        def _set():
-            n_dir_var.set(_fmt(payload["normal_DIR"]))
-            n_ovn_var.set(_fmt(payload["normal_OVN"]))
-            r_dir_var.set(_fmt(payload["rdkb_DIR"]))
-            r_ovn_var.set(_fmt(payload["rdkb_OVN"]))
-        root.after_idle(_set)
+        def on_modified(self, event):
+            # only react if *that* JSON file changed
+            if event.src_path == str(cc.CONFIG_PATH):
+                # schedule the UI update on the Tk main thread
+                root.after(0, self.callback)
 
-    def _fmt(x): return "—" if x is None else str(x)
+    def start_config_watcher(callback):
+        obs = Observer()
+        handler = ConfigHandler(callback)
+        obs.schedule(handler, str(cc.CONFIG_PATH.parent), recursive=False)
+        obs.start()
+        # keep it running in background
+        threading.Thread(target=obs.join, daemon=True).start()
 
-    mon.add_listener(_apply)
-    mon.start()
+    def load_counters():
+        cfg = cc.load_config()
+        n_dir_var.set(str(cfg.get("crash_day_counter",   0)))
+        n_ovn_var.set(str(cfg.get("crash_night_counter", 0)))
+        r_dir_var.set(str(cfg.get("rdkbcrash_day_counter",   0)))
+        r_ovn_var.set(str(cfg.get("rdkbcrash_night_counter", 0)))
 
-    # tidy shutdown
-    def _on_close():
-        mon.stop()
-        root.destroy()
-    root.protocol("WM_DELETE_WINDOW", _on_close)
+    load_counters()  # initial
+
+     # start watching the JSON for changes
+    start_config_watcher(load_counters)
+
+
+
+
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content
@@ -276,17 +294,6 @@ def launch_gui() -> None:
         command=_toggle_aws,
     ).pack(anchor="w", padx=16)
 
-    # PCAT + QXDM launcher
-    pq_fr = ttk.LabelFrame(main_pg, text="PCAT_QXDM")
-    pq_fr.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        pq_fr,
-        text="Start PCAT QXDM",
-        command=main_controller.start_Pact_QXDM,
-    ).pack(fill="x", padx=16, pady=8, ipady=8)
-
     # ── QUTS page ────────────────────────────────────────────────────────
     quts_pg = ttk.Frame(container)
     quts_pg.grid(row=0, column=0, sticky="nsew")
@@ -317,7 +324,19 @@ def launch_gui() -> None:
     ).pack(fill="x", **PADDING)# type: ignore
 
 
-    stop_all = ttk.LabelFrame(quts_pg, text="Stop all Frameworks and Tools")
+    # PCAT + QXDM launcher
+    pq_fr = ttk.LabelFrame(quts_pg, text="PCAT_QXDM")
+    pq_fr.pack(fill="x", **PADDING)# type: ignore
+
+
+    ttk.Button(
+        pq_fr,
+        text="Start PCAT QXDM",
+        command=main_controller.start_Pact_QXDM,
+    ).pack(fill="x", padx=16, pady=8, ipady=8)
+
+
+    stop_all = ttk.LabelFrame(quts_pg, text="Stop all Tools")
     stop_all.pack(fill="x", **PADDING)# type: ignore
 
 

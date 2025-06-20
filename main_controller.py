@@ -18,7 +18,7 @@ import Start_testCase
 import Quts_controller
 import Wifi_controller
 import GUI as gui
-import crash_handler
+import crash_cout_controller_v2 as cc
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -341,7 +341,7 @@ def main() -> None:
 
     # 1️⃣  Start the watcher in a daemon thread
     t = threading.Thread(
-        target=crash_handler.main,
+        target=cc.run_watchdog,
         daemon=True        # auto‑stops when the main program exits
     )
     t.start()

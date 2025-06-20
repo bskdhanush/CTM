@@ -225,24 +225,13 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
 ################### TRAFFIC CSV PROCESSING END #######################################
 
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
-    """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""
-
-																									  
-			 
-									   
-					  
-																	  
-																	 
-			 
-																					 
-																									  
-
+    """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""																				  
     df = get_df('\\*qstaf_monitor_connected_devices.csv')
 
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
     try:
-        df = df[df['SSID'].str.contains('SLO|MLO|Ethernet', na=False)]
+        df = df[df['SSID'].str.contains('SLO|MLO|Ethernet', na=False)] # type: ignore
         df = df.sort_values(by=['TIMESTAMP']) # type: ignore
 
         # Group the data by the 'color' column
@@ -290,8 +279,8 @@ def rf_band_table(figsize: tuple[Literal[7], Literal[4]]):
     fig = None
 
     try:
-        df.columns = df.columns.str.upper()
-        df = df.sort_values(by=['TIMESTAMP'])
+        df.columns = df.columns.str.upper() # type: ignore
+        df = df.sort_values(by=['TIMESTAMP']) # type: ignore
         rf_indexed = create_rfband_csv(df)
 
 				  

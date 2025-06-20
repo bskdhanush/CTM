@@ -48,7 +48,7 @@ def draw_all_plots(parent_frame):
         plot_refs.append((fig, canv, toolbar))
 
 
-def periodic_refresh(parent_frame, interval_secs = 60):
+def periodic_refresh(parent_frame, interval_secs = 120):
     """
     Every interval_secs seconds:
       1) copy updated CSV

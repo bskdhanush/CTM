@@ -100,6 +100,7 @@ def main() -> None:
     #gd.get_latest_dir_update_json(rdkcrashroot, 0,    tracker_file, "rdkb")
 
     # two fully independent observers
+    gd.get_latest_folder_by_depth
     normal_obs = _start_observer(normalroot,   NormalHandler(normalroot, depth, tracker_file))
     rdkb_obs   = _start_observer(rdkcrashroot, RdkbHandler(rdkcrashroot, tracker_file))
 

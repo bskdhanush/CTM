@@ -41,7 +41,7 @@ def launch_gui() -> None:
 
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
-    root.title("QSTAF System Manager")
+    root.title("CPE Test Manager")
     root.geometry("1024x768")
     root.resizable(False, False)
     sv_ttk.set_theme("dark")
@@ -373,7 +373,7 @@ def launch_gui() -> None:
     test_pg = ttk.Frame(container)
     test_pg.grid(row=0, column=0, sticky="nsew")
     pages["Testing"] = test_pg
-    add_nav("Field Testing", "Testing")
+    add_nav("SpeedTest", "Testing")
 
     test_sel = ttk.LabelFrame(test_pg, text="Select config type")
     test_sel.pack(fill="x", **PADDING)# type: ignore

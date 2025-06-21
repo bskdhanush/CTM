@@ -50,7 +50,7 @@ def draw_all_plots(parent_frame):
                 toolbar.pack(anchor="center", pady=(0, 6))
 
                 plot_refs.append((fig_each, canv, toolbar))
-
+                
         except Exception as e:
             print(f'Exception during {plot_fn}')
 

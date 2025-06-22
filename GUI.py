@@ -43,7 +43,7 @@ def launch_gui() -> None:
     root = tk.Tk()
     root.title("CPE Test Manager")
     root.geometry("1024x768")
-    root.resizable(False, False)
+    root.resizable(True, True)
     sv_ttk.set_theme("dark")
 
     # ── Styles ──────────────────────────────────────────────────────────
@@ -82,9 +82,10 @@ def launch_gui() -> None:
     header_frame.columnconfigure(1, weight=0)   # button – fixed
     header_frame.columnconfigure(2, weight=1)  
     '''
-    for col in range(0, 7):
-        header_frame.columnconfigure(col, weight=0)
-    header_frame.columnconfigure(0, weight=1)
+    for col in range(7):
+       header_frame.columnconfigure(col, weight=0)
+    header_frame.columnconfigure(2, weight=1)   # left side expands
+    #header_frame.columnconfigure(6, weight=1) # right side expands
 
     def refresh_meta_mpss():
         meta = "UNKNOWN"
@@ -101,16 +102,12 @@ def launch_gui() -> None:
     ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    refresh_meta_mpss()
+    #refresh_meta_mpss()
     ttk.Button(
         header_frame, text="Get info",
         command=refresh_meta_mpss, width=12
-    ).grid(row=0, column=1, rowspan=2, padx=5)
-    ttk.Button(
-        header_frame, text="Reset Counter",
-        command=cc.rest_counter, width=12
-    ).grid(row=0, column=2, rowspan=2, padx=5)
-    
+    ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
+ 
     n_dir_var  = tk.StringVar(value="—")
     n_ovn_var  = tk.StringVar(value="—")
     r_dir_var  = tk.StringVar(value="—")
@@ -118,26 +115,28 @@ def launch_gui() -> None:
    
     # labels (two rows keeps width sensible)
     ttk.Label(header_frame, text="Crash:- DIR:", anchor="e") \
-        .grid(row=0, column=3, sticky="e", padx=(10,5))
+    .grid(row=0, column=3, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=n_dir_var, anchor="w") \
-        .grid(row=0, column=4, sticky="w")
-
+    .grid(row=0, column=4, sticky="w")
     ttk.Label(header_frame, text="OVN:", anchor="e") \
-        .grid(row=0, column=5, sticky="e", padx=(10,5))
+    .grid(row=0, column=5, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=n_ovn_var, anchor="w") \
-        .grid(row=0, column=6, sticky="w" ,padx=10)
+    .grid(row=0, column=6, sticky="w", padx=10)
 
-    # ─ RDKB counters ──────────────────────────────────────────────────────
+# ── RDKB counters in cols 3–6 (row 1) ───────────────────────────────────
     ttk.Label(header_frame, text="RDKB:- DIR:", anchor="e") \
-        .grid(row=1, column=3, sticky="e", padx=(10,5))
+    .grid(row=1, column=3, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=r_dir_var, anchor="w") \
-        .grid(row=1, column=4, sticky="w")
-
+    .grid(row=1, column=4, sticky="w")
     ttk.Label(header_frame, text="OVN:", anchor="e") \
-        .grid(row=1, column=5, sticky="e", padx=(10,5))
+    .grid(row=1, column=5, sticky="e", padx=(10,5))
     ttk.Label(header_frame, textvariable=r_ovn_var, anchor="w") \
-        .grid(row=1, column=6, sticky="w" ,padx=10)
+    .grid(row=1, column=6, sticky="w", padx=10)
     
+    ttk.Button(
+    header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
+    .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
+
     # ­—----- start the JSON watcher ­-----—
     class ConfigHandler(FileSystemEventHandler):
         def __init__(self, callback):
@@ -209,7 +208,7 @@ def launch_gui() -> None:
 
     ttk.Label(footer, textvariable=quts_stat_var).pack(side="left")
     ttk.Label(footer, textvariable=sched_stat_var, padding=# type: ignore
-(12, 0)).pack(side="left")
+    (12, 0)).pack(side="left")
 
     clock_lbl = ttk.Label(footer)
     clock_lbl.pack(side="right")

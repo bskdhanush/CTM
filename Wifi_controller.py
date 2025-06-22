@@ -48,6 +48,7 @@ def get_adb_id():
 
 def get_meta_build_info():
     meta = None
+    run_command("adb root")
     output, stderr = run_command("adb wait-for-device shell cat /firmware/verinfo/Ver_Info.txt | findstr Meta_Build_ID")
     if not output or stderr:
         raise Exception('Meta Build info NOT FOUND')
@@ -57,6 +58,7 @@ def get_meta_build_info():
 
 def get_mpss_build_info():
     mpss = None
+    #run_command("adb root")
     output, stderr = run_command("adb wait-for-device shell cat /sys/devices/soc0/images | findstr 11:")
     if not output or stderr:
         raise Exception('MPSS Build info NOT FOUND')

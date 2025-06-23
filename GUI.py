@@ -50,29 +50,6 @@ def launch_gui() -> None:
     style = ttk.Style(root)
     style.configure("Sidebar.TFrame", background="#2a2a2e")
 
-    style.configure(
-        "RunBoth.TButton",
-        background="#3A7EF5",
-        foreground="white",
-        focuscolor="#3A7EF5",
-        borderwidth=0,
-    )
-    style.map(
-        "RunBoth.TButton",
-        background=[("active", "#4A8FF6"), ("pressed", "#2A6EE5")],
-    )
-
-    style.configure(
-        "StopAll.TButton",
-        background="#FA5252",
-        foreground="white",
-        focuscolor="#FA5252",
-        borderwidth=0,
-    )
-    style.map(
-        "StopAll.TButton",
-        background=[("active", "#FF6B6B"), ("pressed", "#EA4242")],
-    )
 
     # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
@@ -206,9 +183,13 @@ def launch_gui() -> None:
         value="Scheduler: ON" if aws.is_enabled() else "Scheduler: OFF"
     )
 
-    ttk.Label(footer, textvariable=quts_stat_var).pack(side="left")
-    ttk.Label(footer, textvariable=sched_stat_var, padding=# type: ignore
-    (12, 0)).pack(side="left")
+    quts_label = tk.Label(
+    footer,
+    textvariable=quts_stat_var,
+    font=("TkDefaultFont", 10, "bold"))
+    quts_label.pack(side="left")
+
+    ttk.Label(footer, textvariable=sched_stat_var, padding=(12, 0)).pack(side="left")
 
     clock_lbl = ttk.Label(footer)
     clock_lbl.pack(side="right")
@@ -220,6 +201,11 @@ def launch_gui() -> None:
     def _update_quts() -> None:
         running = Quts_controller.is_service_running("QUTS")
         quts_stat_var.set(f"QUTS: {'Running' if running else 'Stopped'}")
+        white_accent = "#FFFFFF"
+        red_accent  = "#E95959"
+
+        quts_label.config(
+        fg=white_accent if running else red_accent)
         root.after(3_000, _update_quts)
 
     _tick()
@@ -255,19 +241,30 @@ def launch_gui() -> None:
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
 
-    ttk.Button(
-        ctrl,
-        text="Run both Frameworks (3 s delay)",
-        command=main_controller.run_both_with_delay,
-        style="RunBoth.TButton",
-    ).pack(fill="x", padx=16, pady=(12, 6), ipady=10)
+    run_btn = tk.Button(
+    ctrl,
+    text="Run both Frameworks (3 s delay)",
+    command=main_controller.run_both_with_delay,
+    bg="#2A2A2A",            # normal background
+    activebackground="#006EA5",
+    fg="white",              # text color
+    activeforeground="white",
+    bd=0,                    # no border
+    relief="flat")
+    run_btn.pack(fill="x", padx=16, pady=(12, 6), ipady=10)
 
-    ttk.Button(
-        ctrl,
-        text="Stop All Frameworks",
-        command=main_controller.stop_all,
-        style="StopAll.TButton",
-    ).pack(fill="x", padx=16, pady=(6, 12), ipady=10)
+    stop_btn = tk.Button(
+    ctrl,
+    text="Stop All Frameworks",
+    command=main_controller.stop_all,
+    bg="#FA5252",
+    activebackground="#910000",
+    fg="white",
+    activeforeground="white",
+    bd=0,
+    relief="flat",
+)
+    stop_btn.pack(fill="x", padx=16, pady=(6, 12), ipady=10)
 
     # AWS S3 uploader
     aws_fr = ttk.LabelFrame(main_pg, text="AWS S3 Uploader")

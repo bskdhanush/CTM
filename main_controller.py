@@ -108,13 +108,13 @@ def ensure_admin():
 
 def start_control():
     try:
-        Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL)
+        Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'control')
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
 def start_traffic():
     try:
-        Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC)
+        Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'traffic')
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -133,7 +133,7 @@ def stop_all():
 
 def run_s3_uploader():
     try:
-        Start_testCase.start_tests(CMD_DIR_AWS, BAT_FILE_AWS)
+        Start_testCase.start_tests(CMD_DIR_AWS, BAT_FILE_AWS,None)
     except Exception as e:
         messagebox.showerror("Error", str(e))
 

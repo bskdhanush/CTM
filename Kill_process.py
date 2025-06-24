@@ -30,14 +30,15 @@ def stop_all_tests(mode: str):
                 found = True
         except Exception:
             continue
- 
-    for proc in psutil.process_iter(['pid', 'name']):
-        try:
-            if proc.info['name'].lower() == 'chrome.exe':
-                kill_process_and_children(proc.info['pid'])
+    if mode!="control":
+        print("closing chrome")
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['name'].lower() == 'chrome.exe':
+                    kill_process_and_children(proc.info['pid'])
                 found = True
-        except Exception:
-            continue
+            except Exception:
+             continue
 
     return found
    

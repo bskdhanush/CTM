@@ -18,7 +18,9 @@ logging.basicConfig(
 log = logging.getLogger("Counter")
 
 # — Config —
-CRASHDUMP_ROOT     = Path(r"C:\QSTAF\crashDump")
+# CRASHDUMP_ROOT     = Path(r"C:\QSTAF\crashDump")
+CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
+CRASHDUMP_ROOT_QSTAF = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
 CONFIG_PATH        = Path(r"C:\QSTAF\app_config.json")
 
@@ -176,9 +178,9 @@ def schedule_resets():
 
 class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
-        if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT)):
+        if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT_PCAT)):
             time.sleep(120)
-            d, n = process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE)
+            d, n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
            # log.info("Crash → Day:%d Night:%d", d, n)
 
 
@@ -194,14 +196,19 @@ class RdkbHandler(FileSystemEventHandler):
 
 def run_watchdog():
     # initial run
-    process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE)
+    process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
+    # process_dir(CRASHDUMP_ROOT_QSTAF, 'crash', MIN_CRASH_SIZE)
     process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
 
     # start crash observer in its own instance
     obs_crash = Observer()
-    obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT), recursive=True)
+    obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT_PCAT), recursive=True)
     obs_crash.start()
 
+    # start crash observer in its own instance
+    # obs_crash = Observer()
+    # obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT_QSTAF), recursive=True)
+    # obs_crash.start()
     # start rdkb observer in separate instance
     obs_rdkb = Observer()
     obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)

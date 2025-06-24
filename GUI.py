@@ -257,7 +257,7 @@ def launch_gui() -> None:
     ctrl,
     text="Stop All Frameworks",
     command=main_controller.stop_all,
-    bg="#FA5252",
+    bg="#2A2A2A",
     activebackground="#910000",
     fg="white",
     activeforeground="white",

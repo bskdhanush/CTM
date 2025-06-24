@@ -244,10 +244,19 @@ def update_csv_plots():
 '''      
         
         
-def start_Pact_QXDM():
+def start_Pact_only():
+    print("pcat called")
     Quts_controller.start_app(Quts_controller.PCAT_PATH)
-    Quts_controller.start_app(Quts_controller.QXDM_PATH)
 
+def start_QXDM_only():
+    print("QXDM called")    
+    Quts_controller.start_app(Quts_controller.QXDM_PATH)
+def stop_pcat_only():
+    print("Stopped pcat")
+    subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
+def stop_qxdm_only():
+    print("Stopped qxdm")
+    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
 def stop_all_tools_Framework():
     stop_framework(mode="control")
     stop_framework(mode="")

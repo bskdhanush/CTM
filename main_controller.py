@@ -31,6 +31,7 @@ CMD_DIR_TRAFFIC  = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows"
 BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
+QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
 LOG_DIR  = Path(r"C:\QSTAF\logs") 
 
 
@@ -60,6 +61,16 @@ def log_exception(exc_type, exc_value, exc_traceback):
     logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
     
 sys.excepthook = log_exception
+
+def get_qstaf_version():
+    """Read and return the version string from the given text file."""
+    try:
+        with open(QSTAF_file_path, 'r', encoding='utf-8') as f:
+            # strip off any whitespace/newlines
+            return f.read()
+    except Exception as e:
+        # fallback if file’s missing or unreadable
+        return "Unknown"
 
 def get_meta_mpss():
     meta = "UNKNOWN"
@@ -108,13 +119,13 @@ def ensure_admin():
 
 def start_control():
     try:
-        Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'control')
+        Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
 def start_traffic():
     try:
-        Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'traffic')
+        Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -126,8 +137,8 @@ def run_both_with_delay():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def stop_all():
-    found = Kill_process.stop_all_tests()
+def stop_framework(mode):
+    found = Kill_process.stop_all_tests(mode)
     msg = "All processes stopped." if found else "No processes found to stop."
     print(msg)
 
@@ -238,7 +249,8 @@ def start_Pact_QXDM():
     Quts_controller.start_app(Quts_controller.QXDM_PATH)
 
 def stop_all_tools_Framework():
-    stop_all()
+    stop_framework(mode="control")
+    stop_framework(mode="")
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
     

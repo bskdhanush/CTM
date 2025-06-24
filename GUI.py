@@ -12,6 +12,8 @@ from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
 import datetime as dt
+from functools import partial
+from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 from watchdog.observers import Observer
@@ -79,7 +81,7 @@ def launch_gui() -> None:
     ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    refresh_meta_mpss()
+    #refresh_meta_mpss()
     ttk.Button(
         header_frame, text="Get info",
         command=refresh_meta_mpss, width=12
@@ -190,13 +192,22 @@ def launch_gui() -> None:
     quts_label.pack(side="left")
 
     ttk.Label(footer, textvariable=sched_stat_var, padding=(12, 0)).pack(side="left")
-
+    '''
     clock_lbl = ttk.Label(footer)
     clock_lbl.pack(side="right")
 
     def _tick() -> None:
         clock_lbl.config(text=dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         root.after(1_000, _tick)
+    '''
+    center_var = tk.StringVar(value="Internet status")
+    center_lbl = ttk.Label(footer, textvariable=center_var, anchor="center")
+    center_lbl.pack(side="left", fill="x", expand=True)
+
+    version_info=main_controller.get_qstaf_version()
+    ttk.Label(footer,text =f"QSTAF_ver: {version_info}").pack(side="right",padx= 20) 
+
+     
 
     def _update_quts() -> None:
         running = Quts_controller.is_service_running("QUTS")
@@ -208,7 +219,7 @@ def launch_gui() -> None:
         fg=white_accent if running else red_accent)
         root.after(3_000, _update_quts)
 
-    _tick()
+  
     _update_quts()
 
     # ── MAIN PAGE ─────────────────────────────────────────────────────────
@@ -224,7 +235,8 @@ def launch_gui() -> None:
 
     row = ttk.Frame(ctrl)
     row.pack(fill="x", **PADDING)# type: ignore
-# type: ignore
+    row_s = ttk.Frame(ctrl)
+    row_s.pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
@@ -240,6 +252,8 @@ def launch_gui() -> None:
         command=main_controller.start_traffic,
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
+    
+    '''
 
     run_btn = tk.Button(
     ctrl,
@@ -252,19 +266,34 @@ def launch_gui() -> None:
     bd=0,                    # no border
     relief="flat")
     run_btn.pack(fill="x", padx=16, pady=(12, 6), ipady=10)
-
+   
     stop_btn = tk.Button(
     ctrl,
     text="Stop All Frameworks",
     command=main_controller.stop_all,
     bg="#2A2A2A",
-    activebackground="#910000",
+    #activebackground="#000000",
     fg="white",
     activeforeground="white",
     bd=0,
     relief="flat",
 )
     stop_btn.pack(fill="x", padx=16, pady=(6, 12), ipady=10)
+    '''
+    ttk.Button(
+        row_s,
+        text="Stop Control",
+        command=partial(main_controller.stop_framework,"control"),
+        width=18,
+    ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
+
+    ttk.Button(
+        row_s,
+        text="Stop Traffic",
+        command=partial(main_controller.stop_framework,""),
+        width=18,
+    ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
+
 
     # AWS S3 uploader
     aws_fr = ttk.LabelFrame(main_pg, text="AWS S3 Uploader")

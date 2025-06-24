@@ -10,12 +10,17 @@ def kill_process_and_children(pid):
     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
         pass
 
-def stop_all_tests():
+def stop_all_tests(mode: str):
     found = False
-    keywords = [
-        "run_framework.bat", "control_laptop\\windows", "aws_", 
-        "pinghandler", "iperf", "ping"
-    ]
+    if mode=="control": 
+        keywords = [" control ","aws_control_",]
+        print("control loop")
+    else :
+        keywords = [
+        " traffic ", "aws_traffic", 
+        "pinghandler", "iperf", "ping"]
+        print("traffic loop")
+
 
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
@@ -35,4 +40,4 @@ def stop_all_tests():
             continue
 
     return found
-
+   

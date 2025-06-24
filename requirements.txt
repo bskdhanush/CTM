@@ -3,3 +3,5 @@ requests
 sv-ttk
 packaging
 schedule
+watchdog
+pywin32

@@ -79,7 +79,7 @@ def launch_gui() -> None:
     ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    #refresh_meta_mpss()
+    refresh_meta_mpss()
     ttk.Button(
         header_frame, text="Get info",
         command=refresh_meta_mpss, width=12

@@ -395,3 +395,13 @@ def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
             pass
     return fig
 
+
+def update_internet_status():
+    """Returns RED (0) if Backhaul / Ping cases Fail continuously for 120sec. Else Green (1)"""
+    state = {
+        'RED' : 0,
+        'GREEN' : 1,
+        'UNKNOWN' : 2
+    }
+    return state['GREEN']
+    

@@ -83,7 +83,7 @@ def launch_gui() -> None:
 
     refresh_meta_mpss()
     ttk.Button(
-        header_frame, text="Get info",
+        header_frame, text="Get Build info",
         command=refresh_meta_mpss, width=12
     ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
  
@@ -205,7 +205,7 @@ def launch_gui() -> None:
     root.after(0, update_status)
 
     version_info=main_controller.get_qstaf_version()
-    ttk.Label(footer,text =f"QSTAF_ver: {version_info}").pack(side="right",padx= 20) 
+    ttk.Label(footer,text =f"QSTAF VERSION: {version_info}").pack(side="right",padx= 20) 
 
      
 
@@ -216,7 +216,7 @@ def launch_gui() -> None:
         red_accent  = "#E95959"
 
         quts_label.config(
-        fg=white_accent if running else red_accent)
+            fg=white_accent if running else red_accent)
         root.after(3_000, _update_quts)
 
   
@@ -241,14 +241,14 @@ def launch_gui() -> None:
 
     ttk.Button(
         row,
-        text="Control Framework",
+        text="Launch Control Framework",
         command=main_controller.start_control,
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row,
-        text="Traffic Framework",
+        text="Launch Traffic Framework",
         command=main_controller.start_traffic,
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
@@ -282,14 +282,14 @@ def launch_gui() -> None:
     '''
     ttk.Button(
         row_s,
-        text="Stop Control",
+        text="Stop Control Framework",
         command=partial(main_controller.stop_framework,"control"),
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row_s,
-        text="Stop Traffic",
+        text="Stop Traffic Framework",
         command=partial(main_controller.stop_framework,""),
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
@@ -390,7 +390,7 @@ def launch_gui() -> None:
     inner = ttk.Frame(tools_fr)
     inner.pack(padx=10, pady=6, fill="x")
 
-    ttk.Checkbutton(inner, text="QUTS", variable=quts_var)\
+    ttk.Checkbutton(inner, text="QUTS Service", variable=quts_var)\
         .grid(row=0, column=0, padx=8, pady=4, sticky="w")
     ttk.Checkbutton(inner, text="PCAT", variable=pcat_var)\
         .grid(row=0, column=1, padx=8, pady=4, sticky="w")
@@ -438,10 +438,10 @@ def launch_gui() -> None:
     wifi_pg = ttk.Frame(container)
     wifi_pg.grid(row=0, column=0, sticky="nsew")
     pages["Wifi"] = wifi_pg
-    add_nav("Set Wifi", "Wifi")
+    add_nav("Set Wifi (RDKB)", "Wifi")
 
     CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select config type")
+    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select config type for RDKB TMO")
     wifi_sel.pack(fill="x", **PADDING)# type: ignore
 
 
@@ -460,9 +460,9 @@ def launch_gui() -> None:
     test_pg = ttk.Frame(container)
     test_pg.grid(row=0, column=0, sticky="nsew")
     pages["Testing"] = test_pg
-    add_nav("SpeedTest", "Testing")
+    add_nav("Rename SSIDs", "Testing")
 
-    test_sel = ttk.LabelFrame(test_pg, text="Select config type")
+    test_sel = ttk.LabelFrame(test_pg, text="This is to rename SSIDs before Speedtest for RKDB")
     test_sel.pack(fill="x", **PADDING)# type: ignore
 
 

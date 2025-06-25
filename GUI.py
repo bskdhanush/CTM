@@ -200,9 +200,21 @@ def launch_gui() -> None:
         clock_lbl.config(text=dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         root.after(1_000, _tick)
     '''
+    def update_status():
+        status = main_controller.get_internet_status()
+        if status == 1:
+            center_lbl.configure(foreground="green")
+        elif status == 2:
+            center_lbl.configure(foreground="red")
+        else:
+            center_lbl.configure(foreground="white")
+    # schedule next check in 5 seconds (5000 ms)
+        root.after(5000, update_status)
+
     center_var = tk.StringVar(value="Internet status")
     center_lbl = ttk.Label(footer, textvariable=center_var, anchor="center")
     center_lbl.pack(side="left", fill="x", expand=True)
+    root.after(0, update_status)
 
     version_info=main_controller.get_qstaf_version()
     ttk.Label(footer,text =f"QSTAF_ver: {version_info}").pack(side="right",padx= 20) 
@@ -403,10 +415,10 @@ def launch_gui() -> None:
 
     def start_selected_tools():
         if quts_var.get() and pcat_var.get() and qxdm_var.get():
-            main_controller.restart_quts_pcat_qxdm()
+            main_controller.start_all()
         else:
-            #if quts_var.get():
-               # main_controller.restart_quts_only()
+            if quts_var.get():
+                Quts_controller.start_quts()
             if pcat_var.get():
                 main_controller.start_Pact_only()
             if qxdm_var.get():
@@ -414,7 +426,7 @@ def launch_gui() -> None:
 
     def stop_selected_tools():
         if quts_var.get():
-            main_controller.stop_all_tools_Framework()
+            Quts_controller.stop_quts()
         if pcat_var.get():
             main_controller.stop_pcat_only()
         if qxdm_var.get():

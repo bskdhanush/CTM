@@ -22,7 +22,7 @@ CRASHDUMP_ROOT     = Path(r"C:\QSTAF\crashDump")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
 CONFIG_PATH        = Path(r"C:\QSTAF\app_config.json")
 
-MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
+MIN_CRASH_SIZE     = 1.5 * 1024**2   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
 
 # Lock for thread-safe config I/O

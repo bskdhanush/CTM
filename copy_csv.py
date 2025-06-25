@@ -37,7 +37,7 @@ def get_base(BASE_DIR):
                 now = datetime.now()
                 if int((now - date).total_seconds()) < timeout:
                     base_dir_list.append(os.path.join(BASE_DIR, dir))
-                    break
+                    continue
 
         csv_files = glob.glob(os.path.join(BASE_DIR, dir) + '\\**\\*.csv', recursive=True)
         for csv in csv_files:

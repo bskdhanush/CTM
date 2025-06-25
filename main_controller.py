@@ -249,7 +249,7 @@ def start_Pact_only():
     Quts_controller.start_app(Quts_controller.PCAT_PATH,"PCATApp.exe")
 
 def start_QXDM_only():
-    print("QXDM called")  
+    print("QXDM called")
     Quts_controller.start_app(Quts_controller.QXDM_PATH,"QXDM.exe")
 
 def start_all():
@@ -269,7 +269,7 @@ def stop_all_tools_Framework():
     stop_framework(mode="control")
     stop_framework(mode="")
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
-    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)\
+    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
 
 
 def get_internet_status():

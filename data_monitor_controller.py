@@ -9,7 +9,8 @@ import matplotlib.dates as mdates
 
 LOG_DIR   = r"C:\QSTAF\logs"
 _PATTERNS = ("*.csv", "*.xls*", "*.xlsx")
-
+ping_internet_status = 2
+backhaul_internet_status = 2
 
 def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
@@ -65,6 +66,7 @@ def get_df(csv_type):
 ################### TRAFFIC CSV PROCESSING START #######################################
 
 def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
+    global ping_internet_status
     df_all = {}
     csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
 
@@ -89,6 +91,13 @@ def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
         df_indexing = traffic_indexing(id, df_csv)
         df_indexing_all = pd.concat([df_indexing_all, df_indexing], axis=0)
 
+    if 'vpid1_seqno1_Ping' in df_all:
+        if len(df_all['vpid1_seqno1_Ping']) > 10:
+            if df_all['vpid1_seqno1_Ping']['result'].iloc[-10:].eq('Fail').all():
+                ping_internet_status = 0
+            else:
+                ping_internet_status = 1
+                
     return [traffic_timeline_plot(df_all), hist_plot(figsize, df_indexing_all)]
 
 def traffic_timeline_plot(df_all):
@@ -336,6 +345,7 @@ def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
     return fig
 
 def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
+    global backhaul_internet_status
     df = get_df('\\*qstaf_monitor.csv')
     fig = None
     if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
@@ -351,6 +361,11 @@ def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
             ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
             fig.autofmt_xdate()
             fig.tight_layout()
+            if len(df) > 10:
+                if df['BACKHAUL_STATE'].iloc[-10:].eq('FALSE').all():
+                    backhaul_internet_status = 0 #RED
+                else:
+                    backhaul_internet_status = 1 #GREEN
         except Exception as e:
             pass
     return fig
@@ -396,12 +411,16 @@ def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
     return fig
 
 
-def update_internet_status():
-    """Returns RED (0) if Backhaul / Ping cases Fail continuously for 120sec. Else Green (1)"""
-    state = {
+def get_internet_status():
+    """
+        internet_status
         'RED' : 0,
-        'GREEN' : 1,
-        'UNKNOWN' : 2
-    }
-    return state['GREEN']
-    
+        'GREEN' : 1
+    """
+    global ping_internet_status, backhaul_internet_status
+    if backhaul_internet_status == 0 or ping_internet_status == 0:
+        return 0
+    elif ping_internet_status == 1 and backhaul_internet_status == 1:
+        return 1
+    else:
+        return 2

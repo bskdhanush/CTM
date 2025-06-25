@@ -13,6 +13,7 @@ file_time_dict = {}
 timeout = 2 * 60 * 60  # 2 hours
 del_timeout = (2 * 60 * 60) + 30
 
+
 def get_sorted_dirs(base):
     sorted_dirs = []
     if os.path.exists(base):
@@ -20,15 +21,25 @@ def get_sorted_dirs(base):
     return sorted_dirs
 
 
-def get_base(CONTROL_BASE):
+def get_base(BASE_DIR):
     base_dir_list = []
-    dirs = get_sorted_dirs(CONTROL_BASE)
+    dirs = get_sorted_dirs(BASE_DIR)
     print(dirs)
     for dir in dirs:
-        if os.path.exists(os.path.join(CONTROL_BASE, dir, 'old_data.txt')):
+        if os.path.exists(os.path.join(BASE_DIR, dir, 'old_data.txt')):
             continue
 
-        csv_files = glob.glob(os.path.join(CONTROL_BASE, dir) + '\\**\\*.csv', recursive=True)
+        m = re.search(r'(Playlist_)?(\d{4}-\d{2}-\d{2}_\d{2}_\d{2}_\d{2})', dir)
+        if m:
+            date_str = m.group(2)
+            if date_str:
+                date = datetime.strptime(date_str, "%Y-%m-%d_%H_%M_%S")
+                now = datetime.now()
+                if int((now - date).total_seconds()) < timeout:
+                    base_dir_list.append(os.path.join(BASE_DIR, dir))
+                    break
+
+        csv_files = glob.glob(os.path.join(BASE_DIR, dir) + '\\**\\*.csv', recursive=True)
         for csv in csv_files:
             csv_name = csv.split('\\')[-1]
             m = re.search(r'\[(\d+)\].*csv', csv_name)
@@ -39,15 +50,11 @@ def get_base(CONTROL_BASE):
                 delta = now - date
                 print(delta)
                 if int((now-date).total_seconds()) < timeout:
-                    base_dir_list.append(os.path.join(CONTROL_BASE, dir))
+                    base_dir_list.append(os.path.join(BASE_DIR, dir))
                     break
         else:
-            open(os.path.join(CONTROL_BASE, dir, "old_data.txt"), "w").close()
+            open(os.path.join(BASE_DIR, dir, "old_data.txt"), "w").close()
     return base_dir_list
-
-# Initial tool launch
-# add logic to get all folders which have the csv files from last 2 hours -->> CONTROL_OUTPUT_BASE_LIST
-
 
 def get_copy_csv_list(base_dir, csv_patterns):
     csv_copy_list = []
@@ -71,6 +78,7 @@ def get_copy_csv_list(base_dir, csv_patterns):
                         csv_copy_list.append(csv)
     # print(csv_copy_list)
     return csv_copy_list
+
 
 def get_total_copy_csv_list():
     csv_copy_list = []
@@ -102,11 +110,8 @@ def copy_latest_csv():
         print(f'Copying {csv}')
         shutil.copy(csv, LOG_DIR)
 
-# Every 2min, find latest folder.. And trigger watchdog on that folder, looking for modified files.
-# If not modified, continue (dont copy)
-# If modified, copy modified file, and triggger plot re-generation
 
-# Delete old files from LOG_DIR, every 60mins
+# Delete old files from LOG_DIR, every del_timeout
 def delete_old_csv():
     del_csv_list = []
     csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)

@@ -172,7 +172,7 @@ def run_watchdog():
     # initial run
     final_path= get_latest_play()
     process_dir(final_path,'normalcrash', MIN_CRASH_SIZE)
-    process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE)
+    process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
     process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
 
     # start crash observer in its own instance

@@ -20,9 +20,7 @@ log = logging.getLogger("Counter")
 
 # — Config —'
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
-CRASHDUMP_ROOT     = Path(r"C:\QSTAF\crashDump")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
-CRASHDUMP_ROOT_QSTAF = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
 CONFIG_PATH        = Path(r"C:\QSTAF\app_config.json")
 
@@ -136,19 +134,19 @@ def process_dir(root: Path,
 
 
 def get_latest_play():
-    latest_playlsit_path=most_recent_subdir(DEFAULT_CRASHDUMP) 
-    final_path= os.path.join(str(latest_playlsit_path),"CrashLogs")
+    latest_playlist_path=most_recent_subdir(DEFAULT_CRASHDUMP) 
+    final_path= os.path.join(str(latest_playlist_path),"CrashLogs")
     return Path(final_path)
 
  
 
 class DefaultCrashHandler(FileSystemEventHandler):
     def on_created(self, e):
-        fianl_path= get_latest_play()
-        if e.is_directory and e.src_path.startswith(str(fianl_path)):
+        final_path= get_latest_play()
+        if e.is_directory and e.src_path.startswith(str(final_path)):
             #print(updated_path)
             time.sleep(120)
-            n = process_dir(fianl_path, 'normalcrash', MIN_CRASH_SIZE)
+            n = process_dir(final_path, 'normalcrash', MIN_CRASH_SIZE)
             
 
 class CrashHandler(FileSystemEventHandler):
@@ -172,9 +170,9 @@ class RdkbHandler(FileSystemEventHandler):
 
 def run_watchdog():
     # initial run
-    fianl_path= get_latest_play()
-    process_dir(fianl_path,'normalcrash', MIN_CRASH_SIZE)
-    process_dir(CRASHDUMP_ROOT, 'crash', MIN_CRASH_SIZE)
+    final_path= get_latest_play()
+    process_dir(final_path,'normalcrash', MIN_CRASH_SIZE)
+    process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
     process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
 
     # start crash observer in its own instance

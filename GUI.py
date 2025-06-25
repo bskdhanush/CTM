@@ -81,37 +81,27 @@ def launch_gui() -> None:
     ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    #refresh_meta_mpss()
+    refresh_meta_mpss()
     ttk.Button(
         header_frame, text="Get info",
         command=refresh_meta_mpss, width=12
     ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
  
-    n_dir_var  = tk.StringVar(value="—")
-    n_ovn_var  = tk.StringVar(value="—")
-    r_dir_var  = tk.StringVar(value="—")
-    r_ovn_var  = tk.StringVar(value="—")
+    crash_var  = tk.StringVar(value="—")
+    RDKB_var  = tk.StringVar(value="—")
    
     # labels (two rows keeps width sensible)
-    ttk.Label(header_frame, text="Crash:- DIR:", anchor="e") \
+    ttk.Label(header_frame, text="Device Crashes :-", anchor="e") \
     .grid(row=0, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=n_dir_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=crash_var, anchor="w") \
     .grid(row=0, column=4, sticky="w")
-    ttk.Label(header_frame, text="OVN:", anchor="e") \
-    .grid(row=0, column=5, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=n_ovn_var, anchor="w") \
-    .grid(row=0, column=6, sticky="w", padx=10)
 
 # ── RDKB counters in cols 3–6 (row 1) ───────────────────────────────────
-    ttk.Label(header_frame, text="RDKB:- DIR:", anchor="e") \
+    ttk.Label(header_frame, text="RDKB Crashes:- :", anchor="e") \
     .grid(row=1, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=r_dir_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=RDKB_var, anchor="w") \
     .grid(row=1, column=4, sticky="w")
-    ttk.Label(header_frame, text="OVN:", anchor="e") \
-    .grid(row=1, column=5, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=r_ovn_var, anchor="w") \
-    .grid(row=1, column=6, sticky="w", padx=10)
-    
+
     ttk.Button(
     header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
     .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
@@ -137,10 +127,8 @@ def launch_gui() -> None:
 
     def load_counters():
         cfg = cc.load_config()
-        n_dir_var.set(str(cfg.get("crash_day_counter",   0)))
-        n_ovn_var.set(str(cfg.get("crash_night_counter", 0)))
-        r_dir_var.set(str(cfg.get("rdkbcrash_day_counter",   0)))
-        r_ovn_var.set(str(cfg.get("rdkbcrash_night_counter", 0)))
+        crash_var.set(str(cfg.get("crash_counter",   0)))
+        RDKB_var.set(str(cfg.get("rdkbcrash_counter",   0)))
 
     load_counters()  # initial
 

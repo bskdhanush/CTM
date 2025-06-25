@@ -147,7 +147,7 @@ class DefaultCrashHandler(FileSystemEventHandler):
         fianl_path= get_latest_play()
         if e.is_directory and e.src_path.startswith(str(fianl_path)):
             #print(updated_path)
-            time.sleep(10)
+            time.sleep(120)
             n = process_dir(fianl_path, 'normalcrash', MIN_CRASH_SIZE)
             
 
@@ -163,7 +163,7 @@ class CrashHandler(FileSystemEventHandler):
 class RdkbHandler(FileSystemEventHandler):
     def on_created(self, e):
         if e.is_directory and e.src_path.startswith(str(RDKBCRASH_ROOT)):
-            time.sleep(10)
+            time.sleep(40)
             n = process_dir(
                 RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True
             )
@@ -186,11 +186,6 @@ def run_watchdog():
     obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT_PCAT), recursive=True)
     obs_crash.start()
 
-    # start crash observer in its own instance
-    # obs_crash = Observer()
-    # obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT_QSTAF), recursive=True)
-    # obs_crash.start()
-    # start rdkb observer in separate instance
     obs_rdkb = Observer()
     obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)
     obs_rdkb.start()

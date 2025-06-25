@@ -192,7 +192,7 @@ def launch_gui() -> None:
         status = main_controller.get_internet_status()
         if status == 1:
             center_lbl.configure(foreground="green")
-        elif status == 2:
+        elif status == 0:
             center_lbl.configure(foreground="red")
         else:
             center_lbl.configure(foreground="white")

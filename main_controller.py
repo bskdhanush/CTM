@@ -40,16 +40,20 @@ LOG_DIR  = Path(r"C:\QSTAF\logs")
 
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
-    # Running as EXE - log to file
-    log_dir = r"C:\QSTAF\crashDump"
-    os.makedirs(log_dir, exist_ok=True)
+    # ensure both crashDump and logs folders exist
+    crash_dir = r"C:\QSTAF\crashDump"
+    log_dir   = r"C:\QSTAF\logs"
+    for d in (crash_dir, log_dir):
+        os.makedirs(d, exist_ok=True)
+
+    # now log to files in the logs folder
     logging.basicConfig(
         filename=os.path.join(log_dir, "app_debug.log"),
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-    
-    # Redirect stderr to log file for debugging
+
+    # redirect stderr into a separate file
     sys.stderr = open(os.path.join(log_dir, "app_errors.log"), "w")
 
 def log_exception(exc_type, exc_value, exc_traceback):

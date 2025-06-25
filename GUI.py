@@ -87,31 +87,21 @@ def launch_gui() -> None:
         command=refresh_meta_mpss, width=12
     ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
  
-    n_dir_var  = tk.StringVar(value="—")
-    n_ovn_var  = tk.StringVar(value="—")
-    r_dir_var  = tk.StringVar(value="—")
-    r_ovn_var  = tk.StringVar(value="—")
+    crash_var  = tk.StringVar(value="—")
+    RDKB_var  = tk.StringVar(value="—")
    
     # labels (two rows keeps width sensible)
-    ttk.Label(header_frame, text="Crash:- DIR:", anchor="e") \
+    ttk.Label(header_frame, text="Device Crashes :-", anchor="e") \
     .grid(row=0, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=n_dir_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=crash_var, anchor="w") \
     .grid(row=0, column=4, sticky="w")
-    ttk.Label(header_frame, text="OVN:", anchor="e") \
-    .grid(row=0, column=5, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=n_ovn_var, anchor="w") \
-    .grid(row=0, column=6, sticky="w", padx=10)
 
 # ── RDKB counters in cols 3–6 (row 1) ───────────────────────────────────
-    ttk.Label(header_frame, text="RDKB:- DIR:", anchor="e") \
+    ttk.Label(header_frame, text="RDKB Crashes:- :", anchor="e") \
     .grid(row=1, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=r_dir_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=RDKB_var, anchor="w") \
     .grid(row=1, column=4, sticky="w")
-    ttk.Label(header_frame, text="OVN:", anchor="e") \
-    .grid(row=1, column=5, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=r_ovn_var, anchor="w") \
-    .grid(row=1, column=6, sticky="w", padx=10)
-    
+
     ttk.Button(
     header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
     .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
@@ -137,10 +127,8 @@ def launch_gui() -> None:
 
     def load_counters():
         cfg = cc.load_config()
-        n_dir_var.set(str(cfg.get("crash_day_counter",   0)))
-        n_ovn_var.set(str(cfg.get("crash_night_counter", 0)))
-        r_dir_var.set(str(cfg.get("rdkbcrash_day_counter",   0)))
-        r_ovn_var.set(str(cfg.get("rdkbcrash_night_counter", 0)))
+        crash_var.set(str(cfg.get("crash_counter",   0)))
+        RDKB_var.set(str(cfg.get("rdkbcrash_counter",   0)))
 
     load_counters()  # initial
 
@@ -200,9 +188,21 @@ def launch_gui() -> None:
         clock_lbl.config(text=dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         root.after(1_000, _tick)
     '''
+    def update_status():
+        status = main_controller.get_internet_status()
+        if status == 1:
+            center_lbl.configure(foreground="green")
+        elif status == 2:
+            center_lbl.configure(foreground="red")
+        else:
+            center_lbl.configure(foreground="white")
+    # schedule next check in 5 seconds (5000 ms)
+        root.after(5000, update_status)
+
     center_var = tk.StringVar(value="Internet status")
     center_lbl = ttk.Label(footer, textvariable=center_var, anchor="center")
     center_lbl.pack(side="left", fill="x", expand=True)
+    root.after(0, update_status)
 
     version_info=main_controller.get_qstaf_version()
     ttk.Label(footer,text =f"QSTAF VERSION: {version_info}").pack(side="right",padx= 20) 
@@ -403,10 +403,10 @@ def launch_gui() -> None:
 
     def start_selected_tools():
         if quts_var.get() and pcat_var.get() and qxdm_var.get():
-            main_controller.restart_quts_pcat_qxdm()
+            main_controller.start_all()
         else:
-            #if quts_var.get():
-               # main_controller.restart_quts_only()
+            if quts_var.get():
+                Quts_controller.start_quts()
             if pcat_var.get():
                 main_controller.start_Pact_only()
             if qxdm_var.get():
@@ -414,7 +414,7 @@ def launch_gui() -> None:
 
     def stop_selected_tools():
         if quts_var.get():
-            main_controller.stop_all_tools_Framework()
+            Quts_controller.stop_quts()
         if pcat_var.get():
             main_controller.stop_pcat_only()
         if qxdm_var.get():

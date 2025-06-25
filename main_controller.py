@@ -246,22 +246,34 @@ def update_csv_plots():
         
 def start_Pact_only():
     print("pcat called")
-    Quts_controller.start_app(Quts_controller.PCAT_PATH)
+    Quts_controller.start_app(Quts_controller.PCAT_PATH,"PCATApp.exe")
 
 def start_QXDM_only():
-    print("QXDM called")    
-    Quts_controller.start_app(Quts_controller.QXDM_PATH)
+    print("QXDM called")  
+    Quts_controller.start_app(Quts_controller.QXDM_PATH,"QXDM.exe")
+
+def start_all():
+    Quts_controller.start_quts()
+    start_Pact_only()
+    start_QXDM_only()
+
 def stop_pcat_only():
     print("Stopped pcat")
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
+
 def stop_qxdm_only():
     print("Stopped qxdm")
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
+
 def stop_all_tools_Framework():
     stop_framework(mode="control")
     stop_framework(mode="")
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
-    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
+    subprocess.run("taskkill /IM QXDM.exe /F", shell=True)\
+
+
+def get_internet_status():
+    return 1
     
 #---------to collect logs to txt------------------------
 LOG_DIR.mkdir(parents=True, exist_ok=True) 

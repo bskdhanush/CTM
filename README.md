@@ -1,4 +1,4 @@
-To build the exe: pyinstaller main_controller.py  --name QSTAF_Tool   --noconfirm --onefile --console
+To build the exe: pyinstaller main_controller.py  --name CPE_Test_Manager    --noconfirm --onefile --console
 
 app_json format:    
 {

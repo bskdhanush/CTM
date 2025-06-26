@@ -55,7 +55,7 @@ def draw_all_plots(parent_frame):
             print(f'Exception during {plot_fn}')
 
 
-def periodic_refresh(parent_frame, interval_secs = 120):
+def periodic_refresh(parent_frame, interval_secs = 60):
     """
     Every interval_secs seconds:
       1) copy updated CSV

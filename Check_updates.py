@@ -414,4 +414,5 @@ def main():
         launch_updated_exe()
 
 
-
+if __name__ == "__main__":
+    main()

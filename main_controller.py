@@ -41,6 +41,7 @@ LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
     # ensure both crashDump and logs folders exist
+
     log_dir   = r"C:\QSTAF\CTM_logs"
     os.makedirs(log_dir, exist_ok=True)
 

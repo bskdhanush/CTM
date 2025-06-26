@@ -4,7 +4,7 @@ import glob
 import shutil
 from datetime import datetime
 
-LOG_DIR = r'C:\QSTAF\logs'
+LOG_DIR = r'C:\QSTAF\CTM_logs'
 QSTAF_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy'
 CONTROL_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Control')
 TRAFFIC_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Traffic')

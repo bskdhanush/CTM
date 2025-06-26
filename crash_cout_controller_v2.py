@@ -10,19 +10,12 @@ from datetime import datetime, date, time as dt_time, timedelta
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# — Minimal logging —
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-log = logging.getLogger("Counter")
 
 # — Config —'
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
-CONFIG_PATH        = Path(r"C:\QSTAF\app_config.json")
+CONFIG_PATH        = Path(r"C:\QSTAF\CTM_logs\app_config.json")
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
@@ -34,7 +27,7 @@ def load_config() -> dict:
     try:
         return json.loads(CONFIG_PATH.read_text("utf-8"))
     except Exception as e:
-        log.error("App_json is has no data: %s", e)
+        print("App_json is has no data: %s", e)
         return {}
 
 
@@ -188,8 +181,6 @@ def run_watchdog():
     obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)
     obs_rdkb.start()
 
-    log.info("Watching crash and RDKB directories in parallel…")
-
     try:
         while True:
             time.sleep(1)
@@ -200,9 +191,7 @@ def run_watchdog():
         obs_dcrash.join()
         obs_crash.join()
         obs_rdkb.join()
-        log.info("Watchers stopped.")
 
 
-if __name__ == "__main__":
-    run_watchdog()
+
     

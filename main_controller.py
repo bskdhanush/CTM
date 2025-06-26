@@ -32,7 +32,7 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
-LOG_DIR  = Path(r"C:\QSTAF\logs") 
+LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
 
 
 
@@ -41,10 +41,8 @@ LOG_DIR  = Path(r"C:\QSTAF\logs")
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
     # ensure both crashDump and logs folders exist
-    crash_dir = r"C:\QSTAF\crashDump"
-    log_dir   = r"C:\QSTAF\logs"
-    for d in (crash_dir, log_dir):
-        os.makedirs(d, exist_ok=True)
+    log_dir   = r"C:\QSTAF\CTM_logs"
+    os.makedirs(log_dir, exist_ok=True)
 
     # now log to files in the logs folder
     logging.basicConfig(
@@ -163,7 +161,7 @@ def set_wifi_config(dropDown_value):
     Wifi_controller.update_cpe_wifi_config(dropDown_value,"")
     # Wifi_controller.setpassword_bandwiths()
     
-
+'''
 def check_for_updates_integrated():
     """
     Integrated update checker that works in both .py and .exe modes
@@ -209,7 +207,7 @@ def launch_updated_exe():
         sys.exit(0)
     else:
         print(f"Cannot find EXE at {exe_path}. Continuing with current version.")
-
+'''
 def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
     # 1) Require admin

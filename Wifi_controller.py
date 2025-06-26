@@ -75,15 +75,12 @@ def run_dmcli_commands(commands):
         time.sleep(1)
 
 
-def connectBackhall():
+def connectBackhaul():
     run_command("adb root")
     commands = [
-	"dmcli eRT setv Device.Cellular.AccessPoint.1.Apn string fast.t-mobile.com",
-    "sleep 2",
-	"dmcli eRT setv Device.Cellular.AccessPoint.1.X_QCOM.ConnectBackHaul bool true",
-	"sleep 2",
-	"dmcli eRT setv Device.Cellular.X_QCOM.AutoConnect bool true",
-	"sleep 2"
+        "dmcli eRT setv Device.Cellular.AccessPoint.1.Apn string fast.t-mobile.com",
+        "dmcli eRT setv Device.Cellular.AccessPoint.1.X_QCOM.ConnectBackHaul bool true",
+        "dmcli eRT setv Device.Cellular.X_QCOM.AutoConnect bool true"
     ]
     run_dmcli_commands(commands)
     
@@ -132,36 +129,24 @@ def update_2g_slo_5g6g_mlo_config(Config):
 
 def setpassword_bandwiths():
     commands = [
-    'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+        'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
+        'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
 
-    'dmcli eRT setv Device.WiFi.AccessPoint.2.Security.SAEPassphrase string "12345678"',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+        'dmcli eRT setv Device.WiFi.AccessPoint.2.Security.SAEPassphrase string "12345678"',
+        'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
 
-    'dmcli eRT setv Device.WiFi.AccessPoint.17.Security.SAEPassphrase string "12345678"',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+        'dmcli eRT setv Device.WiFi.AccessPoint.17.Security.SAEPassphrase string "12345678"',
+        'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
 
-    # ── bandwidth configuration ────────────────────────────
-    'dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+                                                                                                                         
+        'dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz',
+        'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
 
-    'dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 160MHz',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+        'dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 160MHz',
+        'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
 
-    'dmcli eRT setv Device.WiFi.Radio.3.OperatingChannelBandwidth string 320MHz',
-    'sleep 2',
-    'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
-    'sleep 2',
+        'dmcli eRT setv Device.WiFi.Radio.3.OperatingChannelBandwidth string 320MHz',
+        'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true'
     ]
     run_dmcli_commands(commands)
 

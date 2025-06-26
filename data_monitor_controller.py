@@ -295,11 +295,12 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
     if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
         try:
             df['DL_UL'] = df['DIRECTION'].apply(lambda x: 0 if x == 'DL' else 1)
+            df['IPA_THROUGHPUT'] = df['IPA_THROUGHPUT'] / 1000
 
             fig = Figure(figsize, dpi=100)
             ax = [fig.add_subplot(111)]
             for direction, group in df.groupby('DIRECTION'):
-                ax[0].scatter(group['TIMESTAMP'], group['IPA_THROUGHPUT'], label=f'{direction}')
+                ax[0].scatter(group['TIMESTAMP'], group['IPA_THROUGHPUT'], label=f'{direction} (Mbps)')
                 # ax[0].set_xlabel('TIMESTAMP')
                 # ax[0].set_ylabel('IPA_THROUGHPUT')
                 ax[0].set_title('IPA_THROUGHPUT')

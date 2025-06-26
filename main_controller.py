@@ -159,9 +159,9 @@ def restart_quts_pcat_qxdm():
     
 def set_wifi_config(dropDown_value):
    # print(dropDown_value)
-    Wifi_controller.connectBackhall()
+    # Wifi_controller.connectBackhaul()
     Wifi_controller.update_cpe_wifi_config(dropDown_value,"")
-    Wifi_controller.setpassword_bandwiths()
+    # Wifi_controller.setpassword_bandwiths()
     
 
 def check_for_updates_integrated():

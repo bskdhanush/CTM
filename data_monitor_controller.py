@@ -61,6 +61,7 @@ def get_df(csv_type):
     if isinstance(df, pd.DataFrame) and 'TIMESTAMP' in df:
         df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
 
+    df = df.sort_values(by=['TIMESTAMP'])
     return df
 
 ################### TRAFFIC CSV PROCESSING START #######################################
@@ -227,8 +228,8 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
 
     try:
         df.columns = df.columns.str.upper()
-        df = df.sort_values(by=['TIMESTAMP'])
         df_rf_indexed = get_rfband_df(df)
+        df_rf_indexed = df_rf_indexed.sort_values(by=['TIMESTAMP'])
 
         fig = Figure(figsize, dpi=100)
         ax = [fig.add_subplot(111)]
@@ -296,6 +297,7 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
         try:
             df['DL_UL'] = df['DIRECTION'].apply(lambda x: 0 if x == 'DL' else 1)
             df['IPA_THROUGHPUT'] = df['IPA_THROUGHPUT'] / 1000
+            df = df.sort_values(by=['TIMESTAMP'])
 
             fig = Figure(figsize, dpi=100)
             ax = [fig.add_subplot(111)]
@@ -421,7 +423,8 @@ def get_internet_status():
     global ping_internet_status, backhaul_internet_status
     if backhaul_internet_status == 0 or ping_internet_status == 0:
         return 0
-    elif ping_internet_status == 1 and backhaul_internet_status == 1:
+    elif ping_internet_status == 1 or backhaul_internet_status == 1:
         return 1
     else:
         return 2
+ 

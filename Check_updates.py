@@ -22,7 +22,7 @@ GITHUB_PAT    = os.getenv("GITHUB_PAT") or "ghp_M1EXjBybJPLmrMOOofL7mc45v8QZJ13C
 # Bump this on each new build/exe you generate:
 LOCAL_VERSION = "1.2.6"
 
-DOWNLOAD_DIR  = r"C:\QSTAF"
+DOWNLOAD_DIR  = r"C:\QSTAF\CTM_logs"
 EXE_NAME      = "QSTAF_Tool.exe"
 EXE_PATH      = os.path.join(DOWNLOAD_DIR, EXE_NAME)
 EXE_BACKUP    = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool.exe.backup")

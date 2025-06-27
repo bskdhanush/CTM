@@ -32,7 +32,7 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
-LOG_DIR  = Path(r"C:\QSTAF\logs") 
+LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
 
 
 
@@ -41,20 +41,17 @@ LOG_DIR  = Path(r"C:\QSTAF\logs")
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
     # ensure both crashDump and logs folders exist
-    crash_dir = r"C:\QSTAF\crashDump"
-    log_dir   = r"C:\QSTAF\logs"
-    for d in (crash_dir, log_dir):
-        os.makedirs(d, exist_ok=True)
+    os.makedirs(LOG_DIR, exist_ok=True)
 
     # now log to files in the logs folder
     logging.basicConfig(
-        filename=os.path.join(log_dir, "app_debug.log"),
+        filename=os.path.join(LOG_DIR, "app_debug.log"),
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
 
     # redirect stderr into a separate file
-    sys.stderr = open(os.path.join(log_dir, "app_errors.log"), "w")
+    sys.stderr = open(os.path.join(LOG_DIR, "app_errors.log"), "w")
 
 def log_exception(exc_type, exc_value, exc_traceback):
     """Log uncaught exceptions"""

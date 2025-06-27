@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['logs\\logo.ico'],
+    icon=['C:\\CPE Test Manager\\QC_stuff\\logs\\logo.ico'],
 )

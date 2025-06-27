@@ -16,7 +16,7 @@ import os, json, threading, time, subprocess, schedule, logging, datetime
 # -------------------------------------------------------------------- #
 # Configurable paths & constants
 # -------------------------------------------------------------------- #
-CONFIG_DIR   = r"C:\QSTAF"
+CONFIG_DIR   = r"C:\QSTAF\CTM_logs"
 CONFIG_FILE  = os.path.join(CONFIG_DIR, "app_config.json")
 BAT_PATH     = r"C:\QSTAF\QSTAFpy\bin\aws_s3_uploder.bat"
 RUN_TIME     = "16:00"                                # 4 PM every day

@@ -22,7 +22,7 @@ log = logging.getLogger("Counter")
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
-CONFIG_PATH        = Path(r"C:\QSTAF\app_config.json")
+CONFIG_PATH        = Path(r"C:\QSTAF\CTM_logs\app_config.json")
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB

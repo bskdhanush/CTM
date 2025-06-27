@@ -7,7 +7,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
-LOG_DIR   = r"C:\QSTAF\logs"
+LOG_DIR   = r"C:\QSTAF\CTM_logs"
 _PATTERNS = ("*.csv", "*.xls*", "*.xlsx")
 ping_internet_status = 2
 backhaul_internet_status = 2

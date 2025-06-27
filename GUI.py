@@ -192,7 +192,6 @@ def launch_gui() -> None:
 
     def update_internet_status():
         status = dmc.get_internet_status()
-        print(status)
         if status == 1:
             center_var.set("Internet status: GOOD")
             center_lbl.configure(foreground="green")

@@ -11,6 +11,14 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+log = logging.getLogger("Counter")
+
+
 # — Config —'
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
@@ -180,6 +188,7 @@ def run_watchdog():
     obs_rdkb = Observer()
     obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)
     obs_rdkb.start()
+    log.info("Watching crash and RDKB directories in parallel…")
 
     try:
         while True:

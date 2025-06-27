@@ -49,7 +49,7 @@ def get_adb_id():
 def get_meta_build_info():
     meta = None
     run_command("adb root")
-    output, stderr = run_command("adb wait-for-device shell cat /firmware/verinfo/Ver_Info.txt | findstr Meta_Build_ID")
+    output, stderr = run_command("adb shell cat /firmware/verinfo/Ver_Info.txt | findstr Meta_Build_ID")
     if not output or stderr:
         raise Exception('Meta Build info NOT FOUND')
     else:
@@ -59,7 +59,7 @@ def get_meta_build_info():
 def get_mpss_build_info():
     mpss = None
     #run_command("adb root")
-    output, stderr = run_command("adb wait-for-device shell cat /sys/devices/soc0/images | findstr 11:")
+    output, stderr = run_command("adb shell cat /sys/devices/soc0/images | findstr 11:")
     if not output or stderr:
         raise Exception('MPSS Build info NOT FOUND')
     else:
@@ -71,7 +71,7 @@ def get_mpss_build_info():
 def run_dmcli_commands(commands):
     run_command("adb root")
     for command in commands:
-        run_command(f"adb wait-for-device shell {command}")
+        run_command(f"adb shell {command}")
         time.sleep(1)
 
 

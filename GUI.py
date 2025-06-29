@@ -106,7 +106,7 @@ def launch_gui() -> None:
     header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
     .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
 
-    # ­—----- start the JSON watcher ­-----—
+    # ­—----- start the app_JSON watcher ­-----—
     class ConfigHandler(FileSystemEventHandler):
         def __init__(self, callback):
             self.callback = callback

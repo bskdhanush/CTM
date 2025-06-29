@@ -1,4 +1,4 @@
-To build the exe: pyinstaller main_controller.py  --name CPE_Test_Manager    --noconfirm --onefile --console
+To build the exe: pyinstaller main_controller.py  --name CPE_Test_Manager    --noconfirm --onefile --windowed
 
 app_json format:    
 {

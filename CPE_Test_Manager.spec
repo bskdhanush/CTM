@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['D:\\QC_testing\\GUI\\Quts_tool\\logs\\logo.ico'],
+    icon=['logs\\logo.ico'],
 )

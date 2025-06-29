@@ -33,6 +33,7 @@ CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
 LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
+LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
 
 
 
@@ -273,7 +274,8 @@ def stop_all_tools_Framework():
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
 
 
-
+def get_internet_status():
+    return 1
     
 #---------to collect logs to txt------------------------
 LOG_DIR.mkdir(parents=True, exist_ok=True) 

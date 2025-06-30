@@ -35,8 +35,8 @@ import crash_cout_controller_v2 as cc
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
-
-
+white_accent = "#FFFFFF"
+red_accent  = "#E95959"
 
 def launch_gui() -> None:
     """Construct and run the UI."""
@@ -91,16 +91,22 @@ def launch_gui() -> None:
     RDKB_var  = tk.StringVar(value="—")
    
     # labels (two rows keeps width sensible)
-    ttk.Label(header_frame, text="Device Crashes :-", anchor="e") \
-    .grid(row=0, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=crash_var, anchor="w") \
-    .grid(row=0, column=4, sticky="w")
+    crash_text_lbl =ttk.Label(header_frame, text="Device Crashes:", anchor="e") 
+    crash_text_lbl.grid(row=0, column=3, sticky="e", padx=(10,5))
+    crash_lbl = ttk.Label(header_frame, textvariable=crash_var, anchor="w")
+    crash_lbl.grid(row=0, column=4, sticky="w")
 
+    RDKB_text_lbl= ttk.Label(header_frame, text="RDKB Crashes:", anchor="e") 
+    RDKB_text_lbl.grid(row=1, column=3, sticky="e", padx=(10,5))
+    RDKB_lbl = ttk.Label(header_frame, textvariable=RDKB_var, anchor="w")
+    RDKB_lbl.grid(row=1, column=4, sticky="w")
+    
 # ── RDKB counters in cols 3–6 (row 1) ───────────────────────────────────
-    ttk.Label(header_frame, text="RDKB Crashes:- :", anchor="e") \
-    .grid(row=1, column=3, sticky="e", padx=(10,5))
-    ttk.Label(header_frame, textvariable=RDKB_var, anchor="w") \
-    .grid(row=1, column=4, sticky="w")
+    
+    # ttk.Label(header_frame, text="RDKB Crashes:- :", anchor="e") \
+    # .grid(row=1, column=3, sticky="e", padx=(10,5))
+    # ttk.Label(header_frame, textvariable=RDKB_var, anchor="w") \
+    # .grid(row=1, column=4, sticky="w")
 
     ttk.Button(
     header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
@@ -127,15 +133,32 @@ def launch_gui() -> None:
 
     def load_counters():
         cfg = cc.load_config()
-        crash_var.set(str(cfg.get("crash_counter",   0)))
-        RDKB_var.set(str(cfg.get("rdkbcrash_counter",   0)))
+
+        crash_count = cfg.get("crash_counter", 0)
+        rdkb_count = cfg.get("rdkbcrash_counter", 0)
+
+    # update the StringVars
+        crash_var.set(str(crash_count))
+        RDKB_var.set(str(rdkb_count))
+        if crash_count > 0:
+            crash_lbl.config(foreground=red_accent)
+            crash_text_lbl.configure(foreground=red_accent)
+        else:
+            crash_lbl.configure(foreground=white_accent)
+            crash_text_lbl.configure(foreground=white_accent)
+
+        if rdkb_count > 0:
+            RDKB_lbl.configure(foreground=red_accent)
+            RDKB_text_lbl.configure(foreground=red_accent)
+
+        else:
+            RDKB_lbl.configure(foreground=white_accent)
+            RDKB_text_lbl.configure(foreground=white_accent)
 
     load_counters()  # initial
 
      # start watching the JSON for changes
     start_config_watcher(load_counters)
-
-
 
 
 
@@ -164,9 +187,17 @@ def launch_gui() -> None:
         btn.pack(fill="x", pady=6, padx=6)
         nav_btns[key] = btn
 
+
+
+
     # ── Footer / status bar ───────────────────────────────────────────────
     footer = ttk.Frame(root)
     footer.grid(row=2, column=0, columnspan=2, sticky="ew", padx=12, pady=(4, 8))
+    
+    footer.columnconfigure(0, weight=0)   # QUTS
+    footer.columnconfigure(1, weight=0)   # Scheduler
+    footer.columnconfigure(2, weight=1)   # Internet (will expand & center)
+    footer.columnconfigure(3, weight=0) 
 
     quts_stat_var = tk.StringVar(value="QUTS: Checking…")
     sched_stat_var = tk.StringVar(
@@ -177,9 +208,10 @@ def launch_gui() -> None:
     footer,
     textvariable=quts_stat_var,
     font=("TkDefaultFont", 10, "bold"))
-    quts_label.pack(side="left")
+    quts_label.grid(row=0, column=0, sticky="w")
 
-    ttk.Label(footer, textvariable=sched_stat_var, padding=(12, 0)).pack(side="left")
+    sched_label = ttk.Label(footer, textvariable=sched_stat_var)
+    sched_label.grid(row=0, column=1, sticky="w", padx=(12,0))
     '''
     clock_lbl = ttk.Label(footer)
     clock_lbl.pack(side="right")
@@ -195,35 +227,37 @@ def launch_gui() -> None:
         print(status)
         if status == 1:
             center_var.set("Internet status: GOOD")
-            center_lbl.configure(foreground="green")
+            center_lbl.configure(foreground="green", font=("Segoe UI", 14) )
 
         elif status == 0:
             center_var.set("Internet status: DOWN")
-            center_lbl.configure(foreground="red")
+            center_lbl.configure(foreground="red",font=("Segoe UI", 14))
 
         else:
             center_var.set("Internet status")
-            center_lbl.configure(foreground="white")
+            center_lbl.configure(foreground="white",font=("Segoe UI", 12))
             
         root.after(5000, update_internet_status)
 
     center_var = tk.StringVar(value="Internet status")
-    center_lbl = ttk.Label(footer, textvariable=center_var, anchor="center")
-    center_lbl.configure(foreground="white")
-    center_lbl.pack(side="left", fill="x", expand=True)
+    center_lbl = tk.Label(
+    footer,
+    textvariable=center_var,
+    font=("Segoe UI", 12),
+    fg="white",           # default color
+    anchor="center",)
+    center_lbl.grid(row=0, column=2, sticky="ew")
 
     root.after(0, update_internet_status)
 
-    version_info=main_controller.get_qstaf_version()
-    ttk.Label(footer,text =f"QSTAF VERSION: {version_info}").pack(side="right",padx= 20) 
-
-     
+    version_lbl = ttk.Label(
+    footer,
+    text=f"QSTAF VERSION: {main_controller.get_qstaf_version()}")
+    version_lbl.grid(row=0, column=3, sticky="e", padx=10)
 
     def _update_quts() -> None:
         running = Quts_controller.is_service_running("QUTS")
         quts_stat_var.set(f"QUTS: {'Running' if running else 'Stopped'}")
-        white_accent = "#FFFFFF"
-        red_accent  = "#E95959"
 
         quts_label.config(
             fg=white_accent if running else red_accent)

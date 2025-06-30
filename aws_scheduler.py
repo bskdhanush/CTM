@@ -36,7 +36,7 @@ def _ensure_dir() -> None:
     os.makedirs(CONFIG_DIR, exist_ok=True)
 
 def _default_cfg() -> dict:
-    return {"aws_scheduler_enabled": False}
+    return {"aws_scheduler_enabled": True}
 
 def _load_cfg() -> dict:
     _ensure_dir()

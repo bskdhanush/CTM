@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import subprocess
 import time
+from datetime import datetime
 import ctypes
 from tkinter import messagebox
 import json, threading, time
@@ -19,6 +20,7 @@ import Quts_controller
 import Wifi_controller
 import GUI as gui
 import crash_cout_controller_v2 as cc
+from aws_scheduler import _save_cfg, _load_cfg
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -119,17 +121,17 @@ def ensure_admin():
         print(f"[ERROR] Admin check failed: {e}")
         sys.exit(1)
 
-def start_control():
-    try:
-        Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
-
-def start_traffic():
-    try:
-        Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
+def start_framework(mode):
+    if mode.lower() == 'control':
+        try:
+            Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+    elif mode.lower() == 'traffic':
+        try:
+            Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
 def run_both_with_delay():
     try:
@@ -160,7 +162,42 @@ def set_wifi_config(dropDown_value):
     # Wifi_controller.connectBackhaul()
     Wifi_controller.update_cpe_wifi_config(dropDown_value,"")
     # Wifi_controller.setpassword_bandwiths()
-    
+
+
+def check_restart_timer():
+
+    while True:
+        for mode in ['control', 'traffic']:
+            try:
+                cfg = _load_cfg()
+                relaunch_timer = cfg.get('relaunch_timer', None) #in hours
+                if isinstance(relaunch_timer, str) and relaunch_timer.isnumeric():
+                    relaunch_timer = int(relaunch_timer) * 3600
+                if not relaunch_timer:
+                    cfg['relaunch_timer'] = 6
+                    _save_cfg(cfg)
+                    relaunch_timer = 6 * 3600
+
+                start_time_str = cfg.get(f'{mode}_start_timestamp', 'null')
+                if not start_time_str or start_time_str == 'null':
+                    start_time = datetime.now()
+                    cfg[f'{mode}_start_timestamp'] = datetime.strftime(start_time, "%Y-%m-%d %H:%M:%S")
+                    _save_cfg(cfg)
+                else:
+                    start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+
+                current_time = datetime.now()
+                if (current_time - start_time).seconds > relaunch_timer:
+                    stop_framework(mode)
+                    time.sleep(2)
+                    start_framework(mode)
+                    cfg[f'{mode}_start_timestamp'] = start_time
+                    _save_cfg(cfg)
+            except Exception as e:
+                print(f'Exception during check_restart_timer: {e}')
+
+        time.sleep(300)
+
 '''
 def check_for_updates_integrated():
     """
@@ -301,14 +338,14 @@ def main() -> None:
         daemon=True        # auto‑stops when the main program exits
     )
     t.start()
-    '''
-    t2 = threading.Thread(
-        target=update_csv_plots,
-        daemon=True  # auto‑stops when the main program exits
-    )
-    t2.start()
+    
+    # t2 = threading.Thread(
+    #     target=check_restart_timer,
+    #     daemon=True  # auto‑stops when the main program exits
+    # )
+    # t2.start()
     # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
-    '''
+
     run_app()
 
 if __name__ == "__main__":

@@ -286,14 +286,14 @@ def launch_gui() -> None:
     ttk.Button(
         row,
         text="Launch Control Framework",
-        command=main_controller.start_framework('control'),
+        command=lambda:main_controller.start_framework('control'), # type: ignore
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row,
         text="Launch Traffic Framework",
-        command=main_controller.start_framework('traffic'),
+        command=lambda:main_controller.start_framework('traffic'), # type: ignore
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
     

@@ -132,7 +132,7 @@ def start_framework(mode):
             Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
         except Exception as e:
             messagebox.showerror("Error", str(e))
-
+'''
 def run_both_with_delay():
     try:
         start_control()
@@ -140,7 +140,7 @@ def run_both_with_delay():
         start_traffic()
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
+'''
 def stop_framework(mode):
     found = Kill_process.stop_all_tests(mode)
     msg = "All processes stopped." if found else "No processes found to stop."
@@ -187,7 +187,7 @@ def check_restart_timer():
                     start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
 
                 current_time = datetime.now()
-                if (current_time - start_time).seconds > relaunch_timer:
+                if (current_time - start_time).seconds > relaunch_timer: # type: ignore
                     stop_framework(mode)
                     time.sleep(2)
                     start_framework(mode)

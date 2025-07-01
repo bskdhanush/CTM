@@ -2,8 +2,7 @@ import json
 import os
 from pathlib import Path
 
-
-LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
+LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
 
 def _ensure_dir() -> None:

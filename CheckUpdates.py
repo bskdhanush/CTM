@@ -1,4 +1,4 @@
-# ─── Check_updates.py (with batch-helper launching EXE in a new terminal) ─────────
+# ─── CheckUpdates.py (with batch-helper launching EXE in a new terminal) ─────────
 
 import glob
 import os
@@ -29,7 +29,7 @@ EXE_BACKUP    = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool.exe.backup")
 
 # Log file location (adjust as desired):
 LOG_DIR      = os.path.join(DOWNLOAD_DIR, "logs")
-LOG_FILENAME = os.path.join(LOG_DIR, "check_updates.log")
+LOG_FILENAME = os.path.join(LOG_DIR, "CheckUpdates.log")
 
 
 # ── SET UP LOGGING ──────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-# main_controller.py
+# MainController.py
 from __future__ import annotations
 import sys
 import subprocess
@@ -7,20 +7,16 @@ from datetime import datetime
 import ctypes
 from tkinter import messagebox
 import json, threading, time
-from pathlib import Path
-from typing import Callable, Any
 import logging
-from pathlib import Path
-import builtins
 
-import Kill_process 
-import Check_updates
-import Start_testCase
-import Quts_controller
-import Wifi_controller
+import KillProcess
+import CheckUpdates
+import StartTestCase
+import QutsController
+import WifiController
 import GUI as gui
-import crash_cout_controller_v2 as cc
-import Json_handler as JH
+import CrashCountController as cc
+import JsonHandler as JH
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -36,9 +32,7 @@ BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
 
 
-
-
-#crash_count_controller.run_watch()
+# CrashCountController.run_watch()
 
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
@@ -72,11 +66,11 @@ def get_meta_mpss():
     meta = "UNKNOWN"
     mpss = "UNKNOWN"
     try:
-        meta = Wifi_controller.get_meta_build_info()
+        meta = WifiController.get_meta_build_info()
     except Exception as e:
         print(f'Exception while reading Meta: {e}')
     try:
-        mpss = Wifi_controller.get_mpss_build_info()
+        mpss = WifiController.get_mpss_build_info()
     except Exception as e:
         print(f'Exception while reading MPSS: {e}')
 
@@ -116,12 +110,12 @@ def ensure_admin():
 def start_framework(mode):
     if mode.lower() == 'control':
         try:
-            Start_testCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
+            StartTestCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
         except Exception as e:
             messagebox.showerror("Error", str(e))
     elif mode.lower() == 'traffic':
         try:
-            Start_testCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
+            StartTestCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
         except Exception as e:
             messagebox.showerror("Error", str(e))
 '''
@@ -134,26 +128,26 @@ def run_both_with_delay():
         messagebox.showerror("Error", str(e))
 '''
 def stop_framework(mode):
-    found = Kill_process.stop_all_tests(mode)
+    found = KillProcess.stop_all_tests(mode)
     msg = "All processes stopped." if found else "No processes found to stop."
     print(msg)
 
 def run_s3_uploader():
     try:
-        Start_testCase.start_tests(CMD_DIR_AWS, BAT_FILE_AWS,None)
+        StartTestCase.start_tests(CMD_DIR_AWS, BAT_FILE_AWS,None)
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
 def restart_quts_pcat_qxdm():
     def show_status(msg: str):
         print(msg)
-    Quts_controller.restart_quts_pcat_qxdm(callback=show_status)
+    QutsController.restart_quts_pcat_qxdm(callback=show_status)
     
 def set_wifi_config(dropDown_value):
    # print(dropDown_value)
-    # Wifi_controller.connectBackhaul()
-    Wifi_controller.update_cpe_wifi_config(dropDown_value,"")
-    # Wifi_controller.setpassword_bandwiths()
+    # WifiController.connectBackhaul()
+    WifiController.update_cpe_wifi_config(dropDown_value,"")
+    # WifiController.setpassword_bandwiths()
 
 
 def check_restart_timer():
@@ -198,21 +192,21 @@ def check_for_updates_integrated():
     """
     try:
         # Import the update checking functionality directly
-        import Check_updates
+        import CheckUpdates
         
         # Run the update check logic
-        data = Check_updates.fetch_latest_release_data()
+        data = CheckUpdates.fetch_latest_release_data()
         raw_tag = data.get("tag_name", "")
         latest_tag = raw_tag.lstrip("v")
         
-        print(f"Latest release on GitHub: {latest_tag} (local: {Check_updates.LOCAL_VERSION})")
+        print(f"Latest release on GitHub: {latest_tag} (local: {CheckUpdates.LOCAL_VERSION})")
         
-        if Check_updates.parse_version(latest_tag) > Check_updates.parse_version(Check_updates.LOCAL_VERSION):
+        if CheckUpdates.parse_version(latest_tag) > CheckUpdates.parse_version(CheckUpdates.LOCAL_VERSION):
             print("Newer version detected. Downloading and replacing...")
-            asset_api_url, asset_name = Check_updates.find_latest_exe_asset(data)
+            asset_api_url, asset_name = CheckUpdates.find_latest_exe_asset(data)
             
             # Download the new version
-            Check_updates.download_and_replace(asset_api_url, asset_name)
+            CheckUpdates.download_and_replace(asset_api_url, asset_name)
             print(f"Replaced old EXE with version {latest_tag}.")
             
             # Launch the updated EXE and exit
@@ -229,7 +223,7 @@ def check_for_updates_integrated():
 
 def launch_updated_exe():
     """Launch the updated executable"""
-    exe_path = Check_updates.EXE_PATH
+    exe_path = CheckUpdates.EXE_PATH
     if os.path.isfile(exe_path):
         print(f"Launching updated EXE: {exe_path} --skip-updates")
         subprocess.Popen([exe_path, "--skip-updates"], shell=False)
@@ -237,6 +231,7 @@ def launch_updated_exe():
     else:
         print(f"Cannot find EXE at {exe_path}. Continuing with current version.")
 '''
+
 def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
     # 1) Require admin
@@ -244,7 +239,6 @@ def run_app() -> None:
 
     #commont the below line and uncomment step 2 to check for updates
     gui.launch_gui()
-
 
     '''
     # 2) One‑time update check unless the flag is present
@@ -255,7 +249,7 @@ def run_app() -> None:
                 return
         else:
             # Running from .py – spawn updater in separate console
-            updater = os.path.join(get_executable_dir(), "Check_updates.py")
+            updater = os.path.join(get_executable_dir(), "CheckUpdates.py")
             if os.path.exists(updater):
                 subprocess.Popen(
                     ["cmd", "/c", "start", "", sys.executable, updater],
@@ -266,25 +260,18 @@ def run_app() -> None:
     # 3) Fire up the GUI
     gui.launch_gui()
     '''
-'''
-def update_csv_plots():
-    while True:
-        time.sleep(20)
-        copy_csv.copy_csv_main()
-        
-'''      
-        
+
         
 def start_Pact_only():
     print("pcat called")
-    Quts_controller.start_app(Quts_controller.PCAT_PATH,"PCATApp.exe")
+    QutsController.start_app(QutsController.PCAT_PATH,"PCATApp.exe")
 
 def start_QXDM_only():
     print("QXDM called")
-    Quts_controller.start_app(Quts_controller.QXDM_PATH,"QXDM.exe")
+    QutsController.start_app(QutsController.QXDM_PATH,"QXDM.exe")
 
 def start_all():
-    Quts_controller.start_quts()
+    QutsController.start_quts()
     start_Pact_only()
     start_QXDM_only()
 
@@ -321,8 +308,7 @@ builtins.print = lambda *a, **kw: log.info(" ".join(map(str, a)))
 
 def main() -> None:
 
-
-    # 1️⃣  Start the watcher in a daemon thread
+    # Start the watcher in a daemon thread
     t = threading.Thread(
         target=cc.run_watchdog,
         daemon=True        # auto‑stops when the main program exits
@@ -334,8 +320,8 @@ def main() -> None:
     #     daemon=True  # auto‑stops when the main program exits
     # )
     # t2.start()
-    # 2️⃣  Launch GUI (must stay on the main thread on Windows/macOS)
 
+    # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
 
 if __name__ == "__main__":

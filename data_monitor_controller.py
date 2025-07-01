@@ -58,6 +58,7 @@ def get_df(csv_type):
             else:
                 df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
 
+    df.columns = df.columns.str.upper()
     if isinstance(df, pd.DataFrame) and 'TIMESTAMP' in df:
         df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
 
@@ -241,7 +242,7 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
         fig.tight_layout()
 
     except Exception as e:
-        print('Exception during rf_band_plot')
+        print('Exception during rf_band_plot : {e}')
 
     return fig
 

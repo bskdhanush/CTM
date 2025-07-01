@@ -11,63 +11,17 @@ Usage from any UI:
     aws.run_now()                 -> launch the BAT immediately
 """
 from __future__ import annotations
-import os, json, threading, time, subprocess, schedule, logging, datetime
+import os,threading, time, subprocess, schedule, logging
+
+import Json_handler as JH
+
 
 # -------------------------------------------------------------------- #
 # Configurable paths & constants
-# -------------------------------------------------------------------- #
-CONFIG_DIR   = r"C:\QSTAF\CTM_logs"
-CONFIG_FILE  = os.path.join(CONFIG_DIR, "app_config.json")
+# -------------------------------------------------------------------- 
 BAT_PATH     = r"C:\QSTAF\QSTAFpy\bin\aws_s3_uploder.bat"
 RUN_TIME     = "16:00"                                # 4 PM every day
 
-# -------------------------------------------------------------------- #
-# Logging (optional)
-# -------------------------------------------------------------------- #
-logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    level=logging.INFO
-)
-
-# -------------------------------------------------------------------- #
-# Private helpers – JSON persistence
-# -------------------------------------------------------------------- #
-def _ensure_dir() -> None:
-    os.makedirs(CONFIG_DIR, exist_ok=True)
-
-def _default_cfg() -> dict:
-    return {
-        "aws_scheduler_enabled": "true",
-        "control_start_timestamp": "null",
-        "crash_counter": 0,
-        "crash_last_timestamp": "null",
-        "normalcrash_last_timestamp": "null",
-        "previous_crash_dir": "null",
-        "previous_normalcrash_dir": "null",
-        "previous_rdkbcrash_dir": "null",
-        "rdkbcrash_counter": 0,
-        "rdkbcrash_last_timestamp": "null",
-        "relaunch_control": "false",
-        "relaunch_timer": 6,
-        "relaunch_traffic": "false",
-        "traffic_start_timestamp": "null"
-    }
-
-def _load_cfg() -> dict:
-    _ensure_dir()
-    if not os.path.exists(CONFIG_FILE):
-        _save_cfg(_default_cfg())
-    try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        logging.warning("Config read failed – using defaults (%s)", e)
-        return _default_cfg()
-
-def _save_cfg(cfg: dict) -> None:
-    _ensure_dir()
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2)
 
 # -------------------------------------------------------------------- #
 #  Batch launcher – opens in a visible console
@@ -122,12 +76,12 @@ def _start_loop_once() -> None:
 #  Public API
 # -------------------------------------------------------------------- #
 def is_enabled() -> bool:
-    return bool(_load_cfg().get("aws_scheduler_enabled", False))
+    return bool(JH._load_cfg().get("aws_scheduler_enabled", False))
 
 def set_enabled(enable: bool) -> None:
-    cfg = _load_cfg()
+    cfg = JH._load_cfg()
     cfg["aws_scheduler_enabled"] = bool(enable)
-    _save_cfg(cfg)
+    JH.save_json(cfg)
     _reschedule(enable)
 
 # Initialise on import

@@ -4,9 +4,6 @@ import re
 
 adb_id = None
 
-
-
-
 def run_command(command):
     output = None
     stderr = None

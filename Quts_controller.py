@@ -2,8 +2,6 @@ import subprocess
 import time
 import os
 
-import psutil
-
 SERVICE_NAME = "QUTS"
 PCAT_PATH = r"C:\Program Files (x86)\Qualcomm\PCAT\bin\PCATApp.exe"
 QXDM_PATH = r"C:\Program Files\Qualcomm\QXDM5\QXDM.exe"

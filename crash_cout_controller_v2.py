@@ -10,6 +10,7 @@ from datetime import datetime, date, time as dt_time, timedelta
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+import Json_handler as JH
 
 # — Config —'
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
@@ -23,21 +24,6 @@ MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
 # Lock for thread-safe config I/O
 _cfg_lock = threading.Lock()
 
-def load_config() -> dict:
-    try:
-        return json.loads(CONFIG_PATH.read_text("utf-8"))
-    except Exception as e:
-        print("App_json is has no data: %s", e)
-        return {}
-
-
-def save_config(cfg: dict) -> None:
-    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG_PATH.write_text(
-        json.dumps(cfg, indent=4, sort_keys=True),
-        "utf-8"
-    )
-
 
 def most_recent_subdir(root: Path) -> Path | None:
     if not root.is_dir():
@@ -50,18 +36,19 @@ def get_size(p: Path) -> int:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
 
 def rest_counter():
-    cfg = load_config()
+    cfg = JH.load_json()
+
     print("Resetting Counters" )
     cfg["rdkbcrash_counter"] =0
     cfg["crash_counter"] =0
-    save_config(cfg)
+    JH.save_json(cfg)
 
 def process_dir(root: Path,
                 prefix: str,
                 min_size: float,
                 scan_root: bool = False) -> tuple[int, int]:
      with _cfg_lock:
-        cfg = load_config()
+        cfg = JH.load_json()
 
         # state keys
         prev_k      = f"previous_{prefix}_dir"
@@ -121,7 +108,7 @@ def process_dir(root: Path,
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
 
-        save_config(cfg)
+        JH.save_json(cfg)
         return cfg[count_k]
 
 

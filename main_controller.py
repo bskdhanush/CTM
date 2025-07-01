@@ -20,7 +20,7 @@ import Quts_controller
 import Wifi_controller
 import GUI as gui
 import crash_cout_controller_v2 as cc
-from aws_scheduler import _save_cfg, _load_cfg
+import Json_handler as JH
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -34,8 +34,7 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
-LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
-LOG_DIR  = Path(r"C:\QSTAF\CTM_logs") 
+
 
 
 
@@ -44,17 +43,10 @@ LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 # Set up logging for debugging EXE issues
 if getattr(sys, 'frozen', False):
     # ensure both crashDump and logs folders exist
-    os.makedirs(LOG_DIR, exist_ok=True)
-
-    # now log to files in the logs folder
-    logging.basicConfig(
-        filename=os.path.join(LOG_DIR, "app_debug.log"),
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+    os.makedirs(JH.LOG_DIR, exist_ok=True)
 
     # redirect stderr into a separate file
-    sys.stderr = open(os.path.join(LOG_DIR, "app_errors.log"), "w")
+    sys.stderr = open(os.path.join(JH.LOG_DIR, "app_errors.log"), "w")
 
 def log_exception(exc_type, exc_value, exc_traceback):
     """Log uncaught exceptions"""
@@ -169,20 +161,20 @@ def check_restart_timer():
     while True:
         for mode in ['control', 'traffic']:
             try:
-                cfg = _load_cfg()
+                cfg = JH._load_cfg()
                 relaunch_timer = cfg.get('relaunch_timer', None) #in hours
                 if isinstance(relaunch_timer, str) and relaunch_timer.isnumeric():
                     relaunch_timer = int(relaunch_timer) * 3600
                 if not relaunch_timer:
                     cfg['relaunch_timer'] = 6
-                    _save_cfg(cfg)
+                    JH.save_json(cfg)
                     relaunch_timer = 6 * 3600
 
                 start_time_str = cfg.get(f'{mode}_start_timestamp', 'null')
                 if not start_time_str or start_time_str == 'null':
                     start_time = datetime.now()
                     cfg[f'{mode}_start_timestamp'] = datetime.strftime(start_time, "%Y-%m-%d %H:%M:%S")
-                    _save_cfg(cfg)
+                    JH.save_json(cfg)
                 else:
                     start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
 
@@ -192,7 +184,7 @@ def check_restart_timer():
                     time.sleep(2)
                     start_framework(mode)
                     cfg[f'{mode}_start_timestamp'] = start_time
-                    _save_cfg(cfg)
+                    JH.save_json(cfg)
             except Exception as e:
                 print(f'Exception during check_restart_timer: {e}')
 
@@ -310,11 +302,9 @@ def stop_all_tools_Framework():
     subprocess.run("taskkill /IM PCATApp.exe /F", shell=True)
     subprocess.run("taskkill /IM QXDM.exe /F", shell=True)
 
-
-def get_internet_status():
-    return 1
-    
+   
 #---------to collect logs to txt------------------------
+'''
 LOG_DIR.mkdir(parents=True, exist_ok=True) 
 LOG_PATH = LOG_DIR / "qstaf_tool.log" 
 logging.basicConfig(
@@ -327,7 +317,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 builtins.print = lambda *a, **kw: log.info(" ".join(map(str, a)))
-
+'''
 
 def main() -> None:
 

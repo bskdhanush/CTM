@@ -31,6 +31,7 @@ import aws_scheduler as aws
 import data_monitor_controller as dmc
 import plot_dynamic_render as rdp
 import crash_cout_controller_v2 as cc
+import Json_handler as JH
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ def launch_gui() -> None:
         threading.Thread(target=obs.join, daemon=True).start()
 
     def load_counters():
-        cfg = cc.load_config()
+        cfg = JH.load_json()
 
         crash_count = cfg.get("crash_counter", 0)
         rdkb_count = cfg.get("rdkbcrash_counter", 0)

@@ -1,19 +1,17 @@
 """
 QSTAF System Manager – Tkinter front-end
 Business logic lives in:
-    • main_controller.py
-    • Wifi_controller.py
-    • Quts_controller.py
-    • aws_scheduler.py
-    • data_monitor_controller.py
+    • MainController.py
+    • WifiController.py
+    • QutsController.py
+    • AwsScheduler.py
+    • DataMonitorController.py
 """
 
 from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
-import datetime as dt
 from functools import partial
-from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 from watchdog.observers import Observer
@@ -24,14 +22,14 @@ import threading
 import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
-import main_controller
-import Wifi_controller
-import Quts_controller
-import aws_scheduler as aws
-import data_monitor_controller as dmc
-import plot_dynamic_render as rdp
-import crash_cout_controller_v2 as cc
-import Json_handler as JH
+import MainController
+import WifiController
+import QutsController
+import AwsScheduler as aws
+import DataMonitorController as dmc
+import PlotDynamicRender as rdp
+import CrashCountController as cc
+import JsonHandler as JH
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -57,20 +55,15 @@ def launch_gui() -> None:
     # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
     header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=4)
-    '''
-    header_frame.columnconfigure(0, weight=1)   # left column can grow
-    header_frame.columnconfigure(1, weight=0)   # button – fixed
-    header_frame.columnconfigure(2, weight=1)  
-    '''
+
     for col in range(7):
        header_frame.columnconfigure(col, weight=0)
     header_frame.columnconfigure(2, weight=1)   # left side expands
-    #header_frame.columnconfigure(6, weight=1) # right side expands
 
     def refresh_meta_mpss():
         meta = "UNKNOWN"
         mpss = "UNKNOWN"
-        meta, mpss = main_controller.get_meta_mpss()
+        meta, mpss = MainController.get_meta_mpss()
         meta_var.set(f"Meta : {meta}")
         mpss_var.set(f"MPSS : {mpss}")
 
@@ -102,13 +95,6 @@ def launch_gui() -> None:
     RDKB_lbl = ttk.Label(header_frame, textvariable=RDKB_var, anchor="w")
     RDKB_lbl.grid(row=1, column=4, sticky="w")
     
-# ── RDKB counters in cols 3–6 (row 1) ───────────────────────────────────
-    
-    # ttk.Label(header_frame, text="RDKB Crashes:- :", anchor="e") \
-    # .grid(row=1, column=3, sticky="e", padx=(10,5))
-    # ttk.Label(header_frame, textvariable=RDKB_var, anchor="w") \
-    # .grid(row=1, column=4, sticky="w")
-
     ttk.Button(
     header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
     .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
@@ -138,7 +124,7 @@ def launch_gui() -> None:
         crash_count = cfg.get("crash_counter", 0)
         rdkb_count = cfg.get("rdkbcrash_counter", 0)
 
-    # update the StringVars
+        # update the StringVars
         crash_var.set(str(crash_count))
         RDKB_var.set(str(rdkb_count))
         if crash_count > 0:
@@ -160,7 +146,6 @@ def launch_gui() -> None:
 
      # start watching the JSON for changes
     start_config_watcher(load_counters)
-
 
 
     # ── Grid weights ─────────────────────────────────────────────────────
@@ -189,8 +174,6 @@ def launch_gui() -> None:
         nav_btns[key] = btn
 
 
-
-
     # ── Footer / status bar ───────────────────────────────────────────────
     footer = ttk.Frame(root)
     footer.grid(row=2, column=0, columnspan=2, sticky="ew", padx=12, pady=(4, 8))
@@ -213,15 +196,6 @@ def launch_gui() -> None:
 
     sched_label = ttk.Label(footer, textvariable=sched_stat_var)
     sched_label.grid(row=0, column=1, sticky="w", padx=(12,0))
-    '''
-    clock_lbl = ttk.Label(footer)
-    clock_lbl.pack(side="right")
-
-    def _tick() -> None:
-        clock_lbl.config(text=dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        root.after(1_000, _tick)
-    '''
-
 
     def update_internet_status():
         status = dmc.get_internet_status()
@@ -253,11 +227,11 @@ def launch_gui() -> None:
 
     version_lbl = ttk.Label(
     footer,
-    text=f"QSTAF VERSION: {main_controller.get_qstaf_version()}")
+    text=f"QSTAF VERSION: {MainController.get_qstaf_version()}")
     version_lbl.grid(row=0, column=3, sticky="e", padx=10)
 
     def _update_quts() -> None:
-        running = Quts_controller.is_service_running("QUTS")
+        running = QutsController.is_service_running("QUTS")
         quts_stat_var.set(f"QUTS: {'Running' if running else 'Stopped'}")
 
         quts_label.config(
@@ -276,7 +250,6 @@ def launch_gui() -> None:
     # Framework control
     ctrl = ttk.LabelFrame(main_pg, text="Framework Control")
     ctrl.pack(fill="x", **PADDING)# type: ignore
- # type: ignore
 
     row = ttk.Frame(ctrl)
     row.pack(fill="x", **PADDING)# type: ignore
@@ -287,55 +260,28 @@ def launch_gui() -> None:
     ttk.Button(
         row,
         text="Launch Control Framework",
-        command=lambda:main_controller.start_framework('control'), # type: ignore
+        command=lambda:MainController.start_framework('control'), # type: ignore
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row,
         text="Launch Traffic Framework",
-        command=lambda:main_controller.start_framework('traffic'), # type: ignore
+        command=lambda:MainController.start_framework('traffic'), # type: ignore
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
-    
-    '''
 
-    run_btn = tk.Button(
-    ctrl,
-    text="Run both Frameworks (3 s delay)",
-    command=main_controller.run_both_with_delay,
-    bg="#2A2A2A",            # normal background
-    activebackground="#006EA5",
-    fg="white",              # text color
-    activeforeground="white",
-    bd=0,                    # no border
-    relief="flat")
-    run_btn.pack(fill="x", padx=16, pady=(12, 6), ipady=10)
-   
-    stop_btn = tk.Button(
-    ctrl,
-    text="Stop All Frameworks",
-    command=main_controller.stop_all,
-    bg="#2A2A2A",
-    #activebackground="#000000",
-    fg="white",
-    activeforeground="white",
-    bd=0,
-    relief="flat",
-)
-    stop_btn.pack(fill="x", padx=16, pady=(6, 12), ipady=10)
-    '''
     ttk.Button(
         row_s,
         text="Stop Control Framework",
-        command=partial(main_controller.stop_framework,"control"),
+        command=partial(MainController.stop_framework,"control"),
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row_s,
         text="Stop Traffic Framework",
-        command=partial(main_controller.stop_framework,""),
+        command=partial(MainController.stop_framework,""),
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
 
@@ -348,7 +294,7 @@ def launch_gui() -> None:
     ttk.Button(
         aws_fr,
         text="Run S3 Uploader",
-        command=main_controller.run_s3_uploader,
+        command=MainController.run_s3_uploader,
     ).pack(fill="x", padx=16, pady=8, ipady=8)
 
     aws_var = tk.BooleanVar(value=aws.is_enabled())
@@ -364,60 +310,8 @@ def launch_gui() -> None:
         command=_toggle_aws,
     ).pack(anchor="w", padx=16)
 
+
     # ── QUTS page ────────────────────────────────────────────────────────
-    '''
-    quts_pg = ttk.Frame(container)
-    quts_pg.grid(row=0, column=0, sticky="nsew")
-    pages["QUTS"] = quts_pg
-    add_nav("QUTS Tools", "QUTS")
-   
-    combo = ttk.LabelFrame(quts_pg, text="Restart QUTS + PCAT + QXDM")
-    combo.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        combo,
-        text="Restart QUTS + PCAT + QXDM",
-        command=main_controller.restart_quts_pcat_qxdm,
-        width=30,
-    ).pack(fill="x", **PADDING)# type: ignore
-
-
-    single = ttk.LabelFrame(quts_pg, text="Restart QUTS only")
-    single.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        single,
-        text="Restart QUTS only",
-        command=Quts_controller.restart_quts,
-        width=30,
-    ).pack(fill="x", **PADDING)# type: ignore
-
-
-    # PCAT + QXDM launcher
-    pq_fr = ttk.LabelFrame(quts_pg, text="PCAT_QXDM")
-    pq_fr.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        pq_fr,
-        text="Start PCAT QXDM",
-        command=main_controller.start_Pact_QXDM,
-    ).pack(fill="x", padx=16, pady=8, ipady=8)
-
-
-    stop_all = ttk.LabelFrame(quts_pg, text="Stop all Tools")
-    stop_all.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        stop_all,
-        text="Stop all Tools",
-        command=main_controller.stop_all_tools_Framework,
-    ).pack(fill="x", **PADDING)# type: ignore
-    '''
-  # ── QUTS page ────────────────────────────────────────────────────────
     quts_pg = ttk.Frame(container)
     quts_pg.grid(row=0, column=0, sticky="nsew")
     pages["QUTS"] = quts_pg
@@ -448,22 +342,22 @@ def launch_gui() -> None:
 
     def start_selected_tools():
         if quts_var.get() and pcat_var.get() and qxdm_var.get():
-            main_controller.start_all()
+            MainController.start_all()
         else:
             if quts_var.get():
-                Quts_controller.start_quts()
+                QutsController.start_quts()
             if pcat_var.get():
-                main_controller.start_Pact_only()
+                MainController.start_Pact_only()
             if qxdm_var.get():
-                main_controller.start_QXDM_only()
+                MainController.start_QXDM_only()
 
     def stop_selected_tools():
         if quts_var.get():
-            Quts_controller.stop_quts()
+            QutsController.stop_quts()
         if pcat_var.get():
-            main_controller.stop_pcat_only()
+            MainController.stop_pcat_only()
         if qxdm_var.get():
-            main_controller.stop_qxdm_only()
+            MainController.stop_qxdm_only()
 
     ttk.Button(
         btn_fr,
@@ -497,7 +391,7 @@ def launch_gui() -> None:
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: main_controller.set_wifi_config(wifi_dd.current()),
+        command=lambda: MainController.set_wifi_config(wifi_dd.current()),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -518,14 +412,14 @@ def launch_gui() -> None:
     ttk.Button(
         test_sel,
         text="Set Test SSID",
-        command=lambda: Wifi_controller.update_cpe_wifi_config(test_dd.current(), "_"),
+        command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), "_"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
         test_sel,
         text="Set Default SSID",
-        command=lambda: Wifi_controller.update_cpe_wifi_config(test_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -578,4 +472,4 @@ def launch_gui() -> None:
 
 # ───────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    main_controller.run_app()
+    MainController.run_app()

@@ -2,8 +2,8 @@ import threading
 import time
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk # type: ignore
-import copy_csv
-import data_monitor_controller as dmc
+import CopyCsv
+import DataMonitorController as dmc
 
 # keep this at module scope so state survives between calls
 plot_refs: list[tuple[plt.Figure, FigureCanvasTkAgg, NavigationToolbar2Tk]] = [] # type: ignore
@@ -31,7 +31,7 @@ def draw_all_plots(parent_frame):
     Runs each plot function in PLOT_FUNCS, embeds its Figure in parent_frame,
     and retains the (fig, canvas, toolbar) in plot_refs.
     """
-    copy_csv.copy_csv_main()
+    CopyCsv.copy_csv_main()
     for plot_fn in PLOT_FUNCS:
         try:
             fig = plot_fn(figsize=(7, 4))

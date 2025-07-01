@@ -1,6 +1,5 @@
-# crash_counter_controller.py
+# CrashCountController.py
 
-import json
 import os
 import time
 import threading
@@ -10,9 +9,9 @@ from datetime import datetime, date, time as dt_time, timedelta
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-import Json_handler as JH
+import JsonHandler as JH
 
-# — Config —'
+# — Config —
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")

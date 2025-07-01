@@ -1,10 +1,10 @@
 """
-aws_scheduler.py
+AwsScheduler.py
 Pure logic for remembering a checkbox state and—if enabled—running
 aws_s3_uploder.bat every day at 4 PM.
 
 Usage from any UI:
-    import aws_scheduler as aws
+    import AwsScheduler as aws
 
     aws.is_enabled()              -> bool
     aws.set_enabled(True | False) -> persist + (un)schedule
@@ -13,7 +13,7 @@ Usage from any UI:
 from __future__ import annotations
 import os,threading, time, subprocess, schedule, logging
 
-import Json_handler as JH
+import JsonHandler as JH
 
 
 # -------------------------------------------------------------------- #

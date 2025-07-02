@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['main_controller.py'],
+    ['MainController.py'],
     pathex=[],
     binaries=[],
     datas=[],

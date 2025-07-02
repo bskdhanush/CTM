@@ -193,6 +193,7 @@ def check_restart_timer():
                 JH.save_json(cfg)
                 time.sleep(10)
                 start_framework(mode)
+                
         time.sleep(300)
 
 '''

@@ -30,6 +30,9 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
+TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
+MODES = ("control", "traffic")
+DEFAULT_TIMER_HOURS = 6
 
 
 # CrashCountController.run_watch()
@@ -111,11 +114,13 @@ def start_framework(mode):
     if mode.lower() == 'control':
         try:
             StartTestCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
+            JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
     elif mode.lower() == 'traffic':
         try:
             StartTestCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
+            JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
 '''
@@ -129,6 +134,7 @@ def run_both_with_delay():
 '''
 def stop_framework(mode):
     found = KillProcess.stop_all_tests(mode)
+    JH.rest_framework_timestamps(mode)
     msg = "All processes stopped." if found else "No processes found to stop."
     print(msg)
 
@@ -151,37 +157,43 @@ def set_wifi_config(dropDown_value):
 
 
 def check_restart_timer():
-
+    """
+    Every 5 minutes, for each mode:
+      - load config
+      - if timestamp is null → ignore that mode entirely
+      - else if elapsed >= timer → restart and update timestamp
+    """
     while True:
-        for mode in ['control', 'traffic']:
-            try:
-                cfg = JH._load_cfg()
-                relaunch_timer = cfg.get('relaunch_timer', None) #in hours
-                if isinstance(relaunch_timer, str) and relaunch_timer.isnumeric():
-                    relaunch_timer = int(relaunch_timer) * 3600
-                if not relaunch_timer:
-                    cfg['relaunch_timer'] = 6
-                    JH.save_json(cfg)
-                    relaunch_timer = 6 * 3600
+        cfg = JH.load_json()
+        # compute relaunch period in seconds
+        relaunch_timer = cfg.get("relaunch_timer", DEFAULT_TIMER_HOURS)
+        try:
+            hrs = int(relaunch_timer)
+        except (TypeError, ValueError):
+            hrs = DEFAULT_TIMER_HOURS
+        relaunch_timer = hrs *3600 
 
-                start_time_str = cfg.get(f'{mode}_start_timestamp', 'null')
-                if not start_time_str or start_time_str == 'null':
-                    start_time = datetime.now()
-                    cfg[f'{mode}_start_timestamp'] = datetime.strftime(start_time, "%Y-%m-%d %H:%M:%S")
-                    JH.save_json(cfg)
-                else:
-                    start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+        now_str = now.strftime(TIMESTAMP_FMT)
 
-                current_time = datetime.now()
-                if (current_time - start_time).seconds > relaunch_timer: # type: ignore
-                    stop_framework(mode)
-                    time.sleep(2)
-                    start_framework(mode)
-                    cfg[f'{mode}_start_timestamp'] = start_time
-                    JH.save_json(cfg)
-            except Exception as e:
-                print(f'Exception during check_restart_timer: {e}')
+        for mode in MODES:
+            ts_str = cfg.get(f"{mode}_start_timestamp")
 
+            # **IGNORE** if no timestamp or explicitly "null"
+            if not ts_str or ts_str.lower() == "null":
+                print(f"invalid time stamp found for {mode}")
+                continue
+
+            # parse & check elapsed
+            start_time = datetime.strptime(ts_str, TIMESTAMP_FMT)
+            elapsed = (now - start_time).total_seconds()
+            if elapsed >= relaunch_timer:
+                stop_framework(mode)
+                cfg[f"{mode}_start_timestamp"] = now_str
+                JH.save_json(cfg)
+                time.sleep(10)
+                start_framework(mode)
+                
         time.sleep(300)
 
 '''
@@ -196,8 +208,8 @@ def check_for_updates_integrated():
         
         # Run the update check logic
         data = CheckUpdates.fetch_latest_release_data()
-        raw_tag = data.get("tag_name", "")
-        latest_tag = raw_tag.lstrip("v")
+        relaunch_timer_tag = data.get("tag_name", "")
+        latest_tag = relaunch_timer_tag.lstrip("v")
         
         print(f"Latest release on GitHub: {latest_tag} (local: {CheckUpdates.LOCAL_VERSION})")
         
@@ -315,11 +327,11 @@ def main() -> None:
     )
     t.start()
     
-    # t2 = threading.Thread(
-    #     target=check_restart_timer,
-    #     daemon=True  # auto‑stops when the main program exits
-    # )
-    # t2.start()
+    t2 = threading.Thread(
+        target=check_restart_timer,
+        daemon=True  # auto‑stops when the main program exits
+    )
+    t2.start()
 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

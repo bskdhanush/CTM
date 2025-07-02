@@ -331,7 +331,7 @@ def launch_gui() -> None:
 
     ttk.Button(
         row_relaunch,
-        text="Reset Timer",
+        text="Update Restart Timer",
         command=lambda: set_manual_count()
     ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
     

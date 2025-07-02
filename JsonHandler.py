@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -41,6 +42,13 @@ def _load_cfg() -> dict:
 def rest_framework_timestamps(mode):
     cfg=load_json()
     cfg[f"{mode}_start_timestamp"] = "null"
+    save_json(cfg)
+
+def set_time(mode):
+    now = datetime.now()
+    now_str = now.strftime(mc.TIMESTAMP_FMT)
+    cfg=load_json()
+    cfg[f"{mode}_start_timestamp"] = now_str
     save_json(cfg)
 
 

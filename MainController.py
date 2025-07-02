@@ -114,11 +114,13 @@ def start_framework(mode):
     if mode.lower() == 'control':
         try:
             StartTestCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
+            JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
     elif mode.lower() == 'traffic':
         try:
             StartTestCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
+            JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
 '''
@@ -132,6 +134,7 @@ def run_both_with_delay():
 '''
 def stop_framework(mode):
     found = KillProcess.stop_all_tests(mode)
+    JH.rest_framework_timestamps(mode)
     msg = "All processes stopped." if found else "No processes found to stop."
     print(msg)
 
@@ -168,7 +171,7 @@ def check_restart_timer():
             hrs = int(relaunch_timer)
         except (TypeError, ValueError):
             hrs = DEFAULT_TIMER_HOURS
-        relaunch_timer = hrs * 3600
+        relaunch_timer = hrs *3600 
 
         now = datetime.now()
         now_str = now.strftime(TIMESTAMP_FMT)
@@ -186,14 +189,11 @@ def check_restart_timer():
             elapsed = (now - start_time).total_seconds()
             if elapsed >= relaunch_timer:
                 stop_framework(mode)
-                time.sleep(10)
-                start_framework(mode)
-
-                # update JSON with fresh timestamp
                 cfg[f"{mode}_start_timestamp"] = now_str
                 JH.save_json(cfg)
-
-        time.sleep(5)
+                time.sleep(10)
+                start_framework(mode)
+        
 
 '''
 def check_for_updates_integrated():
@@ -326,11 +326,11 @@ def main() -> None:
     )
     t.start()
     
-    # t2 = threading.Thread(
-    #     target=check_restart_timer,
-    #     daemon=True  # auto‑stops when the main program exits
-    # )
-    # t2.start()
+    t2 = threading.Thread(
+        target=check_restart_timer,
+        daemon=True  # auto‑stops when the main program exits
+    )
+    t2.start()
 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

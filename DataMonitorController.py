@@ -1,5 +1,4 @@
-# ── data_monitor_controller.py ───────────────────────────────────────────────
-import os
+# ── DataMonitorController.py ───────────────────────────────────────────────
 import glob
 import re
 from typing import Literal
@@ -7,8 +6,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
-LOG_DIR   = r"C:\QSTAF\CTM_logs"
-_PATTERNS = ("*.csv", "*.xls*", "*.xlsx")
+LOG_DIR = r"C:\QSTAF\CTM_logs"
 ping_internet_status = 2
 backhaul_internet_status = 2
 
@@ -68,6 +66,8 @@ def get_df(csv_type):
 ################### TRAFFIC CSV PROCESSING START #######################################
 
 def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
+    """ Traffic plots - Calls traffic_timeline_plot and hist_plot """
+
     global ping_internet_status
     df_all = {}
     csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
@@ -103,8 +103,9 @@ def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
     return [traffic_timeline_plot(df_all), hist_plot(figsize, df_indexing_all)]
 
 def traffic_timeline_plot(df_all):
+    """ Timeline plot for traffic scenarios """
+
     df = pd.DataFrame()
-             
     for df_key, df_each in df_all.items():
         try:
             df_each['StartTime'] = pd.to_datetime(df_each['start_time'], format='%Y-%m-%d_%H_%M_%S')
@@ -152,7 +153,6 @@ def traffic_indexing(csv_name, df_csv):
     """Reads Traffic CSV and Creates indexing CSV files"""
 
     df = pd.DataFrame(0, index=range(1), columns=['TOTAL', 'PASS', 'FAIL'])
-
     try:
         df['TOTAL'] = df_csv.shape[0]
         df['PASS'] = df_csv[df_csv['result'] == 'Pass'].shape[0]
@@ -198,6 +198,7 @@ def traffic_indexing(csv_name, df_csv):
 
 def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
     """Generates Histogram plots based on df_all (based on Indexing.csv)"""
+
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
 
@@ -224,6 +225,7 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
 
 ############################ RF BAND PLOT START ######################################
 def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
+    """ RF Band transitions plot """
     df = get_df('\\*RFBandInfo.csv')
     fig = None
 
@@ -247,9 +249,9 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
     return fig
 
 def get_rfband_df(df=None):
+    """Creates RFBand dataframe """
 
     if df is not None:
-
         df["NR_CC_BAND"] = df["NR_CC_BAND"].apply(lambda x: 'N' + str(x).strip())
         df['LTE_BANDS'] = df['LTE_BANDS'].apply(
             lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(
@@ -317,9 +319,9 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
 
 
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
-    """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""																				  
-    df = get_df('\\*qstaf_monitor_connected_devices.csv')
+    """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""
 
+    df = get_df('\\*qstaf_monitor_connected_devices.csv')
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
     try:
@@ -375,9 +377,8 @@ def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
     return fig
 
 
-# RSRP / SNR plot
 def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
-    'RSRP and SNR plots from QSH_FR_MODE csv'
+    """ RSRP and SNR plots from QSH_FR_MODE csv """
 
     df = get_df('\\*QSH_FR_MODE.csv')
     fig = None

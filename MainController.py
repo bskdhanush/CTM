@@ -171,7 +171,7 @@ def check_restart_timer():
             hrs = int(relaunch_timer)
         except (TypeError, ValueError):
             hrs = DEFAULT_TIMER_HOURS
-        relaunch_timer = hrs *3600 
+        relaunch_timer = hrs * 3600 
 
         now = datetime.now()
         now_str = now.strftime(TIMESTAMP_FMT)
@@ -189,8 +189,6 @@ def check_restart_timer():
             elapsed = (now - start_time).total_seconds()
             if elapsed >= relaunch_timer:
                 stop_framework(mode)
-                cfg[f"{mode}_start_timestamp"] = now_str
-                JH.save_json(cfg)
                 time.sleep(10)
                 start_framework(mode)
                 
@@ -317,7 +315,22 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 builtins.print = lambda *a, **kw: log.info(" ".join(map(str, a)))
 '''
+# to be implemented
+def is_running(mode):
+    """Return True if mode process is running. Else False"""
+    return False
 
+def reset_start_timestamp():
+    """ Resets start_time stamp to null in json if not running"""
+    if not is_running('control'):
+        cfg = JH.load_json()
+        cfg[f"control_start_timestamp"] = "null"
+        JH.save_json(cfg)
+
+    if not is_running('traffic'):
+        cfg = JH.load_json()
+        cfg[f"traffic_start_timestamp"] = "null"
+        JH.save_json(cfg)
 def main() -> None:
 
     # Start the watcher in a daemon thread
@@ -326,7 +339,8 @@ def main() -> None:
         daemon=True        # auto‑stops when the main program exits
     )
     t.start()
-    
+
+    reset_start_timestamp()
     t2 = threading.Thread(
         target=check_restart_timer,
         daemon=True  # auto‑stops when the main program exits

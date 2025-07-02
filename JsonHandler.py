@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import MainController as mc
 
 LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
@@ -36,6 +37,11 @@ def _load_cfg() -> dict:
     except Exception as e:
         print("Config read failed – using defaults (%s)", e)
         return _default_cfg()
+    
+def rest_framework_timestamps(mode):
+    cfg=load_json()
+    cfg[f"{mode}_start_timestamp"] = "null"
+    save_json(cfg)
 
 
 

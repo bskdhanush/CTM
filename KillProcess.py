@@ -15,7 +15,7 @@ def stop_all_tests(mode: str):
     if mode=="control": 
         keywords = [" control ","aws_control_",]
         print("control loop")
-    else :
+    else:
         keywords = [
         " traffic ", "aws_traffic", 
         "pinghandler", "iperf", "ping"]

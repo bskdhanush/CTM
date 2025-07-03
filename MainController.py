@@ -154,7 +154,7 @@ def set_wifi_config(dropDown_value):
    # print(dropDown_value)
     # WifiController.connectBackhaul()
     WifiController.update_cpe_wifi_config(dropDown_value,"")
-    # WifiController.setpassword_bandwiths()
+    WifiController.setpassword_bandwiths()
 
 
 def check_restart_timer():

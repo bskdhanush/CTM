@@ -165,6 +165,7 @@ def check_restart_timer():
       - else if elapsed >= timer → restart and update timestamp
     """
     while True:
+        reset_start_timestamp()
         cfg = JH.load_json()
         # compute relaunch period in seconds
         relaunch_timer = cfg.get("relaunch_timer", DEFAULT_TIMER_HOURS)
@@ -193,7 +194,7 @@ def check_restart_timer():
                 time.sleep(10)
                 start_framework(mode)
                 
-        time.sleep(300)
+        time.sleep(120)
 
 '''
 def check_for_updates_integrated():
@@ -322,9 +323,9 @@ def is_running(mode):
     """Return True if mode process is running. Else False"""
     found = False
     if mode == "control":
-        keywords = ["control ", "aws_control_"]
+        keywords = ["control "]
     else:
-        keywords = ["traffic", "aws_traffic", "pinghandler", "iperf", "ping"]
+        keywords = ["traffic "]
 
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
@@ -358,7 +359,7 @@ def main() -> None:
     )
     t.start()
 
-    reset_start_timestamp()
+    
     t2 = threading.Thread(
         target=check_restart_timer,
         daemon=True  # auto‑stops when the main program exits

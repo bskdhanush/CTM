@@ -100,8 +100,10 @@ def update_3_slo_config(Config):
         # Rename SSID names,
         f"dmcli eRT setv Device.WiFi.SSID.1.SSID string {slo_2g_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true",
+        "sleep 1"
         f"dmcli eRT setv Device.WiFi.SSID.2.SSID string {slo_5g_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true",
+        "sleep 1"
         f"dmcli eRT setv Device.WiFi.SSID.17.SSID string {slo_6g_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
@@ -117,8 +119,10 @@ def update_2g_slo_5g6g_mlo_config(Config):
     commands = [
         f"dmcli eRT setv Device.WiFi.SSID.1.SSID string {slo_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true",
+        "sleep 1"
         f"dmcli eRT setv Device.WiFi.SSID.2.SSID string {mlo_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true",
+        "sleep 1"
         f"dmcli eRT setv Device.WiFi.SSID.17.SSID string {mlo_ssid}",
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
@@ -128,19 +132,21 @@ def setpassword_bandwiths():
     commands = [
         'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
         'dmcli eRT setv Device.WiFi.AccessPoint.2.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
         'dmcli eRT setv Device.WiFi.AccessPoint.17.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
                                                                                                                          
         'dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz',
         'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
+        "sleep 1"
 
         'dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 160MHz',
         'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
+        "sleep 1"
 
         'dmcli eRT setv Device.WiFi.Radio.3.OperatingChannelBandwidth string 320MHz',
         'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true'

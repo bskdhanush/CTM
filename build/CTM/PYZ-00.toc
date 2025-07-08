@@ -1,4 +1,4 @@
-('D:\\QC_testing\\GUI\\Quts_tool\\build\\CPE_Test_Manager\\PYZ-00.pyz',
+('D:\\QC_testing\\GUI\\Quts_tool\\build\\CTM\\PYZ-00.pyz',
  [('AwsScheduler',
    'D:\\QC_testing\\GUI\\Quts_tool\\AwsScheduler.py',
    'PYMODULE'),

@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='CPE_Test_Manager',
+    name='CTM',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

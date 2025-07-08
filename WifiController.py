@@ -132,19 +132,21 @@ def setpassword_bandwiths():
     commands = [
         'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
         'dmcli eRT setv Device.WiFi.AccessPoint.2.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
         'dmcli eRT setv Device.WiFi.AccessPoint.17.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true',
-
+        "sleep 1"
                                                                                                                          
         'dmcli eRT setv Device.WiFi.Radio.1.OperatingChannelBandwidth string 40MHz',
         'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
+        "sleep 1"
 
         'dmcli eRT setv Device.WiFi.Radio.2.OperatingChannelBandwidth string 160MHz',
         'dmcli eRT setv Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting bool true',
+        "sleep 1"
 
         'dmcli eRT setv Device.WiFi.Radio.3.OperatingChannelBandwidth string 320MHz',
         'dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true'

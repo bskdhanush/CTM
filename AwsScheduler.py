@@ -76,10 +76,10 @@ def _start_loop_once() -> None:
 #  Public API
 # -------------------------------------------------------------------- #
 def is_enabled() -> bool:
-    return bool(JH._load_cfg().get("aws_scheduler_enabled", False))
+    return bool(JH.load_cfg().get("aws_scheduler_enabled", False))
 
 def set_enabled(enable: bool) -> None:
-    cfg = JH._load_cfg()
+    cfg = JH.load_cfg()
     cfg["aws_scheduler_enabled"] = bool(enable)
     JH.save_json(cfg)
     _reschedule(enable)

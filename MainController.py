@@ -10,7 +10,6 @@ import json, threading, time
 import logging
 
 import KillProcess
-import CheckUpdates
 import StartTestCase
 import QutsController
 import WifiController
@@ -348,7 +347,7 @@ def reset_start_timestamp():
         cfg = JH.load_json()
         cfg[f"traffic_start_timestamp"] = "null"
         JH.save_json(cfg)
-        
+       
         
 def main() -> None:
 
@@ -359,13 +358,14 @@ def main() -> None:
     )
     t.start()
 
+
     
     t2 = threading.Thread(
         target=check_restart_timer,
         daemon=True  # auto‑stops when the main program exits
     )
     t2.start()
-
+ 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
 

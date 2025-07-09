@@ -28,7 +28,7 @@ def _default_cfg() -> dict:
         "traffic_start_timestamp": "null"
     }
 
-def _load_cfg() -> dict:
+def load_cfg() -> dict:
     _ensure_dir()
     if not os.path.exists(CONFIG_FILE):
         save_json(_default_cfg())

@@ -14,7 +14,7 @@ from packaging.version import parse as parse_version
 # ── CONFIGURATION ────────────────────────────────────────────────────────────────
 
 GITHUB_USER   = "bskdhanush"
-GITHUB_REPO   = "QC_stuff"
+GITHUB_REPO   = "CTM"
 
 # You should supply a valid PAT in your environment; do NOT hard-code in production.
 GITHUB_PAT    = os.getenv("GITHUB_PAT") or "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"

@@ -43,8 +43,10 @@ def download_asset_by_tag(tag: str, dest_folder="."):
             print(f"  - {a['name']}")
         return
 
-    download_url = exe_asset["url"]  # 👈 Use API URL (not browser_download_url)
+    download_url = exe_asset["url"] 
+    print(download_url) 
     filename = exe_asset["name"]
+    print(filename)
     dest_path = os.path.join(dest_folder, filename)
 
     print(f"⬇️ Downloading {filename} from release {tag}...")

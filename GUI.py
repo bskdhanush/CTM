@@ -494,10 +494,7 @@ def launch_gui() -> None:
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")
     pages["QSTAF"] = QSTAF_pg
     add_nav("Install QSTAF", "QSTAF")
-    avaible_ver=gr.fetch_all_release()
-    print(type(avaible_ver))
-    print(avaible_ver)
-    
+    avaible_ver=gr.get_all_tags()
 
     ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
     ver_sel.pack(fill="x", **PADDING)# type: ignore  
@@ -505,6 +502,13 @@ def launch_gui() -> None:
     select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
     select_ver.current(0)
     select_ver.pack(padx=20, pady=10)
+
+    
+    ttk.Button(
+        ver_sel,
+        text="Download",
+        command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
+    ).pack(fill="x", **PADDING)# type: ignore
 
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)

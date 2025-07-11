@@ -6,6 +6,7 @@ GITHUB_USER = "bskdhanush"
 GITHUB_REPO = "CTM"
 GITHUB_PAT = os.getenv("GITHUB_PAT") or "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"
 
+
 def get_session():
     if not GITHUB_PAT:
         raise EnvironmentError("GITHUB_PAT not set. Cannot access private repository.")
@@ -23,9 +24,13 @@ def fetch_all_release():
     r.raise_for_status()
     return r.json()
 
-def download_asset_by_tag(tag: str, dest_folder="."):
+def get_all_tags():
     releases = fetch_all_release()
-    selected = next((r for r in releases if r.get("tag_name") == tag), None)
+    return [release['tag_name'] for release in releases]
+
+def download_asset_by_tag(tag: str, dest_folder):
+    releases=fetch_all_release()
+    selected = next((r for r in releases if r.get("tag_name") == tag), None) # type: ignore
 
     if not selected:
         print(f"❌ Release with tag '{tag}' not found.")
@@ -65,4 +70,4 @@ def download_asset_by_tag(tag: str, dest_folder="."):
 
 if __name__ == "__main__":
     selected_tag = "v1.2.5"
-    download_asset_by_tag(selected_tag)
+    download_asset_by_tag(selected_tag,".")

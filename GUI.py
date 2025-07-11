@@ -30,6 +30,7 @@ import DataMonitorController as dmc
 import PlotDynamicRender as rdp
 import CrashCountController as cc
 import JsonHandler as JH
+import gitReleases as gr
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -468,7 +469,7 @@ def launch_gui() -> None:
     add_nav("Rename SSIDs", "Testing")
 
     test_sel = ttk.LabelFrame(test_pg, text="This is to rename SSIDs before Speedtest for RKDB")
-    test_sel.pack(fill="x", **PADDING)# type: ignore
+    test_sel.pack(fill="x", **PADDING)# type: ignore  
 
 
     test_dd = ttk.Combobox(test_sel, values=CHOICES, state="readonly")
@@ -488,6 +489,22 @@ def launch_gui() -> None:
         command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
+    # ── QSTAF update page ─────────────────────────────────────────────────────
+    QSTAF_pg = ttk.Frame(container)
+    QSTAF_pg.grid(row=0, column=0, sticky="nsew")
+    pages["QSTAF"] = QSTAF_pg
+    add_nav("Install QSTAF", "QSTAF")
+    avaible_ver=gr.fetch_all_release()
+    print(type(avaible_ver))
+    print(avaible_ver)
+    
+
+    ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
+    ver_sel.pack(fill="x", **PADDING)# type: ignore  
+
+    select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
+    select_ver.current(0)
+    select_ver.pack(padx=20, pady=10)
 
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)
@@ -530,6 +547,8 @@ def launch_gui() -> None:
     rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
     rdp.periodic_refresh(list_fr)
+
+
 
     # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")

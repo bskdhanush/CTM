@@ -17,6 +17,7 @@ from tkinter import ttk
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
+import time
 
 # ── 3rd-party ──────────────────────────────────────────────────────────────
 import sv_ttk
@@ -31,6 +32,7 @@ import PlotDynamicRender as rdp
 import CrashCountController as cc
 import JsonHandler as JH
 import gitReleases as gr
+import RealTimeDataController
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -38,6 +40,14 @@ PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 white_accent = "#FFFFFF"
 red_accent  = "#E95959"
 
+
+def display_real_time_rf_data():
+    time.sleep(60)
+    while True:
+        rf_band, rsrp = RealTimeDataController.get_current_rfband_rsrp()
+        # update GUI with rf_band and rsrp if not None
+        time.sleep(1)
+        
 def launch_gui() -> None:
     """Construct and run the UI."""
 

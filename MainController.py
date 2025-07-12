@@ -347,8 +347,12 @@ def reset_start_timestamp():
         cfg = JH.load_json()
         cfg[f"traffic_start_timestamp"] = "null"
         JH.save_json(cfg)
-       
-        
+
+def SpeedTest():
+    pass 
+
+
+
 def main() -> None:
 
     # Start the watcher in a daemon thread

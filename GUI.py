@@ -524,6 +524,15 @@ def launch_gui() -> None:
         command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
+    SpeedTest = ttk.LabelFrame(test_pg, text="Start speed test")
+    SpeedTest.pack(fill="x", **PADDING)# type: ignore  
+
+    ttk.Button(
+        SpeedTest,
+        text="Start Speed Test",
+        command=MainController.SpeedTest,
+    ).pack(fill="x", **PADDING)# type: ignore
+
     # ── QSTAF update page ─────────────────────────────────────────────────────
     QSTAF_pg = ttk.Frame(container)
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")

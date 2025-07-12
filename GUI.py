@@ -41,13 +41,7 @@ white_accent = "#FFFFFF"
 red_accent  = "#E95959"
 
 
-def display_real_time_rf_data():
-    time.sleep(60)
-    while True:
-        rf_band, rsrp = RealTimeDataController.get_current_rfband_rsrp()
-        # update GUI with rf_band and rsrp if not None
-        time.sleep(1)
-        
+
 def launch_gui() -> None:
     """Construct and run the UI."""
 
@@ -70,27 +64,29 @@ def launch_gui() -> None:
     for col in range(7):
        header_frame.columnconfigure(col, weight=0)
     header_frame.columnconfigure(2, weight=1)   # left side expands
+    
+    RFband_info= tk.StringVar(value="Band Combo : ")
+    SNR_values = tk.StringVar(value= "Channel Conditions : ")
 
-    def refresh_meta_mpss():
-        meta = "UNKNOWN"
-        mpss = "UNKNOWN"
-        meta, mpss = MainController.get_meta_mpss()
-        meta_var.set(f"Meta : {meta}")
-        mpss_var.set(f"MPSS : {mpss}")
+    
+    def display_real_time_rf_data():
+        time.sleep(20)
+        while True:
+            rf_band, rsrp = RealTimeDataController.get_current_rfband_rsrp()
+            root.after(0, lambda: RFband_info.set(f"Band Combo: {rf_band}"))
+            root.after(0, lambda: SNR_values.set(f"Channel Conditions: {rsrp}"))
+            time.sleep(1)
 
-    meta_var = tk.StringVar(value="Meta : ")
-    mpss_var = tk.StringVar(value="MPSS : ")
+    t3 = threading.Thread(
+    target=display_real_time_rf_data,
+    daemon=True)
+    t3.start()
 
-    ttk.Label(header_frame, textvariable=meta_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=RFband_info, anchor="w") \
     .grid(row=0, column=0, sticky="w", padx=15)
-    ttk.Label(header_frame, textvariable=mpss_var, anchor="w") \
+    ttk.Label(header_frame, textvariable=SNR_values, anchor="w") \
     .grid(row=1, column=0, sticky="w", padx=15)
 
-    refresh_meta_mpss()
-    ttk.Button(
-        header_frame, text="Get Build info",
-        command=refresh_meta_mpss, width=12
-    ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
  
     crash_var  = tk.StringVar(value="—")
     RDKB_var  = tk.StringVar(value="—")
@@ -386,6 +382,35 @@ def launch_gui() -> None:
         variable=aws_var,
         command=_toggle_aws,
     ).pack(anchor="w", padx=16)
+
+
+
+
+    # get devices build info
+    Build_info= ttk.LabelFrame(main_pg, text="GET build info")
+    Build_info.pack(fill="x",**PADDING) #type: ignore
+
+    def refresh_meta_mpss():
+        meta = "UNKNOWN"
+        mpss = "UNKNOWN"
+        meta, mpss = MainController.get_meta_mpss()
+        meta_var.set(f"Meta : {meta}")
+        mpss_var.set(f"MPSS : {mpss}")
+
+    meta_var = tk.StringVar(value="Meta : ")
+    mpss_var = tk.StringVar(value="MPSS : ")
+
+    ttk.Label(Build_info, textvariable=meta_var, anchor="w") \
+    .grid(row=0, column=0, sticky="w", padx=15)
+    ttk.Label(Build_info, textvariable=mpss_var, anchor="w") \
+    .grid(row=1, column=0, sticky="w", padx=15)
+
+    refresh_meta_mpss()
+    ttk.Button(
+        Build_info, text="Get Build info",
+        command=refresh_meta_mpss, width=12
+    ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
+
 
 
     # ── QUTS page ────────────────────────────────────────────────────────

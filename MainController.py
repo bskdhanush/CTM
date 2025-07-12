@@ -364,15 +364,6 @@ def main() -> None:
         daemon=True  # auto‑stops when the main program exits
     )
     t2.start()
-
-
-    # Thread to display real-time RF Band and RSRP
-    t3 = threading.Thread(
-        target=gui.display_real_time_rf_data,
-        daemon=True
-    )
-    t3.start()
-
  
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

@@ -17,6 +17,7 @@ import GUI as gui
 import CrashCountController as cc
 import JsonHandler as JH
 import psutil
+import yaml
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -30,6 +31,10 @@ BAT_FILE_TRAFFIC = "Run_framework.bat"
 CMD_DIR_AWS      = r"C:\QSTAF\QSTAFpy\bin"
 BAT_FILE_AWS     = "aws_s3_uploder.bat"
 QSTAF_file_path  =r"C:\QSTAF\QSTAFpy\version.txt"
+CONFIG_YAML = r"C:\QSTAF\QSTAFpy\config\config.yaml"
+CONFIG_1_ITERATION_YAML = r"C:\QSTAF\QSTAFpy\config\config_1_iteration.yaml"
+TC_SPEEDTEST = r"C:\QSTAF\QSTAFpy\test_cases\Traffic\SpeedTest.txt"
+RUN_SPEEDTEST_BAT = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows\Run_SpeedTest.bat"
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 MODES = ("control", "traffic")
 DEFAULT_TIMER_HOURS = 6
@@ -349,7 +354,62 @@ def reset_start_timestamp():
         JH.save_json(cfg)
 
 def SpeedTest():
-    pass 
+    # Create CONFIG_1_ITERATION_YAML if does not exist
+    try:
+        if not os.path.exists(CONFIG_1_ITERATION_YAML):
+            if os.path.exists(CONFIG_YAML):
+                with open(CONFIG_YAML, 'r') as f:
+                    config = yaml.safe_load(f)
+
+                # Update fields
+                config['traffic']['max_main_executions'] = 1
+                config['traffic']['iteration_method'] = 'ByCount'
+                config['traffic']['iteration_count'] = 1
+                config['traffic']['playlist'] = False
+                config['traffic']['playlist_data'][0]['file_location'] = r'C:\QSTAF\QSTAFpy\test_cases\Traffic\SpeedTest.txt'
+
+                # Save the updated content back to the file
+                with open(CONFIG_1_ITERATION_YAML, 'w') as f:
+                    yaml.dump(config, f, default_flow_style=False)
+
+
+        if not os.path.exists(TC_SPEEDTEST):
+            with open(TC_SPEEDTEST, 'w') as f:
+                f.write("SpeedTest 7 1:2")
+
+        if not os.path.exists(RUN_SPEEDTEST_BAT):
+            with open(RUN_SPEEDTEST_BAT, 'w') as f:
+                f.write("""@echo off
+                    call C:\QSTAF\myenv\Scripts\\activate.bat
+                    
+                    set config_file=..\..\..\config\config_1_iteration.yaml
+                    set test_file=..\..\..\\test_cases\Traffic\SpeedTest.txt
+                    
+                    :argument_loop
+                    if "%~1"=="-c" (
+                      set config_file=%~2
+                      shift
+                      shift
+                    ) else if "%~1"=="-t" (
+                      set test_file=%~2
+                      shift
+                      shift
+                    ) else (
+                      goto :end_args
+                    )
+                    goto :argument_loop
+                    
+                    :end_args
+                    
+                    py C:\QSTAF\QSTAFpy\src\core\Main.py -m traffic -c %config_file% -t %test_file%""")
+                
+    except Exception as e:
+        print(f'Exception updating config yaml: {e}')
+
+    try:
+        StartTestCase.start_tests(CMD_DIR_TRAFFIC, 'Run_SpeedTest.bat', 'traffic')
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
 
 

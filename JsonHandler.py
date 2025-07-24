@@ -25,7 +25,8 @@ def _default_cfg() -> dict:
         "relaunch_control": "false",
         "relaunch_timer": 6,
         "relaunch_traffic": "false",
-        "traffic_start_timestamp": "null"
+        "traffic_start_timestamp": "null",
+        "SpeedTestData":[],
     }
 
 def load_cfg() -> dict:

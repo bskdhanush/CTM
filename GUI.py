@@ -533,6 +533,58 @@ def launch_gui() -> None:
         command=MainController.SpeedTest,
     ).pack(fill="x", **PADDING)# type: ignore
 
+    # ── Speed Test Data table ───────────────────────────────────────────
+
+    SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
+    SpeedTest_table.pack(fill="both", expand=True, **PADDING) # type: ignore
+
+    COLUMNS = ("TimeStamp", "Dl", "UL", "adbid")
+
+    tree = ttk.Treeview(
+    SpeedTest_table,
+    columns=COLUMNS,
+    show="headings",
+    height=4   # ≤4 rows visible; more will scroll
+    )
+
+# Headings + column options
+    tree.heading("TimeStamp",    text="TimeStamp")
+    tree.heading("Dl", text="DL")
+    tree.heading("UL", text="UL")
+    tree.heading("adbid",     text="ADB ID")
+
+    tree.column("TimeStamp", width=170, anchor="w")
+    tree.column("Dl",        width=80,  anchor="e")
+    tree.column("UL",        width=80,  anchor="e")
+    tree.column("adbid",     width=120, anchor="w")
+
+# Grid the tree + scrollbar
+    tree.grid(row=0, column=0, sticky="nsew")
+    vscroll = ttk.Scrollbar(SpeedTest_table, orient="vertical", command=tree.yview)
+    vscroll.grid(row=0, column=1, sticky="ns")
+    tree.configure(yscrollcommand=vscroll.set)
+
+    
+    SpeedTest_table.columnconfigure(0, weight=1)
+
+    def load_data_table():
+        """Read JSON list and (re)populate the table."""
+        data = JH.load_json().get("SpeedTestData", [])   # <-- adjust key to your JSON
+    # Clear
+        for row in data:
+            tree.insert(
+            "",
+            "end",
+            values=(
+                row.get("TimeStamp", ""),
+                row.get("Dl", ""),
+                row.get("UL", ""),
+                row.get("adbid", "")
+            )
+        )
+    # initial fill
+    load_data_table()
+
     # ── QSTAF update page ─────────────────────────────────────────────────────
     QSTAF_pg = ttk.Frame(container)
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")

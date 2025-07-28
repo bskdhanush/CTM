@@ -14,6 +14,7 @@ from __future__ import annotations          # for | typing in <3.10
 from functools import partial
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
@@ -32,7 +33,9 @@ import PlotDynamicRender as rdp
 import CrashCountController as cc
 import JsonHandler as JH
 import gitReleases as gr
+import QSTAFInstaller 
 import RealTimeDataController
+
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -598,13 +601,46 @@ def launch_gui() -> None:
     select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
     select_ver.current(0)
     select_ver.pack(padx=20, pady=10)
+    selected_zip = tk.StringVar(value="No file selected")
 
-    
     ttk.Button(
         ver_sel,
         text="Download",
         command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
     ).pack(fill="x", **PADDING)# type: ignore
+
+
+    Qstaf_install = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
+    Qstaf_install.pack(fill="x", **PADDING)# type: ignore
+
+    def _pick_zip() -> None:
+        filePath = filedialog.askopenfilename(
+        title="Select QSTAF .zip",
+        filetypes=[("ZIP archives", "*.zip"), ("All files", "*.*")]
+        )
+        if filePath:
+            selected_zip.set(filePath)
+            QSTAFInstaller.isntallQSTAF(filePath)
+            
+
+    ttk.Label(
+        Qstaf_install,
+        textvariable=selected_zip,
+        anchor="w",
+        style="Hint.TLabel"  # type: ignore
+    ).pack(fill="x", padx=16)
+
+
+    ttk.Button(
+        Qstaf_install,
+        text="Choose ZIP…",
+        command=_pick_zip,
+    ).pack(fill="x", **PADDING)  # type: ignore
+
+    
+   
+
+
 
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)

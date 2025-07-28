@@ -1,19 +1,12 @@
-"""
-QSTAF System Manager – Tkinter front-end
-Business logic lives in:
-    • MainController.py
-    • WifiController.py
-    • QutsController.py
-    • AwsScheduler.py
-    • DataMonitorController.py
-"""
-
 from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
+import  datetime as dt
 from functools import partial
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk ,filedialog, messagebox
+from tkinter import filedialog
+from tkinter.scrolledtext import ScrolledText
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
@@ -32,7 +25,9 @@ import PlotDynamicRender as rdp
 import CrashCountController as cc
 import JsonHandler as JH
 import gitReleases as gr
+import QSTAFInstaller 
 import RealTimeDataController
+
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -598,13 +593,124 @@ def launch_gui() -> None:
     select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
     select_ver.current(0)
     select_ver.pack(padx=20, pady=10)
+    selected_zip = tk.StringVar(value="No file selected")
 
-    
     ttk.Button(
         ver_sel,
         text="Download",
         command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
     ).pack(fill="x", **PADDING)# type: ignore
+
+
+    Qstaf_install = ttk.LabelFrame(QSTAF_pg, text="Select and install QSTAF")
+    Qstaf_install.pack(fill="x", **PADDING)  # type: ignore
+
+# Path label (with hint style)
+    selected_zip = tk.StringVar(value='No file selected — click "Choose archive…"')
+    style.configure("Hint.TLabel", foreground="#6b7280")
+
+    zip_label = ttk.Label(
+        Qstaf_install,
+        textvariable=selected_zip,
+        anchor="w",
+        style="Hint.TLabel",
+    )
+    zip_label.pack(fill="x", **PADDING)  # type: ignore
+
+# --- Progress + Logs ----------------------------------------------------------
+    progress_var = tk.IntVar(value=0)
+    progress_bar = ttk.Progressbar(Qstaf_install, maximum=100, variable=progress_var, mode="determinate")
+    progress_bar.pack(fill="x", padx=16, pady=(0, 8))
+
+    log_box = ScrolledText(Qstaf_install, height=10, wrap="word", state="disabled")
+    log_box.pack(fill="both", expand=False, padx=16, pady=(0, 12))
+
+    def _log(msg: str):
+        ts = dt.datetime.now().strftime("%H:%M:%S") # type: ignore
+        log_box.configure(state="normal")
+        log_box.insert("end", f"[{ts}] {msg}\n")
+        log_box.see("end")
+        log_box.configure(state="disabled")
+
+    def _run_install(path: str) -> None:
+    # reset UI & start
+        progress_var.set(0)
+        progress_bar.configure(mode="indeterminate")
+        progress_bar.start(10)
+        _log(f"Starting install for: {path}")
+
+        top = QSTAF_pg.winfo_toplevel()
+
+        def ui_status(msg: str):
+            top.after(0, lambda: _log(msg))
+
+        def ui_progress(pct: int):
+            def _upd():
+                progress_bar.configure(mode="determinate")
+                progress_var.set(int(max(0, min(100, pct))))
+            top.after(0, _upd)
+
+        def worker():
+            try:
+                ok, msg = QSTAFInstaller.install_qstaf_from_zip(
+                    path,
+                    on_status=ui_status,
+                    on_progress=ui_progress,
+                    keep_temp=False,   # set True if you want to inspect temp folder
+                )
+            except Exception as e:
+                ok, msg = False, str(e)
+
+                def done():
+                    progress_bar.stop()
+                    progress_bar.configure(mode="determinate")
+                    progress_var.set(100 if ok else 0)
+                    if ok:
+                        _log("Completed.")
+                        messagebox.showinfo("Install", msg or "Installed successfully.")
+                    else:
+                        _log(f"Failed: {msg}")
+                        messagebox.showerror("Install failed", msg or "Unknown error.")
+                top.after(0, done)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _pick_zip() -> None:
+        filePath = filedialog.askopenfilename(
+            title="Select QSTAF archive",
+            filetypes=[
+            ("Archives", "*.zip *.7z"),
+            ("ZIP archives", "*.zip"),
+            ("7z archives", "*.7z"),
+            ("All files", "*.*"),
+        ],
+    )
+        if not filePath:
+            return
+        if not filePath.lower().endswith((".zip", ".7z")):
+            messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
+            return
+
+        selected_zip.set(filePath)
+        zip_label.configure(style="TLabel")  # switch from hint to normal
+        _run_install(filePath)
+
+    btn_row = ttk.Frame(Qstaf_install)
+    btn_row.pack(fill="x", padx=16, pady=(0, 8))
+
+    ttk.Button(btn_row, text="Choose archive…", command=_pick_zip, width=18)\
+    .pack(side="left")
+
+    def _clear_logs():
+        log_box.configure(state="normal")
+        log_box.delete("1.0", "end")
+        log_box.configure(state="disabled")
+
+    ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
+    .pack(side="right")
+   
+
+
 
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)
@@ -644,9 +750,9 @@ def launch_gui() -> None:
     # populate dynamically --------------------------------------------------
 
     # draw the first plot immediately
-    rdp.draw_all_plots(list_fr)
+    #rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
-    rdp.periodic_refresh(list_fr)
+    #rdp.periodic_refresh(list_fr)
 
 
 

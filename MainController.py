@@ -18,6 +18,8 @@ import CrashCountController as cc
 import JsonHandler as JH
 import psutil
 import yaml
+import glob
+import pandas as pd
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -38,7 +40,7 @@ RUN_SPEEDTEST_BAT = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows\Run_SpeedTest.
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 MODES = ("control", "traffic")
 DEFAULT_TIMER_HOURS = 6
-
+TRAFFIC_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy\traffic'
 
 # CrashCountController.run_watch()
 
@@ -375,15 +377,15 @@ def SpeedTest():
 
         if not os.path.exists(TC_SPEEDTEST):
             with open(TC_SPEEDTEST, 'w') as f:
-                f.write("SpeedTest 7 1:2")
+                f.write("SpeedTest 1111 1:2")
 
         if not os.path.exists(RUN_SPEEDTEST_BAT):
             with open(RUN_SPEEDTEST_BAT, 'w') as f:
                 f.write("""@echo off
-                    call C:\QSTAF\myenv\Scripts\\activate.bat
+                    call C:\\QSTAF\\myenv\\Scripts\\activate.bat
                     
-                    set config_file=..\..\..\config\config_1_iteration.yaml
-                    set test_file=..\..\..\\test_cases\Traffic\SpeedTest.txt
+                    set config_file=..\\..\\..\\config\\config_1_iteration.yaml
+                    set test_file=..\\..\\..\\test_cases\\Traffic\\SpeedTest.txt
                     
                     :argument_loop
                     if "%~1"=="-c" (
@@ -401,7 +403,7 @@ def SpeedTest():
                     
                     :end_args
                     
-                    py C:\QSTAF\QSTAFpy\src\core\Main.py -m traffic -c %config_file% -t %test_file%""")
+                    py C:\\QSTAF\\QSTAFpy\\src\\core\\Main.py -m traffic -c %config_file% -t %test_file%""")
                 
     except Exception as e:
         print(f'Exception updating config yaml: {e}')
@@ -411,7 +413,31 @@ def SpeedTest():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
+    get_all_speedtest_results()
 
+
+def get_all_speedtest_results():
+    speedtest_csvs = glob.glob(TRAFFIC_OUTPUT_BASE + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+    df_csv = pd.DataFrame()
+
+    for speedtest_csv in speedtest_csvs:
+        df_csv = pd.concat([df_csv, pd.read_csv(speedtest_csv)], axis=0)
+    df_csv = df_csv.sort_values(by=['end_time'], ascending=False)
+    if len(df_csv) > 10:
+        df_csv = df_csv.head(10)
+    speedtest_list = []
+
+    for i in range(len(df_csv)):
+        speedtest_list.append({
+            'DL' : df_csv['download_speed_Mbps'].iloc[i],
+            'UL' : df_csv['upload_speed_Mbps'].iloc[i],
+            'adbid' : df_csv['Metadata_device'].iloc[i],
+            'TimeStamp' : df_csv['end_time'].iloc[i]
+        })
+    print(speedtest_list)
+    cfg = JH.load_json()
+    cfg["SpeedTestData"] = speedtest_list
+    JH.save_json(cfg)
 
 def main() -> None:
 

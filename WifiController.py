@@ -31,17 +31,45 @@ def run_command(command):
         print(f"{command} failed after max re-attempts")
     return output, stderr
 
-def get_adb_id():
-    global adb_id
-    if not adb_id:
-        output, stderr = run_command("adb devices")
-        if not output or stderr:
-            raise Exception('adb id NOT FOUND')
-        else:
-            m = re.search(r'(\w+)\s*device$', output)
-            if m:
-                adb_id = m.group(1)
-    return adb_id
+# def get_adb_id():
+#     global adb_id
+#     if not adb_id:
+#         output, stderr = run_command("adb devices")
+#         if not output or stderr:
+#             raise Exception('adb id NOT FOUND')
+#         else:
+#             m = re.search(r'(\w+)\s*device$', output)
+#             if m:
+#                 adb_id = m.group(1)
+#     return adb_id
+
+def get_adb_id() -> str | None:
+    """
+    Returns the first **healthy** ADB serial or None if no devices are connected.
+    A healthy line looks like:  84a07517\tdevice
+    """
+    try:
+        proc = subprocess.run(
+            ["adb", "devices"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except FileNotFoundError:
+        print("ADB executable not found in PATH")
+        return None
+
+    lines = proc.stdout.strip().splitlines()
+
+    for line in lines[1:]:                # skip the header
+        parts = line.strip().split()
+        if len(parts) >= 2 and parts[1] == "device":
+            return parts[0]               # healthy transport
+
+    # No healthy device lines ► optional: kick the server
+    # subprocess.run(["adb", "kill-server"])
+    return None
 
 def get_meta_build_info():
     meta = None

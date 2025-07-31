@@ -561,7 +561,7 @@ def launch_gui() -> None:
     ttk.Button(
         SpeedTest_table,
         text="Refresh Data",
-        command=lambda: load_data_table(),
+        command=lambda:(MainController.get_all_speedtest_results(),load_data_table()),
     ).grid(row=1, column=0, sticky="ew", padx=10, pady=(6, 0))
 
 

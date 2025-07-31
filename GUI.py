@@ -533,7 +533,7 @@ def launch_gui() -> None:
     SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
     SpeedTest_table.pack(fill="both", expand=True, **PADDING) # type: ignore
 
-    COLUMNS = ("TimeStamp", "Dl", "UL", "adbid")
+    COLUMNS = ("TimeStamp", "DL", "UL", "adbid")
 
     tree = ttk.Treeview(
     SpeedTest_table,
@@ -544,14 +544,14 @@ def launch_gui() -> None:
 
 # Headings + column options
     tree.heading("TimeStamp",    text="TimeStamp")
-    tree.heading("Dl", text="DL")
-    tree.heading("UL", text="UL")
+    tree.heading("DL", text="DL (Mbps)")
+    tree.heading("UL", text="UL (Mbps)")
     tree.heading("adbid",     text="ADB ID")
 
-    tree.column("TimeStamp", width=170, anchor="w")
-    tree.column("Dl",        width=80,  anchor="e")
-    tree.column("UL",        width=80,  anchor="e")
-    tree.column("adbid",     width=120, anchor="w")
+    tree.column("TimeStamp", width=170,  anchor="center")
+    tree.column("DL",        width=80,  anchor="center")
+    tree.column("UL",        width=80,  anchor="center")
+    tree.column("adbid",     width=120, anchor="center")
 
 # Grid the tree + scrollbar
     tree.grid(row=0, column=0, sticky="nsew")
@@ -572,7 +572,7 @@ def launch_gui() -> None:
             "end",
             values=(
                 row.get("TimeStamp", ""),
-                row.get("Dl", ""),
+                row.get("DL", ""),
                 row.get("UL", ""),
                 row.get("adbid", "")
             )
@@ -585,21 +585,21 @@ def launch_gui() -> None:
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")
     pages["QSTAF"] = QSTAF_pg
     add_nav("Install QSTAF", "QSTAF")
-    avaible_ver=gr.get_all_tags()
+    # avaible_ver=gr.get_all_tags()
 
-    ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
-    ver_sel.pack(fill="x", **PADDING)# type: ignore  
+    # ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
+    # ver_sel.pack(fill="x", **PADDING)# type: ignore  
 
-    select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
-    select_ver.current(0)
-    select_ver.pack(padx=20, pady=10)
-    selected_zip = tk.StringVar(value="No file selected")
+    # select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
+    # select_ver.current(0)
+    # select_ver.pack(padx=20, pady=10)
+    # selected_zip = tk.StringVar(value="No file selected")
 
-    ttk.Button(
-        ver_sel,
-        text="Download",
-        command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
-    ).pack(fill="x", **PADDING)# type: ignore
+    # ttk.Button(
+        # ver_sel,
+        # text="Download",
+        # command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
+    # ).pack(fill="x", **PADDING)# type: ignore
 
 
     Qstaf_install = ttk.LabelFrame(QSTAF_pg, text="Select and install QSTAF")
@@ -750,9 +750,9 @@ def launch_gui() -> None:
     # populate dynamically --------------------------------------------------
 
     # draw the first plot immediately
-    #rdp.draw_all_plots(list_fr)
+    rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
-    #rdp.periodic_refresh(list_fr)
+    rdp.periodic_refresh(list_fr)
 
 
 

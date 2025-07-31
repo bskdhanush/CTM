@@ -8,9 +8,11 @@ import subprocess
 import time
 from pathlib import Path
 from typing import Callable, Optional, Tuple, List
+import re
+import WifiController
 
 # --------------------------- Destinations (Windows) ---------------------------
-DEST_CONFIG   = Path(r"C:/QSTAF/QSTAFpy/config/config.yml")
+DEST_CONFIG   = Path(r"C:/QSTAF/QSTAFpy/config/config.yaml")
 DEST_MAINPY   = Path(r"C:/QSTAF/QSTAFpy/src/core/Main.py")
 DEST_CTRL_TXT = Path(r"C:/QSTAF/QSTAFpy/test_cases/Control/TC_control.txt")
 DEST_TRF_TXT  = Path(r"C:/QSTAF/QSTAFpy/test_cases/Traffic/TC_traffic.txt")
@@ -184,12 +186,28 @@ def _copy_verified(src: Path, dst: Path, on_status: StatusCB) -> Optional[str]:
             _status(on_status, err)
             return err
         _status(on_status, f"Copied {src.name} ({size_src} bytes) → {dst}")
+        if 'config.yaml' in src.name:
+            update_config_yaml_with_adbid(dst)
         return None
     except Exception as e:
         err = f"Copy failed {src} → {dst}: {e}"
         _status(on_status, err)
         return err
 
+def replacer(match):
+    adb_id = WifiController.get_adb_id()
+    if adb_id:
+        return f'{match.group(1)}{adb_id}'
+    else:
+        return f'{match.group(1)}{match.group(2)}'
+
+def update_config_yaml_with_adbid(config_file):
+    config_content = ''
+    with open(config_file, 'r') as f:
+        config_content = f.read()
+    updated_config = re.sub(r'(adb_serial_id\s*:\s*)(\w+)', replacer, config_content)
+    with open(config_file, 'w') as f:
+        f.write(updated_config)
 # ------------------------------- Main routine --------------------------------
 
 def install_qstaf_from_zip(
@@ -229,23 +247,23 @@ def install_qstaf_from_zip(
 
         # Proceed regardless of rc, per request. We still report rc in final message.
 
-        # 3) Copy files from Replaced
+        # 3) Copy files from Replace
         _progress(on_progress, 60)
-        _status(on_status, "Locating 'Replaced' folder…")
-        replaced_dir = next(
-            (p for p in temp_dir.rglob("*") if p.is_dir() and p.name.lower() == "replaced"),
+        _status(on_status, "Locating 'Replace' folder…")
+        replace_dir = next(
+            (p for p in temp_dir.rglob("*") if p.is_dir() and p.name.lower() == "replace"),
             None,
         )
-        if not replaced_dir:
-            return False, "Replaced folder not found."
+        if not replace_dir:
+            return False, "Replace folder not found."
 
-        _status(on_status, f"Replaced dir: {replaced_dir}")
+        _status(on_status, f"Replace dir: {replace_dir}")
 
-        def find_in_replaced(name: str) -> Optional[Path]:
-            return next((p for p in replaced_dir.rglob(name)), None)
+        def find_in_replace(name: str) -> Optional[Path]:
+            return next((p for p in replace_dir.rglob(name)), None)
 
         files_map = {
-            "config.yml":      DEST_CONFIG,
+            "config.yaml":      DEST_CONFIG,
             "Main.py":         DEST_MAINPY,
             "TC_control.txt":  DEST_CTRL_TXT,
             "TC_traffic.txt":  DEST_TRF_TXT,
@@ -257,9 +275,9 @@ def install_qstaf_from_zip(
 
         errors: List[str] = []
         for src_name, dst_path in files_map.items():
-            src = find_in_replaced(src_name)
+            src = find_in_replace(src_name)
             if not src or not src.exists():
-                msg_missing = f"Required file missing in Replaced: {src_name}"
+                msg_missing = f"Required file missing in Replace: {src_name}"
                 _status(on_status, msg_missing)
                 errors.append(msg_missing)
             else:
@@ -271,6 +289,7 @@ def install_qstaf_from_zip(
 
         _progress(on_progress, 100)
         if errors:
+            _status(on_status, f"Completed with errors (installer rc={rc})")
             return False, f"Completed with errors (installer rc={rc}): " + "; ".join(errors)
 
         _status(on_status, "Completed.")

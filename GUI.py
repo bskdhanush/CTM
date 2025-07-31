@@ -26,7 +26,6 @@ import CrashCountController as cc
 import JsonHandler as JH
 import gitReleases as gr
 import QSTAFInstaller 
-import RealTimeDataController
 
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
@@ -58,48 +57,53 @@ def launch_gui() -> None:
 
     for col in range(7):
        header_frame.columnconfigure(col, weight=0)
-    header_frame.columnconfigure(2, weight=1)   # left side expands
+    header_frame.columnconfigure(1, weight=1)   # left side expands
     
-    RFband_info= tk.StringVar(value="Band Combo : ")
-    SNR_values = tk.StringVar(value= "Channel Conditions : ")
+  
 
-    
-    def display_real_time_rf_data():
-        time.sleep(20)
-        while True:
-            rf_band, rsrp = RealTimeDataController.get_current_rfband_rsrp()
-            root.after(0, lambda: RFband_info.set(f"Band Combo: {rf_band}"))
-            root.after(0, lambda: SNR_values.set(f"Channel Conditions: {rsrp}"))
-            time.sleep(1)
+    meta_var = tk.StringVar(value="Meta : ")
+    mpss_var = tk.StringVar(value="MPSS : ")
 
-    t3 = threading.Thread(
-    target=display_real_time_rf_data,
-    daemon=True)
-    t3.start()
+    ttk.Label(header_frame, textvariable=meta_var,  anchor="w") \
+        .grid(row=0, column=0, sticky="w", padx=15)
+    ttk.Label(header_frame, textvariable=mpss_var,  anchor="w") \
+        .grid(row=1, column=0, sticky="w", padx=15)
 
-    ttk.Label(header_frame, textvariable=RFband_info, anchor="w") \
-    .grid(row=0, column=0, sticky="w", padx=15)
-    ttk.Label(header_frame, textvariable=SNR_values, anchor="w") \
-    .grid(row=1, column=0, sticky="w", padx=15)
+    def refresh_meta_mpss() -> None:
+        meta, mpss = MainController.get_meta_mpss()
+        meta_var.set(f"Meta : {meta or 'UNKNOWN'}")
+        mpss_var.set(f"MPSS : {mpss or 'UNKNOWN'}")
+    refresh_meta_mpss()
 
- 
+    ttk.Button(
+        header_frame, text="Get Build info",
+        command=refresh_meta_mpss, width=12
+    ).grid(row=2, column=0, sticky="w", padx=10, pady=5)
+
+    # --- reboot button (centre-left, on its own row) ----------------------------
+    ttk.Button(
+        header_frame, text="Restart Device", width=12,
+        command=lambda: WifiController.run_command("adb root && adb reboot")
+    ).grid(row=2, column=2, sticky="w", padx=10, pady=5)
+
+    # --- crash counters (hard-right) -------------------------------------------
     crash_var  = tk.StringVar(value="—")
-    RDKB_var  = tk.StringVar(value="—")
-   
-    # labels (two rows keeps width sensible)
-    crash_text_lbl =ttk.Label(header_frame, text="Device Crashes:", anchor="e") 
-    crash_text_lbl.grid(row=0, column=3, sticky="e", padx=(10,5))
+    RDKB_var   = tk.StringVar(value="—")
+
+    crash_text_lbl = ttk.Label(header_frame, text="Device Crashes:", anchor="e")
+    crash_text_lbl.grid(row=0, column=3, sticky="e", padx=(10, 5))
     crash_lbl = ttk.Label(header_frame, textvariable=crash_var, anchor="w")
     crash_lbl.grid(row=0, column=4, sticky="w")
 
-    RDKB_text_lbl= ttk.Label(header_frame, text="RDKB Crashes:", anchor="e") 
-    RDKB_text_lbl.grid(row=1, column=3, sticky="e", padx=(10,5))
+    RDKB_text_lbl = ttk.Label(header_frame, text="RDKB Crashes:",  anchor="e")
+    RDKB_text_lbl.grid(row=1, column=3, sticky="e", padx=(10, 5))
     RDKB_lbl = ttk.Label(header_frame, textvariable=RDKB_var, anchor="w")
     RDKB_lbl.grid(row=1, column=4, sticky="w")
-    
+
     ttk.Button(
-    header_frame,text="Reset Counter",command=cc.rest_counter,width=12)\
-    .grid(row=2,column=3,columnspan=4,sticky="e",padx=20,pady=5)
+        header_frame, text="Reset Counter", width=12,
+        command=cc.rest_counter
+    ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
     # ­—----- start the app_JSON watcher ­-----—
     class ConfigHandler(FileSystemEventHandler):
@@ -185,8 +189,8 @@ def launch_gui() -> None:
     footer.columnconfigure(3, weight=0) 
 
     quts_stat_var = tk.StringVar(value="QUTS: Checking…")
-    sched_stat_var = tk.StringVar(
-        value="Scheduler: ON" if aws.is_enabled() else "Scheduler: OFF"
+    adb_var = tk.StringVar(
+        value="ADB ID: Connecting…"
     )
 
     quts_label = tk.Label(
@@ -195,8 +199,25 @@ def launch_gui() -> None:
     font=("TkDefaultFont", 10, "bold"))
     quts_label.grid(row=0, column=0, sticky="w")
 
-    sched_label = ttk.Label(footer, textvariable=sched_stat_var)
-    sched_label.grid(row=0, column=1, sticky="w", padx=(12,0))
+    adbId_label = ttk.Label(footer, textvariable=adb_var)
+    adbId_label.grid(row=0, column=1, sticky="w", padx=(12,0))
+
+    def poll_adb_id():
+        try:
+            new_id = WifiController.get_adb_id()     # fast, non-blocking call
+            adb_var.set(f"ADB ID: {new_id}" if new_id else "ADB ID: --")
+        except Exception as exc:
+            print("ADB-ID poll error:", exc)
+            adb_var.set("ADB ID: --")                # show placeholder
+        finally:
+            # <-- THIS IS THE CRITICAL LINE
+            root.after(1000, poll_adb_id)            # schedule next poll in 1 s
+
+    # kick-off once, everything else is automatic
+    root.after(0, poll_adb_id)
+    
+                
+
 
     def update_internet_status():
         status = dmc.get_internet_status()
@@ -369,7 +390,6 @@ def launch_gui() -> None:
 
     def _toggle_aws() -> None:
         aws.set_enabled(aws_var.get())
-        sched_stat_var.set("Scheduler: ON" if aws.is_enabled() else "Scheduler: OFF")
 
     ttk.Checkbutton(
         aws_fr,
@@ -377,34 +397,6 @@ def launch_gui() -> None:
         variable=aws_var,
         command=_toggle_aws,
     ).pack(anchor="w", padx=16)
-
-
-
-
-    # get devices build info
-    Build_info= ttk.LabelFrame(main_pg, text="GET build info")
-    Build_info.pack(fill="x",**PADDING) #type: ignore
-
-    def refresh_meta_mpss():
-        meta = "UNKNOWN"
-        mpss = "UNKNOWN"
-        meta, mpss = MainController.get_meta_mpss()
-        meta_var.set(f"Meta : {meta}")
-        mpss_var.set(f"MPSS : {mpss}")
-
-    meta_var = tk.StringVar(value="Meta : ")
-    mpss_var = tk.StringVar(value="MPSS : ")
-
-    ttk.Label(Build_info, textvariable=meta_var, anchor="w") \
-    .grid(row=0, column=0, sticky="w", padx=15)
-    ttk.Label(Build_info, textvariable=mpss_var, anchor="w") \
-    .grid(row=1, column=0, sticky="w", padx=15)
-
-    refresh_meta_mpss()
-    ttk.Button(
-        Build_info, text="Get Build info",
-        command=refresh_meta_mpss, width=12
-    ).grid(row=2, column=0, sticky="w", padx=10,pady= 5)
 
 
 
@@ -474,7 +466,7 @@ def launch_gui() -> None:
     wifi_pg = ttk.Frame(container)
     wifi_pg.grid(row=0, column=0, sticky="nsew")
     pages["Wifi"] = wifi_pg
-    add_nav("Set Wifi (RDKB)", "Wifi")
+    add_nav("Set/Rename WIFI", "Wifi")
 
     CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
     wifi_sel = ttk.LabelFrame(wifi_pg, text="Select config type for RDKB TMO")
@@ -492,13 +484,7 @@ def launch_gui() -> None:
     ).pack(fill="x", **PADDING)# type: ignore
 
 
-    # ── TESTING page ─────────────────────────────────────────────────────
-    test_pg = ttk.Frame(container)
-    test_pg.grid(row=0, column=0, sticky="nsew")
-    pages["Testing"] = test_pg
-    add_nav("Rename SSIDs", "Testing")
-
-    test_sel = ttk.LabelFrame(test_pg, text="This is to rename SSIDs before Speedtest for RKDB")
+    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest for RKDB")
     test_sel.pack(fill="x", **PADDING)# type: ignore  
 
 
@@ -519,6 +505,15 @@ def launch_gui() -> None:
         command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
+
+
+    # ── TESTING page ─────────────────────────────────────────────────────
+    test_pg = ttk.Frame(container)
+    test_pg.grid(row=0, column=0, sticky="nsew")
+    pages["Testing"] = test_pg
+    add_nav("Speed TEST", "Testing")
+
+    
     SpeedTest = ttk.LabelFrame(test_pg, text="Start speed test")
     SpeedTest.pack(fill="x", **PADDING)# type: ignore  
 
@@ -562,9 +557,21 @@ def launch_gui() -> None:
     
     SpeedTest_table.columnconfigure(0, weight=1)
 
+
+    ttk.Button(
+        SpeedTest_table,
+        text="Refresh Data",
+        command=lambda:(MainController.get_all_speedtest_results(),load_data_table()),
+    ).grid(row=1, column=0, sticky="ew", padx=10, pady=(6, 0))
+
+
+
+
+
     def load_data_table():
         """Read JSON list and (re)populate the table."""
-        data = JH.load_json().get("SpeedTestData", [])   # <-- adjust key to your JSON
+        data = JH.load_json().get("SpeedTestData", []) 
+        tree.delete(*tree.get_children())  # <-- adjust key to your JSON
     # Clear
         for row in data:
             tree.insert(
@@ -626,14 +633,15 @@ def launch_gui() -> None:
     log_box.pack(fill="both", expand=False, padx=16, pady=(0, 12))
 
     def _log(msg: str):
-        ts = dt.datetime.now().strftime("%H:%M:%S") # type: ignore
-        log_box.configure(state="normal")
-        log_box.insert("end", f"[{ts}] {msg}\n")
-        log_box.see("end")
-        log_box.configure(state="disabled")
+            ts = dt.datetime.now().strftime("%H:%M:%S")  # type: ignore
+            log_box.configure(state="normal")
+            log_box.insert("end", f"[{ts}] {msg}\n")
+            log_box.see("end")
+            log_box.configure(state="disabled")
 
     def _run_install(path: str) -> None:
-    # reset UI & start
+        """Run QSTAF installer asynchronously and update GUI elements."""
+        # Reset UI and start indeterminate progress
         progress_var.set(0)
         progress_bar.configure(mode="indeterminate")
         progress_bar.start(10)
@@ -642,35 +650,41 @@ def launch_gui() -> None:
         top = QSTAF_pg.winfo_toplevel()
 
         def ui_status(msg: str):
+            # Schedule status log update on the Tk main thread
             top.after(0, lambda: _log(msg))
 
         def ui_progress(pct: int):
+            """Update determinate progress bar from 0‑100."""
             def _upd():
-                progress_bar.configure(mode="determinate")
-                progress_var.set(int(max(0, min(100, pct))))
+                # If we are still in indeterminate mode switch first
+                if progress_bar['mode'] == 'indeterminate':
+                    progress_bar.stop()
+                    progress_bar.configure(mode='determinate')
+                progress_var.set(max(0, min(100, int(pct))))
             top.after(0, _upd)
 
         def worker():
+            ok = False
+            msg = ""
             try:
                 ok, msg = QSTAFInstaller.install_qstaf_from_zip(
                     path,
                     on_status=ui_status,
                     on_progress=ui_progress,
-                    keep_temp=False,   # set True if you want to inspect temp folder
+                    keep_temp=False,  # set True if you want to inspect temp folder
                 )
             except Exception as e:
                 ok, msg = False, str(e)
-
+            finally:
+                # Always run this to tidy the UI (no pop‑ups)
                 def done():
                     progress_bar.stop()
-                    progress_bar.configure(mode="determinate")
+                    progress_bar.configure(mode='determinate')
                     progress_var.set(100 if ok else 0)
                     if ok:
-                        _log("Completed.")
-                        messagebox.showinfo("Install", msg or "Installed successfully.")
+                        _log("Completed." if not msg else f"Completed: {msg}")
                     else:
-                        _log(f"Failed: {msg}")
-                        messagebox.showerror("Install failed", msg or "Unknown error.")
+                        _log(f"Failed: {msg or 'Unknown error.'}")
                 top.after(0, done)
 
         threading.Thread(target=worker, daemon=True).start()

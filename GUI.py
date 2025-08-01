@@ -491,7 +491,7 @@ def launch_gui() -> None:
 
 
     CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select config type for RDKB TMO")
+    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select Config Type" )
     wifi_sel.pack(fill="x", **PADDING)# type: ignore
 
 
@@ -506,8 +506,8 @@ def launch_gui() -> None:
     ).pack(fill="x", **PADDING)# type: ignore
 
 
-    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest for RKDB")
-    test_sel.pack(fill="x", **PADDING)# type: ignore  
+    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest")
+    test_sel.pack(fill="x", **PADDING )# type: ignore  
 
 
     test_dd = ttk.Combobox(test_sel, values=CHOICES, state="readonly")

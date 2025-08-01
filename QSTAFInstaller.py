@@ -9,13 +9,11 @@ import time
 from pathlib import Path
 from typing import Callable, Optional, Tuple, List
 import re
+import os
 import WifiController
 
 # --------------------------- Destinations (Windows) ---------------------------
-DEST_CONFIG   = Path(r"C:/QSTAF/QSTAFpy/config/config.yaml")
-DEST_MAINPY   = Path(r"C:/QSTAF/QSTAFpy/src/core/Main.py")
-DEST_CTRL_TXT = Path(r"C:/QSTAF/QSTAFpy/test_cases/Control/TC_control.txt")
-DEST_TRF_TXT  = Path(r"C:/QSTAF/QSTAFpy/test_cases/Traffic/TC_traffic.txt")
+QSTAF_BASE = Path(r"C:/QSTAF/QSTAFpy")
 
 StatusCB   = Optional[Callable[[str], None]]
 ProgressCB = Optional[Callable[[int], None]]
@@ -259,29 +257,22 @@ def install_qstaf_from_zip(
 
         _status(on_status, f"Replace dir: {replace_dir}")
 
-        def find_in_replace(name: str) -> Optional[Path]:
-            return next((p for p in replace_dir.rglob(name)), None)
-
-        files_map = {
-            "config.yaml":      DEST_CONFIG,
-            "Main.py":         DEST_MAINPY,
-            "TC_control.txt":  DEST_CTRL_TXT,
-            "TC_traffic.txt":  DEST_TRF_TXT,
-        }
+        def find_in_dir(name: str, directory: Path) -> Optional[Path]:
+            return next((p for p in directory.rglob(name)), None)
 
         _status(on_status, "Copying updated files…")
         step = 60
-        step_inc = 40 // max(1, len(files_map))
+        step_inc = 40 // max(1, len(os.listdir(replace_dir)))
 
         errors: List[str] = []
-        for src_name, dst_path in files_map.items():
-            src = find_in_replace(src_name)
-            if not src or not src.exists():
-                msg_missing = f"Required file missing in Replace: {src_name}"
+        for src_name in os.listdir(replace_dir):
+            dst_path = find_in_dir(src_name, QSTAF_BASE)
+            if not dst_path or not dst_path.exists():
+                msg_missing = f"File {src_name} not found in : {QSTAF_BASE.name}"
                 _status(on_status, msg_missing)
                 errors.append(msg_missing)
             else:
-                err = _copy_verified(src, dst_path, on_status)
+                err = _copy_verified(Path(os.path.join(replace_dir, src_name)), dst_path, on_status)
                 if err:
                     errors.append(err)
             step += step_inc

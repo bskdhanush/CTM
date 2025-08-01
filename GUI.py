@@ -221,11 +221,11 @@ def launch_gui() -> None:
     internet_label.grid(   row=0, column=2, sticky="ew", padx=5)
     version_label.grid(  row=0, column=3, sticky="e",  padx=5)
 
-#     def only_if_changed(new_text):
-#         adb_var.set(new_text)
+    def update_label(new_text):
+        adb_var.set(new_text)
 
 # # this returns immediately and never blocks your mainloop
-#     MainController.start_adb_poll_thread(root, only_if_changed, interval_ms=1000)
+    MainController.start_adb_track_thread(root, update_label)
     
                 
 

@@ -386,28 +386,55 @@ def get_all_speedtest_results():
 
 
 
-def start_adb_poll_thread(root, update_fn, interval_ms=1000):
+def start_adb_track_thread(root, update_fn, *_, **__):
+    def initial_snapshot():
+        try:
+            out = subprocess.check_output(["adb", "devices"], text=True)
+            for line in out.splitlines()[1:]:
+                parts = line.split()
+                if len(parts) >= 2 and parts[1] == "device":
+                    return f"ADB ID: {parts[0]}"
+        except Exception:
+            pass
+        return "ADB ID: --"
+
     def worker():
-        last_display = None
-        while True:
-            try:
-                new_id = WifiController.get_adb_id()
-            except Exception as exc:
-                print("ADB-ID poll error:", exc)
-                new_id = None
+        last_display = initial_snapshot()
+        root.after(0, update_fn, last_display)
 
-            display = f"ADB ID: {new_id}" if new_id else "ADB ID: --"
+        popen_args = dict(
+            args=["adb", "track-devices"],
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
 
-            # only schedule a UI update when it’s changed
+        # ── hide console window on Windows ─────────────────────────────
+        if os.name == "nt":                                     # win32
+            popen_args["creationflags"] = subprocess.CREATE_NO_WINDOW
+            # (Older alternative: use STARTUPINFO with STARTF_USESHOWWINDOW)
+        # ────────────────────────────────────────────────────────────────
+
+        try:
+            proc = subprocess.Popen(**popen_args) # type: ignore
+        except FileNotFoundError:
+            root.after(0, update_fn, "ADB ID: --  (adb not found)")
+            return
+
+        proc.stdout.readline()  # type: ignore # skip header
+        for line in proc.stdout: # type: ignore
+            parts = line.strip().split()
+            if len(parts) < 2:
+                continue
+            serial, state = parts[0], parts[1]
+            display = f"ADB ID: {serial}" if state == "device" else "ADB ID: --"
             if display != last_display:
-                # Use root.after to marshal back to the main thread
                 root.after(0, update_fn, display)
                 last_display = display
 
-            time.sleep(interval_ms / 1000.0)
+        root.after(0, update_fn, "ADB ID: --")  # adb exited
 
-    t3 = threading.Thread(target=worker, daemon=True)
-    t3.start()
+    threading.Thread(target=worker, daemon=True).start()
 
 
 def check_wifi_type(toggle_var,wifi_config):

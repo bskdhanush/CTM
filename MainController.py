@@ -130,15 +130,7 @@ def start_framework(mode):
             JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
-'''
-def run_both_with_delay():
-    try:
-        start_control()
-        time.sleep(5)
-        start_traffic()
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
-'''
+
 def stop_framework(mode):
     found = KillProcess.stop_all_tests(mode)
     JH.rest_framework_timestamps(mode)
@@ -202,53 +194,6 @@ def check_restart_timer():
                 
         time.sleep(120)
 
-'''
-def check_for_updates_integrated():
-    """
-    Integrated update checker that works in both .py and .exe modes
-    Returns True if update was found and applied, False otherwise
-    """
-    try:
-        # Import the update checking functionality directly
-        import CheckUpdates
-        
-        # Run the update check logic
-        data = CheckUpdates.fetch_latest_release_data()
-        relaunch_timer_tag = data.get("tag_name", "")
-        latest_tag = relaunch_timer_tag.lstrip("v")
-        
-        print(f"Latest release on GitHub: {latest_tag} (local: {CheckUpdates.LOCAL_VERSION})")
-        
-        if CheckUpdates.parse_version(latest_tag) > CheckUpdates.parse_version(CheckUpdates.LOCAL_VERSION):
-            print("Newer version detected. Downloading and replacing...")
-            asset_api_url, asset_name = CheckUpdates.find_latest_exe_asset(data)
-            
-            # Download the new version
-            CheckUpdates.download_and_replace(asset_api_url, asset_name)
-            print(f"Replaced old EXE with version {latest_tag}.")
-            
-            # Launch the updated EXE and exit
-            launch_updated_exe()
-            return True
-        else:
-            print("Already up to date.")
-            return False
-            
-    except Exception as exc:
-        print(f"Update check failed: {exc}")
-        return False
-
-
-def launch_updated_exe():
-    """Launch the updated executable"""
-    exe_path = CheckUpdates.EXE_PATH
-    if os.path.isfile(exe_path):
-        print(f"Launching updated EXE: {exe_path} --skip-updates")
-        subprocess.Popen([exe_path, "--skip-updates"], shell=False)
-        sys.exit(0)
-    else:
-        print(f"Cannot find EXE at {exe_path}. Continuing with current version.")
-'''
 
 def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
@@ -438,6 +383,68 @@ def get_all_speedtest_results():
     cfg = JH.load_json()
     cfg["SpeedTestData"] = speedtest_list
     JH.save_json(cfg)
+
+
+
+def start_adb_poll_thread(root, update_fn, interval_ms=1000):
+    def worker():
+        last_display = None
+        while True:
+            try:
+                new_id = WifiController.get_adb_id()
+            except Exception as exc:
+                print("ADB-ID poll error:", exc)
+                new_id = None
+
+            display = f"ADB ID: {new_id}" if new_id else "ADB ID: --"
+
+            # only schedule a UI update when it’s changed
+            if display != last_display:
+                # Use root.after to marshal back to the main thread
+                root.after(0, update_fn, display)
+                last_display = display
+
+            time.sleep(interval_ms / 1000.0)
+
+    t3 = threading.Thread(target=worker, daemon=True)
+    t3.start()
+
+
+def check_wifi_type(toggle_var,wifi_config):
+    print(wifi_config)
+    if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
+        print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
+        #method call here
+    elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
+        print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
+    elif toggle_var == "RDKB":
+        print(f"RDKB selected {toggle_var, wifi_config}")
+        set_wifi_config(wifi_config)
+         
+
+def check_Rename_SSID(toggle_var,wifi_config,rename_type):
+    if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
+        if rename_type == "_":  #test SSID
+            print(f"OWRT 3 SLO selected with test SSID")
+        else:
+            print(f"OWRT 3 SLO selected with default SSID")
+        #method call here
+    elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
+        if rename_type == "_":  #test SSID
+            print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
+        else:
+            print(f"OWRT 2G SLO + 5G-6G MLO with default SSID")
+    elif toggle_var == "RDKB":
+        if rename_type == "_":  #test SSID
+            WifiController.update_cpe_wifi_config(wifi_config, "_")
+        else:
+            WifiController.update_cpe_wifi_config(wifi_config, "")
+       
+        
+
+
+    
+
 
 def main() -> None:
 

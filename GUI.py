@@ -35,6 +35,10 @@ white_accent = "#FFFFFF"
 red_accent  = "#E95959"
 
 
+# ── Global toggle variable ─────────────────────────────────────────────────
+# ----- Helper fuctions to get/set the toggle selection -----
+
+
 
 def launch_gui() -> None:
     """Construct and run the UI."""
@@ -155,7 +159,7 @@ def launch_gui() -> None:
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content
-    root.rowconfigure(1, weight=1)     # row 1   = sidebar + pages
+    root.rowconfigure(1, weight=1)     # row 1   = sidebar  pages
 
     # ── Sidebar & container ───────────────────────────────────────────────
     sidebar   = ttk.Frame(root, style="Sidebar.TFrame")
@@ -182,39 +186,46 @@ def launch_gui() -> None:
     # ── Footer / status bar ───────────────────────────────────────────────
     footer = ttk.Frame(root)
     footer.grid(row=2, column=0, columnspan=2, sticky="ew", padx=12, pady=(4, 8))
-    
-    footer.columnconfigure(0, weight=0)   # QUTS
-    footer.columnconfigure(1, weight=0)   # Scheduler
-    footer.columnconfigure(2, weight=1)   # Internet (will expand & center)
-    footer.columnconfigure(3, weight=0) 
 
+    # give each of 4 columns equal weight
+    footer.columnconfigure(0, weight=0)
+    footer.columnconfigure(1, weight=1)
+    footer.columnconfigure(2, weight=1)
+    footer.columnconfigure(3, weight=0)
+
+    # --- vars ---
+    adb_var       = tk.StringVar(value="ADB ID: --")
     quts_stat_var = tk.StringVar(value="QUTS: Checking…")
-    adb_var = tk.StringVar(
-        value="ADB ID: Connecting…"
-    )
+    center_var    = tk.StringVar(value="Internet status")
+    version_text  = f"QSTAF VERSION: {MainController.get_qstaf_version()}"
 
+    # --- widgets in desired order ---
+    adb_label = ttk.Label(footer, textvariable=adb_var)
     quts_label = tk.Label(
-    footer,
-    textvariable=quts_stat_var,
-    font=("TkDefaultFont", 10, "bold"))
-    quts_label.grid(row=0, column=0, sticky="w")
+        footer,
+        textvariable=quts_stat_var,
+        font=("TkDefaultFont", 10, "bold"),
+    )
+    internet_label = tk.Label(
+        footer,
+        textvariable=center_var,
+        font=("Segoe UI", 12),
+        fg="white",
+        anchor="center",
+    )
+    version_label = ttk.Label(footer, text=version_text)
 
-    adbId_label = ttk.Label(footer, textvariable=adb_var)
-    adbId_label.grid(row=0, column=1, sticky="w", padx=(12,0))
+    # --- grid them evenly ---
+    adb_label.grid(    row=0, column=0, sticky="w",  padx=5)
+    quts_label.grid(   row=0, column=1, sticky="ew", padx=5)
+    internet_label.grid(   row=0, column=2, sticky="ew", padx=5)
+    version_label.grid(  row=0, column=3, sticky="e",  padx=5)
 
-    def poll_adb_id():
-        try:
-            new_id = WifiController.get_adb_id()     # fast, non-blocking call
-            adb_var.set(f"ADB ID: {new_id}" if new_id else "ADB ID: --")
-        except Exception as exc:
-            print("ADB-ID poll error:", exc)
-            adb_var.set("ADB ID: --")                # show placeholder
-        finally:
-            # <-- THIS IS THE CRITICAL LINE
-            root.after(1000, poll_adb_id)            # schedule next poll in 1 s
+#     def only_if_changed(new_text):
+#         adb_var.set(new_text)
 
-    # kick-off once, everything else is automatic
-    root.after(0, poll_adb_id)
+# # this returns immediately and never blocks your mainloop
+#     MainController.start_adb_poll_thread(root, only_if_changed, interval_ms=1000)
     
                 
 
@@ -223,33 +234,21 @@ def launch_gui() -> None:
         status = dmc.get_internet_status()
         if status == 1:
             center_var.set("Internet status: GOOD")
-            center_lbl.configure(foreground="green", font=("Segoe UI", 14) )
+            internet_label.configure(foreground="green", font=("Segoe UI", 14) )
 
         elif status == 0:
             center_var.set("Internet status: DOWN")
-            center_lbl.configure(foreground="red",font=("Segoe UI", 14))
+            internet_label.configure(foreground="red",font=("Segoe UI", 14))
 
         else:
             center_var.set("Internet status")
-            center_lbl.configure(foreground="white",font=("Segoe UI", 12))
+            internet_label.configure(foreground="white",font=("Segoe UI", 12))
             
         root.after(5000, update_internet_status)
 
-    center_var = tk.StringVar(value="Internet status")
-    center_lbl = tk.Label(
-    footer,
-    textvariable=center_var,
-    font=("Segoe UI", 12),
-    fg="white",           # default color
-    anchor="center",)
-    center_lbl.grid(row=0, column=2, sticky="ew")
 
     root.after(0, update_internet_status)
 
-    version_lbl = ttk.Label(
-    footer,
-    text=f"QSTAF VERSION: {MainController.get_qstaf_version()}")
-    version_lbl.grid(row=0, column=3, sticky="e", padx=10)
 
     def _update_quts() -> None:
         running = QutsController.is_service_running("QUTS")
@@ -468,8 +467,31 @@ def launch_gui() -> None:
     pages["Wifi"] = wifi_pg
     add_nav("Set/Rename WIFI", "Wifi")
 
+        # ── Toggle Options ────────────────────────────────────────────────────
+
+    toggle_fr = ttk.LabelFrame(wifi_pg, text="Toggle Options")
+    toggle_fr.pack(fill="x", **PADDING) # type: ignore
+
+    toggle_var = tk.StringVar(value="OWRT")
+
+    # Two radiobuttons share the same StringVar, so only one can be “on” at a time
+    ttk.Radiobutton(
+        toggle_fr,
+        text="OWRT (ATT)",
+        variable=toggle_var,
+        value="OWRT",
+    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
+
+    ttk.Radiobutton(
+        toggle_fr,
+        text="RDKB (TMO)",
+        variable=toggle_var,
+        value="RDKB",
+    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
+
+
     CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select config type for RDKB TMO")
+    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select Config Type" )
     wifi_sel.pack(fill="x", **PADDING)# type: ignore
 
 
@@ -480,12 +502,12 @@ def launch_gui() -> None:
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: MainController.set_wifi_config(wifi_dd.current()),
+        command=lambda: MainController.check_wifi_type(toggle_var.get(),wifi_dd.current()),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
-    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest for RKDB")
-    test_sel.pack(fill="x", **PADDING)# type: ignore  
+    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest")
+    test_sel.pack(fill="x", **PADDING )# type: ignore  
 
 
     test_dd = ttk.Combobox(test_sel, values=CHOICES, state="readonly")
@@ -495,14 +517,14 @@ def launch_gui() -> None:
     ttk.Button(
         test_sel,
         text="Set Test SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), "_"),
+        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), "_"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
         test_sel,
         text="Set Default SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(test_dd.current(), ""),
+        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -537,7 +559,7 @@ def launch_gui() -> None:
     height=4   # ≤4 rows visible; more will scroll
     )
 
-# Headings + column options
+# Headings  column options
     tree.heading("TimeStamp",    text="TimeStamp")
     tree.heading("DL", text="DL (Mbps)")
     tree.heading("UL", text="UL (Mbps)")
@@ -548,7 +570,7 @@ def launch_gui() -> None:
     tree.column("UL",        width=80,  anchor="center")
     tree.column("adbid",     width=120, anchor="center")
 
-# Grid the tree + scrollbar
+# Grid the tree  scrollbar
     tree.grid(row=0, column=0, sticky="nsew")
     vscroll = ttk.Scrollbar(SpeedTest_table, orient="vertical", command=tree.yview)
     vscroll.grid(row=0, column=1, sticky="ns")
@@ -624,7 +646,7 @@ def launch_gui() -> None:
     )
     zip_label.pack(fill="x", **PADDING)  # type: ignore
 
-# --- Progress + Logs ----------------------------------------------------------
+# --- Progress  Logs ----------------------------------------------------------
     progress_var = tk.IntVar(value=0)
     progress_bar = ttk.Progressbar(Qstaf_install, maximum=100, variable=progress_var, mode="determinate")
     progress_bar.pack(fill="x", padx=16, pady=(0, 8))
@@ -776,5 +798,4 @@ def launch_gui() -> None:
 
 
 # ───────────────────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    MainController.run_app()
+

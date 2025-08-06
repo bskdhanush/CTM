@@ -608,7 +608,7 @@ def launch_gui() -> None:
         )
     # initial fill
     load_data_table()
-    start_config_watcher(load_data_table())
+    start_config_watcher(load_data_table)
     
 
     # ── QSTAF update page ─────────────────────────────────────────────────────

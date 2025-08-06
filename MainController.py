@@ -1,5 +1,6 @@
 # MainController.py
 from __future__ import annotations
+from gc import callbacks
 import sys
 import subprocess
 import time
@@ -300,7 +301,7 @@ def reset_start_timestamp():
         cfg[f"traffic_start_timestamp"] = "null"
         JH.save_json(cfg)
 
-def SpeedTest():
+def SpeedTest(callback=None):
     # Create CONFIG_1_ITERATION_YAML if does not exist
     try:
         if not os.path.exists(CONFIG_1_ITERATION_YAML):
@@ -354,11 +355,11 @@ def SpeedTest():
         print(f'Exception updating config yaml: {e}')
 
     try:
-        StartTestCase.start_tests(CMD_DIR_TRAFFIC, 'Run_SpeedTest.bat', 'traffic')
+        StartTestCase.start_bat_and_watch_stdout(CMD_DIR_TRAFFIC, 'Run_SpeedTest.bat',callback) #, 'traffic'
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-    get_all_speedtest_results()
+    #get_all_speedtest_results()
 
 
 def get_all_speedtest_results():

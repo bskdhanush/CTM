@@ -37,11 +37,12 @@ red_accent  = "#E95959"
 
 # ── Global toggle variable ─────────────────────────────────────────────────
 
-
+root =None
 
 
 def launch_gui() -> None:
     """Construct and run the UI."""
+    global root 
 
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
@@ -118,7 +119,8 @@ def launch_gui() -> None:
             # only react if *that* JSON file changed
             if event.src_path == str(cc.CONFIG_PATH):
                 # schedule the UI update on the Tk main thread
-                root.after(0, self.callback)
+                if root is not None:
+                    root.after(0, self.callback)
 
     def start_config_watcher(callback):
         obs = Observer()
@@ -244,7 +246,8 @@ def launch_gui() -> None:
             center_var.set("Internet status")
             internet_label.configure(foreground="white",font=("Segoe UI", 12))
             
-        root.after(5000, update_internet_status)
+        if root is not None:
+            root.after(5000, update_internet_status)
 
 
     root.after(0, update_internet_status)
@@ -256,7 +259,8 @@ def launch_gui() -> None:
 
         quts_label.config(
             fg=white_accent if running else red_accent)
-        root.after(3_000, _update_quts)
+        if root is not None:
+            root.after(3_000, _update_quts)
 
   
     _update_quts()
@@ -542,7 +546,7 @@ def launch_gui() -> None:
     ttk.Button(
         SpeedTest,
         text="Start Speed Test",
-        command=MainController.SpeedTest,
+        command=lambda:MainController.SpeedTest(load_data_table),
     ).pack(fill="x", **PADDING)# type: ignore
 
     # ── Speed Test Data table ───────────────────────────────────────────

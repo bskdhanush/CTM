@@ -22,7 +22,7 @@ def start_tests(CMD_DIR,BAT_FILE,WINDOW_TITLE):
 
 
 
-def start_bat_and_watch_stdout(cmd_dir, bat_file):
+def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
     proc = subprocess.Popen(
         ["cmd.exe", "/C", "call", bat_file],
         cwd=cmd_dir,
@@ -37,6 +37,9 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file):
             sys.stdout.write(line)  # optional mirroring
             if KEY in line:
                 MainController.get_all_speedtest_results()
+                if callback:
+                    # Schedule callback to run on main thread
+                    GUI.root.after(0, callback) # type: ignore
 
                 proc.terminate()
              

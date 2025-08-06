@@ -1,5 +1,9 @@
-import subprocess
-import os
+import os, threading, subprocess,sys
+import GUI
+import MainController
+
+
+KEY = "****** Stop Main #"
 
 def start_tests(CMD_DIR,BAT_FILE,WINDOW_TITLE):
     if not os.path.exists(os.path.join(CMD_DIR, BAT_FILE)):
@@ -18,4 +22,23 @@ def start_tests(CMD_DIR,BAT_FILE,WINDOW_TITLE):
 
 
 
+def start_bat_and_watch_stdout(cmd_dir, bat_file):
+    proc = subprocess.Popen(
+        ["cmd.exe", "/C", "call", bat_file],
+        cwd=cmd_dir,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        creationflags=subprocess.CREATE_NO_WINDOW,  # no extra console
+    )
+    def reader():
+        assert proc.stdout
+        for line in proc.stdout:
+            sys.stdout.write(line)  # optional mirroring
+            if KEY in line:
+                MainController.get_all_speedtest_results()
 
+                proc.terminate()
+             
+    threading.Thread(target=reader, daemon=True).start()
+    return proc

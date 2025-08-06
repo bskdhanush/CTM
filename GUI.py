@@ -36,7 +36,7 @@ red_accent  = "#E95959"
 
 
 # ── Global toggle variable ─────────────────────────────────────────────────
-# ----- Helper fuctions to get/set the toggle selection -----
+
 
 
 
@@ -608,6 +608,8 @@ def launch_gui() -> None:
         )
     # initial fill
     load_data_table()
+    start_config_watcher(load_data_table())
+    
 
     # ── QSTAF update page ─────────────────────────────────────────────────────
     QSTAF_pg = ttk.Frame(container)

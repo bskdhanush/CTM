@@ -551,44 +551,57 @@ def launch_gui() -> None:
 
     # ── Speed Test Data table ───────────────────────────────────────────
 
-    SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
-    SpeedTest_table.pack(fill="both", expand=True, **PADDING) # type: ignore
-
-    COLUMNS = ("TimeStamp", "DL", "UL", "adbid")
-
-    tree = ttk.Treeview(
-    SpeedTest_table,
-    columns=COLUMNS,
-    show="headings",
-    height=4   # ≤4 rows visible; more will scroll
-    )
-
-# Headings  column options
-    tree.heading("TimeStamp",    text="TimeStamp")
-    tree.heading("DL", text="DL (Mbps)")
-    tree.heading("UL", text="UL (Mbps)")
-    tree.heading("adbid",     text="ADB ID")
-
-    tree.column("TimeStamp", width=170,  anchor="center")
-    tree.column("DL",        width=80,  anchor="center")
-    tree.column("UL",        width=80,  anchor="center")
-    tree.column("adbid",     width=120, anchor="center")
-
-# Grid the tree  scrollbar
-    tree.grid(row=0, column=0, sticky="nsew")
-    vscroll = ttk.Scrollbar(SpeedTest_table, orient="vertical", command=tree.yview)
-    vscroll.grid(row=0, column=1, sticky="ns")
-    tree.configure(yscrollcommand=vscroll.set)
-
     
+    SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
+    SpeedTest_table.pack(fill="both", expand=True, **PADDING)  # type: ignore
+
+    # Make the LabelFrame act like a grid container
+    SpeedTest_table.rowconfigure(0, weight=0)   # table row grows
     SpeedTest_table.columnconfigure(0, weight=1)
 
+    COLUMNS = ("DL", "UL", "Band Info","Location","TimeStamp","adbid")  # include Location
 
+    tree = ttk.Treeview(
+        SpeedTest_table,
+        columns=COLUMNS,
+        show="headings",
+        height=4,  # visible rows
+    )
+
+    # Headings
+    tree.heading("TimeStamp", text="TimeStamp")
+    tree.heading("DL",        text="DL (Mbps)")
+    tree.heading("UL",        text="UL (Mbps)")
+    tree.heading("adbid",     text="ADB ID")
+    tree.heading("Location",    text="Location")
+    tree.heading("Band Info",    text="Band Info")
+
+    # Column widths; set some stretch=False so total width exceeds widget -> enables X scroll
+    tree.column("TimeStamp", width=170, anchor="center", stretch=False)
+    tree.column("DL",        width=120, anchor="center", stretch=False)
+    tree.column("UL",        width=120, anchor="center", stretch=False)
+    tree.column("adbid",     width=140, anchor="center", stretch=False)
+    tree.column("Location",    width=180, anchor="center", stretch=True)
+    tree.column("Band Info",    width=180, anchor="center", stretch=True)
+
+    # Scrollbars
+    vscroll = ttk.Scrollbar(SpeedTest_table, orient="vertical",   command=tree.yview)
+    hsb     = ttk.Scrollbar(SpeedTest_table, orient="horizontal", command=tree.xview)
+
+    # Wire scrollbars to the tree
+    tree.configure(yscrollcommand=vscroll.set, xscrollcommand=hsb.set)
+
+    # Layout (tree row 0, hsb row 1, button row 2; vscroll spans rows 0-1)
+    tree.grid(row=0, column=0, sticky="nsew")
+    vscroll.grid(row=0, column=1, sticky="ns", rowspan=2)
+    hsb.grid(row=1, column=0, sticky="ew")
+
+    # Refresh button BELOW the hscrollbar (row 2)
     ttk.Button(
         SpeedTest_table,
         text="Refresh Data",
-        command=lambda:(MainController.get_all_speedtest_results(),load_data_table()),
-    ).grid(row=1, column=0, sticky="ew", padx=10, pady=(6, 0))
+        command=lambda: (MainController.get_all_speedtest_results(), load_data_table()),
+    ).grid(row=2, column=0, sticky="ew", padx=10, pady=(6, 0))
 
 
 
@@ -604,10 +617,13 @@ def launch_gui() -> None:
             "",
             "end",
             values=(
-                row.get("TimeStamp", ""),
+                
                 row.get("DL", ""),
                 row.get("UL", ""),
-                row.get("adbid", "")
+                row.get("Band Info", ""),
+                row.get("Location", ""), 
+                row.get("TimeStamp", ""),
+                row.get("adbid", "")  # add Band Info column
             )
         )
     # initial fill

@@ -1,6 +1,7 @@
 import time
 import subprocess
 import re
+import os
 
 adb_id = None
 
@@ -108,8 +109,52 @@ def connectBackhaul():
         "dmcli eRT setv Device.Cellular.X_QCOM.AutoConnect bool true"
     ]
     run_dmcli_commands(commands)
-    
-def update_3_slo_config(Config):
+
+def update_3_slo_config_owrt(Config):
+    ssid_suffix = ''
+    json_content = ''
+    adb_id = get_adb_id()
+    if not adb_id:
+        adb_id = ''
+    if Config != '':
+        ssid_suffix = '_Test'
+
+    if not os.path.exists(f'config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json'):
+        with open('config/OWRT_TC_ondevice_3slo.json', 'r') as f:
+            json_content = f.read()
+        updated_json_content = json_content.replace('_SLO', f'_SLO_{adb_id}{ssid_suffix}')
+        with open(f'config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json', 'w') as f:
+            f.write(updated_json_content)
+
+    run_command("adb root")
+    run_command(f"adb push config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    run_command("adb reboot")
+
+def update_2g5g_mlo_config_owrt(Config):
+    ssid_suffix = ''
+    json_content = ''
+    adb_id = get_adb_id()
+    if not adb_id:
+        adb_id = ''
+    if Config != '':
+        ssid_suffix = '_Test'
+
+    if not os.path.exists(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json'):
+        with open('config/OWRT_TC_ondevice_25mlo.json', 'r') as f:
+            json_content = f.read()
+        updated_json_content = json_content.replace('_MLO', f'_MLO_{adb_id}{ssid_suffix}')
+        with open(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json', 'w') as f:
+            f.write(updated_json_content)
+
+    run_command("adb root")
+    run_command(f"adb push config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    run_command("adb reboot")
+
+def update_3_mlo_config_owrt(Config):
+    pass
+
+
+def update_3_slo_config_rdkb(Config):
     ssid_suffix =''
     adb_id = get_adb_id()
     if Config!="":
@@ -137,7 +182,7 @@ def update_3_slo_config(Config):
     ]
     run_dmcli_commands(commands)
 
-def update_2g_slo_5g6g_mlo_config(Config):
+def update_2g_slo_5g6g_mlo_config_rdkb(Config):
     ssid_suffix =''
     adb_id = get_adb_id()
     if Config!="":
@@ -156,7 +201,7 @@ def update_2g_slo_5g6g_mlo_config(Config):
     ]
     run_dmcli_commands(commands)
 
-def setpassword_bandwiths():
+def setpassword_bandwidths_rdkb():
     commands = [
         'dmcli eRT setv Device.WiFi.AccessPoint.1.Security.SAEPassphrase string "12345678"',
         'dmcli eRT setv Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting bool true',
@@ -190,21 +235,30 @@ def update_6g_slo_2g5g_mlo_config():
 def update_3_mlo_config():
     pass
 
-def update_cpe_wifi_config(wifi_config,config):
+def update_cpe_wifi_config(wifi_config, toggle_var, config):
     # Read Meta
     try:
         meta = get_meta_build_info()
     except Exception as e:
         raise Exception(e)
 
-    if meta and 'LE.2.2' in meta:
+    # if meta and 'LE.2.2' in meta:
+    if toggle_var == 'RDKB':
         # RDKB, use dmcli commands
 
         if wifi_config == 0:
-            update_3_slo_config(config)
+            update_3_slo_config_rdkb(config)
         elif wifi_config == 1:
-            update_2g_slo_5g6g_mlo_config(config)
+            update_2g_slo_5g6g_mlo_config_rdkb(config)
+        elif wifi_config == 2:
+            update_3_mlo_config_rdkb(config)
 
-    elif meta and 'LE.1.2' in meta:
+    # elif meta and 'LE.1.2' in meta:
+    elif toggle_var == 'OWRT':
         # LE.1.2 - QCMAP_CLI
-        pass
+        if wifi_config == 0:
+            update_3_slo_config_owrt(config)
+        elif wifi_config == 1:
+            update_2g5g_mlo_config_owrt(config)
+        elif wifi_config == 2:
+            update_3_mlo_config_owrt(config)

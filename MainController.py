@@ -41,8 +41,7 @@ RUN_SPEEDTEST_BAT = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows\Run_SpeedTest.
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 MODES = ("control", "traffic")
 DEFAULT_TIMER_HOURS = 6
-TRAFFIC_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy\traffic'
-CONTROL_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy\control'
+LOG_DIR = r'C:\QSTAF\CTM_logs'
 
 # CrashCountController.run_watch()
 
@@ -365,7 +364,7 @@ def SpeedTest(callback=None):
 
 
 def get_all_speedtest_results():
-    speedtest_csvs = glob.glob(TRAFFIC_OUTPUT_BASE + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+    speedtest_csvs = glob.glob(LOG_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
     df_csv = pd.DataFrame()
 
     for speedtest_csv in speedtest_csvs:
@@ -375,7 +374,7 @@ def get_all_speedtest_results():
         df_csv = df_csv.head(10)
     speedtest_list = []
 
-    dl_stats_csvs = glob.glob(CONTROL_OUTPUT_BASE + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+    dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
     dl_stats_df = pd.DataFrame()
     for dl_stats_csv in dl_stats_csvs:
         try:
@@ -391,7 +390,7 @@ def get_all_speedtest_results():
     dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 100000).gt(0).cumsum() - 1
     rfband_df = pd.concat([dl_stats_df['TIMESTAMP'], dl_stats_df.groupby('INDEX')['BAND'].transform(lambda x: '+'.join(x))], axis=1)
 
-    gps_monitor_csvs = glob.glob(CONTROL_OUTPUT_BASE + '\\**\\*qstaf_gps_monitor.csv', recursive=True)
+    gps_monitor_csvs = glob.glob(LOG_DIR + '\\**\\*qstaf_gps_monitor.csv', recursive=True)
     gps_df = pd.DataFrame()
     for gps_monitor_csv in gps_monitor_csvs:
         try:
@@ -496,6 +495,7 @@ def start_adb_track_thread(root, update_fn, *_, **__):
 
 
 def check_wifi_type(toggle_var,wifi_config):
+    print(wifi_config)
     set_wifi_config(wifi_config, toggle_var)
     # if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
     #     print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")

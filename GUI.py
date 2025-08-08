@@ -474,9 +474,15 @@ def launch_gui() -> None:
     toggle_fr = ttk.LabelFrame(wifi_pg, text="Toggle Options")
     toggle_fr.pack(fill="x", **PADDING) # type: ignore
 
+    
+    OWRT_CHOICES = ("3 SLO", "2G-5G MLO", "3 MLO")
+    RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
+
     toggle_var = tk.StringVar(value="OWRT")
 
     # Two radiobuttons share the same StringVar, so only one can be “on” at a time
+
+
     ttk.Radiobutton(
         toggle_fr,
         text="OWRT (ATT)",
@@ -492,19 +498,30 @@ def launch_gui() -> None:
     ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
 
 
-    CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
+
     wifi_sel = ttk.LabelFrame(wifi_pg, text="Select Config Type" )
     wifi_sel.pack(fill="x", **PADDING)# type: ignore
 
-
-    wifi_dd = ttk.Combobox(wifi_sel, values=CHOICES, state="readonly")
-    wifi_dd.current(0)
+    wifi_dd = ttk.Combobox(wifi_sel, state="readonly")
     wifi_dd.pack(padx=20, pady=10)
+
+    def _update_choices(*_):
+        choices = OWRT_CHOICES if toggle_var.get() == "OWRT" else RDKB_CHOICES
+        wifi_dd.configure(values=choices)
+        # Set current value to first choice if not in choices
+        cur = wifi_dd.get()
+        wifi_dd.set(cur if cur in choices and cur else choices[0])
+
+    toggle_var.trace_add("write", _update_choices)
+    _update_choices() 
+
+
+   
 
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: MainController.check_wifi_type(toggle_var.get(),wifi_dd.current()),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -512,21 +529,17 @@ def launch_gui() -> None:
     test_sel.pack(fill="x", **PADDING )# type: ignore  
 
 
-    test_dd = ttk.Combobox(test_sel, values=CHOICES, state="readonly")
-    test_dd.current(0)
-    test_dd.pack(padx=20, pady=10)
-
     ttk.Button(
         test_sel,
         text="Set Test SSID",
-        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), "_"),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "_"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
         test_sel,
         text="Set Default SSID",
-        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 

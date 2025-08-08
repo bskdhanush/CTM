@@ -149,13 +149,6 @@ def restart_quts_pcat_qxdm():
         print(msg)
     QutsController.restart_quts_pcat_qxdm(callback=show_status)
     
-def set_wifi_config(dropDown_value, toggle_var):
-    # print(dropDown_value)
-    # WifiController.connectBackhaul()
-    WifiController.update_cpe_wifi_config(dropDown_value, toggle_var, "")
-    if toggle_var == 'RDKB':
-        WifiController.setpassword_bandwidths_rdkb()
-
 
 def check_restart_timer():
     """
@@ -375,20 +368,23 @@ def get_all_speedtest_results():
     speedtest_list = []
 
     dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+    
     dl_stats_df = pd.DataFrame()
+    rfband_df = pd.DataFrame()
     for dl_stats_csv in dl_stats_csvs:
         try:
             dl_stats_df = pd.concat([dl_stats_df, pd.read_csv(dl_stats_csv)], axis=0)
         except Exception as e:
             print(f'Exception during dl_stats_df: {e}')
-    dl_stats_df = dl_stats_df.sort_values(by=['TIMESTAMP'], ascending=False)
+    if not dl_stats_df.empty:
+        dl_stats_df = dl_stats_df.sort_values(by=['TIMESTAMP'], ascending=False)
 
-    dl_stats_df['DEVICE_TIMESTAMP'] = dl_stats_df['DEVICE_TIMESTAMP'].apply(lambda x: pd.to_datetime(x, format='%Y/%m/%d %H:%M:%S.%f'))
-    dl_stats_df['TIME_DIFF'] = dl_stats_df['DEVICE_TIMESTAMP'] - dl_stats_df['DEVICE_TIMESTAMP'].shift(-1)
-    dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
+        dl_stats_df['DEVICE_TIMESTAMP'] = dl_stats_df['DEVICE_TIMESTAMP'].apply(lambda x: pd.to_datetime(x, format='%Y/%m/%d %H:%M:%S.%f'))
+        dl_stats_df['TIME_DIFF'] = dl_stats_df['DEVICE_TIMESTAMP'] - dl_stats_df['DEVICE_TIMESTAMP'].shift(-1)
+        dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
 
-    dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 100000).gt(0).cumsum() - 1
-    rfband_df = pd.concat([dl_stats_df['TIMESTAMP'], dl_stats_df.groupby('INDEX')['BAND'].transform(lambda x: '+'.join(x))], axis=1)
+        dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 100000).gt(0).cumsum() - 1
+        rfband_df = pd.concat([dl_stats_df['TIMESTAMP'], dl_stats_df.groupby('INDEX')['BAND'].transform(lambda x: '+'.join(x))], axis=1)
 
     gps_monitor_csvs = glob.glob(LOG_DIR + '\\**\\*qstaf_gps_monitor.csv', recursive=True)
     gps_df = pd.DataFrame()
@@ -398,10 +394,12 @@ def get_all_speedtest_results():
             gps_df = pd.concat([gps_df, pd.read_csv(gps_monitor_csv, header=None, names=['TIMESTAMP', 'LATITUDE', 'LONGITUDE', 'ALTITUDE'])], ignore_index=True, axis=0)
         except Exception as e:
             print(f'Exception during gps_df: {e}')
-
-    gps_df = gps_df.sort_values(by=['TIMESTAMP'], ascending=False)
+    if not gps_df.empty:
+        gps_df = gps_df.sort_values(by=['TIMESTAMP'], ascending=False)
     time_window = pd.Timedelta(minutes=5)
+
     for i in range(len(df_csv)):
+
         speedtest_dict = {
             'DL': df_csv['download_speed_Mbps'].iloc[i],
             'UL': df_csv['upload_speed_Mbps'].iloc[i],
@@ -409,32 +407,36 @@ def get_all_speedtest_results():
             'ADBID': df_csv['Metadata_device'].iloc[i],
             'TIMESTAMP': df_csv['end_time'].iloc[i]
         }
+        if not gps_df.empty:
+            gps_df_filtered = gps_df[(pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') >= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') <= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
 
-        gps_df_filtered = gps_df[(pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') >= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') <= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
-
-        if not gps_df_filtered.empty:
-            closest = gps_df_filtered.loc[
-                (pd.to_datetime(gps_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') - pd.to_datetime(
-                    speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
-            speedtest_dict['LOCATION'] = f'{closest['LATITUDE'].replace('latitude: ', '')}, {closest['LONGITUDE'].replace('longitude: ', '')}'
+            if not gps_df_filtered.empty:
+                closest = gps_df_filtered.loc[
+                    (pd.to_datetime(gps_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') - pd.to_datetime(
+                        speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
+                speedtest_dict['LOCATION'] = f'{closest['LATITUDE'].replace('latitude: ', '')}, {closest['LONGITUDE'].replace('longitude: ', '')}'
+            else:
+                speedtest_dict['LOCATION'] = 'UNKNOWN'
         else:
             speedtest_dict['LOCATION'] = 'UNKNOWN'
 
-        rfband_df_filtered = rfband_df[
-            (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') >= pd.to_datetime(
-                speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (
-                    pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') <= pd.to_datetime(
-                speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
+        if not rfband_df.empty:
+            rfband_df_filtered = rfband_df[
+                (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') >= pd.to_datetime(
+                    speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (
+                        pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') <= pd.to_datetime(
+                    speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
 
-        if not rfband_df_filtered.empty:
-            closest = rfband_df_filtered.loc[
-                (pd.to_datetime(rfband_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') - pd.to_datetime(
-                    speedtest_dict['TIMESTAMP'],
-                    format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
-            speedtest_dict['BAND'] = closest['BAND']
+            if not rfband_df_filtered.empty:
+                closest = rfband_df_filtered.loc[
+                    (pd.to_datetime(rfband_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') - pd.to_datetime(
+                        speedtest_dict['TIMESTAMP'],
+                        format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
+                speedtest_dict['BAND'] = closest['BAND']
+            else:
+                speedtest_dict['BAND'] = 'UNKNOWN'
         else:
             speedtest_dict['BAND'] = 'UNKNOWN'
-
         speedtest_list.append(speedtest_dict)
 
     cfg = JH.load_json()
@@ -484,7 +486,7 @@ def start_adb_track_thread(root, update_fn, *_, **__):
             if len(parts) < 2:
                 continue
             serial, state = parts[0], parts[1]
-            display = f"ADB ID: {serial}" if state == "device" else "ADB ID: --"
+            display = f"ADB ID: {str(serial)[4:]}" if state == "device" and serial else "ADB ID: --"
             if display != last_display:
                 root.after(0, update_fn, display)
                 last_display = display
@@ -494,36 +496,43 @@ def start_adb_track_thread(root, update_fn, *_, **__):
     threading.Thread(target=worker, daemon=True).start()
 
 
-def check_wifi_type(toggle_var,wifi_config):
-    print(wifi_config)
-    set_wifi_config(wifi_config, toggle_var)
-    # if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
-    #     print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
-    #     #method call here
-    # elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO
-    #     print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
-    # elif toggle_var == "RDKB":
-    #     print(f"RDKB selected {toggle_var, wifi_config}")
-    #     set_wifi_config(wifi_config)
+# def check_wifi_type(toggle_var,wifi_config):
+#     #set_wifi_config(wifi_config, toggle_var)
+#     if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
+#         print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
+#         WifiController.update_cpe_wifi_config(toggle_var,wifi_config,"") #test SSID
+#          #method call here
+#     elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO
+#         print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
+#         WifiController.update_cpe_wifi_config(toggle_var,wifi_config,"") #test SSID
+#     elif toggle_var == "RDKB":
+#         print(f"RDKB selected {toggle_var, wifi_config}")
+#         WifiController.connectBackhaul()
+#         WifiController.setpassword_bandwidths_rdkb()
          
 
-def check_Rename_SSID(toggle_var,wifi_config,rename_type):
-    if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
-        if rename_type == "_":  #test SSID
-            print(f"OWRT 3 SLO selected with test SSID")
-        else:
-            print(f"OWRT 3 SLO selected with default SSID")
-        #method call here
-    elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
-        if rename_type == "_":  #test SSID
-            print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
-        else:
-            print(f"OWRT 2G SLO + 5G-6G MLO with default SSID")
-    elif toggle_var == "RDKB":
-        if rename_type == "_":  #test SSID
-            WifiController.update_cpe_wifi_config(wifi_config, "_")
-        else:
-            WifiController.update_cpe_wifi_config(wifi_config, "")
+# def check_Rename_SSID(toggle_var,wifi_config,rename_type):
+#     if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
+#         if rename_type == "_":  #test SSID
+#             print(f"OWRT 3 SLO selected with test SSID")
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
+#         else:
+#             print(f"OWRT 3 SLO selected with default SSID")
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
+#         #method call here
+#     elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
+#         if rename_type == "_":  #test SSID
+#             print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
+#         else:
+#             print(f"OWRT 2G SLO + 5G-6G MLO with default SSID")
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
+
+#     elif toggle_var == "RDKB":
+#         if rename_type == "_":  #test SSID
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
+#         else:
+#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
        
         
 

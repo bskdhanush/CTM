@@ -145,13 +145,15 @@ def update_2g5g_mlo_config_owrt(Config):
         updated_json_content = json_content.replace('_MLO', f'_MLO_{adb_id}{ssid_suffix}')
         with open(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json', 'w') as f:
             f.write(updated_json_content)
-
+    
     run_command("adb root")
     run_command(f"adb push config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    print("Pushed OWRT_TC_ondevice_25mlo.json")
     run_command("adb reboot")
+    print("done")
 
 def update_3_mlo_config_owrt(Config):
-    pass
+    print("OWRT 3 MLO selected with test SSID")
 
 
 def update_3_slo_config_rdkb(Config):
@@ -181,6 +183,7 @@ def update_3_slo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
+    setpassword_bandwidths_rdkb()
 
 def update_2g_slo_5g6g_mlo_config_rdkb(Config):
     ssid_suffix =''
@@ -200,6 +203,7 @@ def update_2g_slo_5g6g_mlo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
+    setpassword_bandwidths_rdkb()
 
 def setpassword_bandwidths_rdkb():
     commands = [
@@ -235,7 +239,7 @@ def update_6g_slo_2g5g_mlo_config():
 def update_3_mlo_config():
     pass
 
-def update_cpe_wifi_config(wifi_config, toggle_var, config):
+def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
     try:
         meta = get_meta_build_info()
@@ -251,7 +255,8 @@ def update_cpe_wifi_config(wifi_config, toggle_var, config):
         elif wifi_config == 1:
             update_2g_slo_5g6g_mlo_config_rdkb(config)
         elif wifi_config == 2:
-            update_3_mlo_config_rdkb(config)
+            #update_3_mlo_config_rdkb(config)
+            pass
 
     # elif meta and 'LE.1.2' in meta:
     elif toggle_var == 'OWRT':

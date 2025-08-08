@@ -44,4 +44,4 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
                 proc.terminate()
              
     threading.Thread(target=reader, daemon=True).start()
-    return proc
+

@@ -1,0 +1,109 @@
+{
+    "0": {
+        "command": "qmiBasedAirplaneModeOff",
+        "input": {
+            "start_delay": 0,
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "0:1"
+            }
+        }
+    },
+    "1": {
+        "command": "setAutoConnect",
+        "input": {
+            "auto_connect_flag": true,
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "5:10"
+            }
+        }
+    },
+    "2": {
+        "command": "setLanConfig",
+        "input": {
+            "gw_ip_input_addr": "192.168.224.2",
+            "netmask_input_addr": "255.255.252.0",
+            "enable_dhcp_input_val": "1",
+            "dhcp_start_ip_input_addr": "192.168.224.100",
+            "dhcp_end_ip_input_addr": "192.168.227.99",
+            "lease_time_input_sec": "43200",
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "10:15"
+            }
+        }
+    },
+    "3": {
+        "command": "configEnable3SoftAP",
+        "input": {
+            "primary_ap": {
+                "band": 2,
+                "ssid": "QSTAF_2G_SLO_37ebcaef_Test",
+                "encryption": "ccmp",
+                "password": "12345678",
+                "wpa3_flag": true
+            },
+            "guest_ap1": {
+                "set_access_profile": true,
+                "access_profile": "full_access",
+                "band": 5,
+                "ssid": "QSTAF_5G_SLO_37ebcaef_Test",
+                "encryption": "ccmp",
+                "password": "12345678",
+                "wpa3_flag": true
+            },
+            "guest_ap2": {
+                "set_access_profile": true,
+                "access_profile": "full_access",
+                "band": 6,
+                "ssid": "QSTAF_6G_SLO_37ebcaef_Test",
+                "encryption": "ccmp",
+                "password": "12345678",
+                "wpa3_flag": true
+            },
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "2:8"
+            }
+        }
+    },
+    "4": {
+        "command": "ping",
+        "input": {
+            "ping_server_ip": "8.8.8.8",
+            "ping_payload_bytes": "66",
+            "ping_timeout": "100",
+            "ping_iterations": "5",
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "1:2"
+            }
+        }
+    },
+    "5": {
+        "command": "ftpUpload",
+        "input": {
+            "ftp_server_config": "ftp_server1",
+            "local_file_path": "/data/dapp/ftpupload.txt",
+            "remote_file_path": "/Uploads/ftpupload.txt",
+            "server": "34.203.229.42",
+            "user": "user1",
+            "password": "QualFTP001",
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "8:12"
+            }
+        }
+    },
+    "6": {
+        "command": "customSleep",
+        "input": {
+            "duration": 10,
+            "Metadata": {
+                "vpid": 0,
+                "start_delay": "1:2"
+            }
+        }
+    }
+}

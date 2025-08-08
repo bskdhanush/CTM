@@ -228,8 +228,6 @@ def launch_gui() -> None:
 
 # # this returns immediately and never blocks your mainloop
     MainController.start_adb_track_thread(root, update_label)
-    
-                
 
 
     def update_internet_status():
@@ -240,11 +238,11 @@ def launch_gui() -> None:
 
         elif status == 0:
             center_var.set("Internet status: DOWN")
-            internet_label.configure(foreground="red",font=("Segoe UI", 14))
+            internet_label.configure(foreground="red", font=("Segoe UI", 14))
 
         else:
             center_var.set("Internet status")
-            internet_label.configure(foreground="white",font=("Segoe UI", 12))
+            internet_label.configure(foreground="white", font=("Segoe UI", 12))
             
         if root is not None:
             root.after(5000, update_internet_status)
@@ -532,12 +530,11 @@ def launch_gui() -> None:
     ).pack(fill="x", **PADDING)# type: ignore
 
 
-
     # ── TESTING page ─────────────────────────────────────────────────────
     test_pg = ttk.Frame(container)
     test_pg.grid(row=0, column=0, sticky="nsew")
     pages["Testing"] = test_pg
-    add_nav("Speed TEST", "Testing")
+    add_nav("SpeedTest", "Testing")
 
     
     SpeedTest = ttk.LabelFrame(test_pg, text="Start speed test")
@@ -550,7 +547,6 @@ def launch_gui() -> None:
     ).pack(fill="x", **PADDING)# type: ignore
 
     # ── Speed Test Data table ───────────────────────────────────────────
-
     
     SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
     SpeedTest_table.pack(fill="both", expand=True, **PADDING)  # type: ignore
@@ -604,9 +600,6 @@ def launch_gui() -> None:
     ).grid(row=2, column=0, sticky="ew", padx=10, pady=(6, 0))
 
 
-
-
-
     def load_data_table():
         """Read JSON list and (re)populate the table."""
         data = JH.load_json().get("SpeedTestData", []) 
@@ -617,18 +610,16 @@ def launch_gui() -> None:
             "",
             "end",
             values=(
-                
                 row.get("DL", ""),
                 row.get("UL", ""),
-                row.get("Band Info", ""),
-                row.get("Location", ""), 
-                row.get("TimeStamp", ""),
-                row.get("adbid", "")  # add Band Info column
+                row.get("BAND", ""),
+                row.get("LOCATION", ""),
+                row.get("TIMESTAMP", ""),
+                row.get("ADBID", "")
             )
         )
     # initial fill
     load_data_table()
-    
     
 
     # ── QSTAF update page ─────────────────────────────────────────────────────
@@ -766,8 +757,6 @@ def launch_gui() -> None:
 
     ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
     .pack(side="right")
-   
-
 
 
     # ── DATA MONITOR page ───────────────────────────────────────────────

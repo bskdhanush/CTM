@@ -279,7 +279,7 @@ def get_rfband_df(df=None):
         df2 = pd.concat([df2_l, df2_n], axis=0).dropna()
         df2.sort_values(by=['TIMESTAMP'])
         df2['ORIG_TIMESTAMP'] = df2['TIMESTAMP']
-        df2['TIMESTAMP'] = pd.to_datetime(df2['TIMESTAMP']).dt.strftime('%H:%M:%S')
+        df2['TIMESTAMP'] = pd.to_datetime(df2['TIMESTAMP'], format='%H:%M:%S').dt.strftime('%H:%M:%S')
 
         df2["BAND"] = (df2['LTE_BANDS'] + '+' + df2["NR_CC_BAND"]).apply(lambda x: x.strip('+'))
         df2["BAND"] = df2["BAND"].replace(r'(N\d{3})(\+N\d{3}){7}', r"\1" + 'M', regex=True)

@@ -504,7 +504,7 @@ def launch_gui() -> None:
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -512,21 +512,17 @@ def launch_gui() -> None:
     test_sel.pack(fill="x", **PADDING )# type: ignore  
 
 
-    test_dd = ttk.Combobox(test_sel, values=CHOICES, state="readonly")
-    test_dd.current(0)
-    test_dd.pack(padx=20, pady=10)
-
     ttk.Button(
         test_sel,
         text="Set Test SSID",
-        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), "_"),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "_"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
         test_sel,
         text="Set Default SSID",
-        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 

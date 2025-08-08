@@ -183,6 +183,7 @@ def update_3_slo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
+    setpassword_bandwidths_rdkb()
 
 def update_2g_slo_5g6g_mlo_config_rdkb(Config):
     ssid_suffix =''
@@ -202,6 +203,7 @@ def update_2g_slo_5g6g_mlo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
+    setpassword_bandwidths_rdkb()
 
 def setpassword_bandwidths_rdkb():
     commands = [
@@ -237,32 +239,31 @@ def update_6g_slo_2g5g_mlo_config():
 def update_3_mlo_config():
     pass
 
-def update_cpe_wifi_config(wifi_config, toggle_var, config):
+def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
     try:
         meta = get_meta_build_info()
     except Exception as e:
         raise Exception(e)
-    print(toggle_var, wifi_config, config  )
+
     # if meta and 'LE.2.2' in meta:
-    if wifi_config == 'RDKB':
+    if toggle_var == 'RDKB':
         # RDKB, use dmcli commands
 
-        if toggle_var == 0:
+        if wifi_config == 0:
             update_3_slo_config_rdkb(config)
-        elif toggle_var == 1:
+        elif wifi_config == 1:
             update_2g_slo_5g6g_mlo_config_rdkb(config)
-        elif toggle_var == 2:
+        elif wifi_config == 2:
             #update_3_mlo_config_rdkb(config)
             pass
 
     # elif meta and 'LE.1.2' in meta:
-    elif wifi_config == 'OWRT':
+    elif toggle_var == 'OWRT':
         # LE.1.2 - QCMAP_CLI
-        if toggle_var == 0:
+        if wifi_config == 0:
             update_3_slo_config_owrt(config)
-        elif toggle_var == 1:
-            print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
+        elif wifi_config == 1:
             update_2g5g_mlo_config_owrt(config)
-        elif toggle_var == 2:
+        elif wifi_config == 2:
             update_3_mlo_config_owrt(config)

@@ -251,7 +251,8 @@ def update_cpe_wifi_config(wifi_config, toggle_var, config):
         elif wifi_config == 1:
             update_2g_slo_5g6g_mlo_config_rdkb(config)
         elif wifi_config == 2:
-            update_3_mlo_config_rdkb(config)
+            #update_3_mlo_config_rdkb(config)
+            pass
 
     # elif meta and 'LE.1.2' in meta:
     elif toggle_var == 'OWRT':

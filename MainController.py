@@ -486,7 +486,7 @@ def start_adb_track_thread(root, update_fn, *_, **__):
             if len(parts) < 2:
                 continue
             serial, state = parts[0], parts[1]
-            display = f"ADB ID: {serial}" if state == "device" else "ADB ID: --"
+            display = f"ADB ID: {str(serial)[4:]}" if state == "device" and serial else "ADB ID: --"
             if display != last_display:
                 root.after(0, update_fn, display)
                 last_display = display

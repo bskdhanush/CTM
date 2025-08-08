@@ -153,7 +153,7 @@ def update_2g5g_mlo_config_owrt(Config):
     print("done")
 
 def update_3_mlo_config_owrt(Config):
-    pass
+    print("OWRT 3 MLO selected with test SSID")
 
 
 def update_3_slo_config_rdkb(Config):

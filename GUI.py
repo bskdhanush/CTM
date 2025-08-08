@@ -504,7 +504,7 @@ def launch_gui() -> None:
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: MainController.check_wifi_type(toggle_var.get(),wifi_dd.current()),
+        command=lambda: MainController.check_Rename_SSID(toggle_var.get(),test_dd.current(), ""),
     ).pack(fill="x", **PADDING)# type: ignore
 
 

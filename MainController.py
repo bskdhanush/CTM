@@ -149,13 +149,6 @@ def restart_quts_pcat_qxdm():
         print(msg)
     QutsController.restart_quts_pcat_qxdm(callback=show_status)
     
-def set_wifi_config(dropDown_value, toggle_var):
-    # print(dropDown_value)
-    # WifiController.connectBackhaul()
-    WifiController.update_cpe_wifi_config(dropDown_value, toggle_var, "")
-    if toggle_var == 'RDKB':
-        WifiController.setpassword_bandwidths_rdkb()
-
 
 def check_restart_timer():
     """
@@ -504,36 +497,41 @@ def start_adb_track_thread(root, update_fn, *_, **__):
 
 
 def check_wifi_type(toggle_var,wifi_config):
-    print(wifi_config)
-    set_wifi_config(wifi_config, toggle_var)
-    # if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
-    #     print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
-    #     #method call here
-    # elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO
-    #     print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
-    # elif toggle_var == "RDKB":
-    #     print(f"RDKB selected {toggle_var, wifi_config}")
-    #     set_wifi_config(wifi_config)
+    #set_wifi_config(wifi_config, toggle_var)
+    if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
+        print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
+        WifiController.update_cpe_wifi_config(toggle_var,wifi_config,"") #test SSID
+         #method call here
+    elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO
+         print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
+    elif toggle_var == "RDKB":
+        print(f"RDKB selected {toggle_var, wifi_config}")
+        WifiController.connectBackhaul()
+        WifiController.setpassword_bandwidths_rdkb()
          
 
 def check_Rename_SSID(toggle_var,wifi_config,rename_type):
     if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
         if rename_type == "_":  #test SSID
             print(f"OWRT 3 SLO selected with test SSID")
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
         else:
             print(f"OWRT 3 SLO selected with default SSID")
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
         #method call here
     elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
         if rename_type == "_":  #test SSID
             print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
         else:
             print(f"OWRT 2G SLO + 5G-6G MLO with default SSID")
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
+
     elif toggle_var == "RDKB":
-        pass
-        # if rename_type == "_":  #test SSID
-        #     #WifiController.update_cpe_wifi_config(wifi_config, "_")
-        # else:
-        #     #WifiController.update_cpe_wifi_config(wifi_config, "")
+        if rename_type == "_":  #test SSID
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
+        else:
+            WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
        
         
 

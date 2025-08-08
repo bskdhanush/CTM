@@ -145,10 +145,12 @@ def update_2g5g_mlo_config_owrt(Config):
         updated_json_content = json_content.replace('_MLO', f'_MLO_{adb_id}{ssid_suffix}')
         with open(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json', 'w') as f:
             f.write(updated_json_content)
-
+    
     run_command("adb root")
     run_command(f"adb push config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    print("Pushed OWRT_TC_ondevice_25mlo.json")
     run_command("adb reboot")
+    print("done")
 
 def update_3_mlo_config_owrt(Config):
     pass
@@ -241,25 +243,26 @@ def update_cpe_wifi_config(wifi_config, toggle_var, config):
         meta = get_meta_build_info()
     except Exception as e:
         raise Exception(e)
-
+    print(toggle_var, wifi_config, config  )
     # if meta and 'LE.2.2' in meta:
-    if toggle_var == 'RDKB':
+    if wifi_config == 'RDKB':
         # RDKB, use dmcli commands
 
-        if wifi_config == 0:
+        if toggle_var == 0:
             update_3_slo_config_rdkb(config)
-        elif wifi_config == 1:
+        elif toggle_var == 1:
             update_2g_slo_5g6g_mlo_config_rdkb(config)
-        elif wifi_config == 2:
+        elif toggle_var == 2:
             #update_3_mlo_config_rdkb(config)
             pass
 
     # elif meta and 'LE.1.2' in meta:
-    elif toggle_var == 'OWRT':
+    elif wifi_config == 'OWRT':
         # LE.1.2 - QCMAP_CLI
-        if wifi_config == 0:
+        if toggle_var == 0:
             update_3_slo_config_owrt(config)
-        elif wifi_config == 1:
+        elif toggle_var == 1:
+            print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
             update_2g5g_mlo_config_owrt(config)
-        elif wifi_config == 2:
+        elif toggle_var == 2:
             update_3_mlo_config_owrt(config)

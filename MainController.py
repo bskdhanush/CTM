@@ -353,7 +353,10 @@ def SpeedTest(callback=None):
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-    get_all_speedtest_results()
+    try:
+        get_all_speedtest_results()
+    except Exception as e:
+        print(f'Exception during get_all_speedtest_results: {e}')
 
 
 def get_all_speedtest_results():

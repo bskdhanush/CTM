@@ -2,7 +2,10 @@ from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
 import  datetime as dt
+import os
 from functools import partial
+import json
+from pathlib import Path
 import tkinter as tk
 from tkinter import ttk ,filedialog, messagebox
 from tkinter import filedialog
@@ -16,6 +19,7 @@ import time
 import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
+import ADBController
 import MainController
 import WifiController
 import QutsController
@@ -111,21 +115,25 @@ def launch_gui() -> None:
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
     # ­—----- start the app_JSON watcher ­-----—
-    class ConfigHandler(FileSystemEventHandler):
-        def __init__(self, callback):
+    class JsonFileWatcher(FileSystemEventHandler):
+        def __init__(self, callback, file_path_to_watch):
             self.callback = callback
+            self.file_path_to_watch = file_path_to_watch
 
         def on_modified(self, event):
             # only react if *that* JSON file changed
-            if event.src_path == str(cc.CONFIG_PATH):
+            if event.src_path == str(self.file_path_to_watch):
                 # schedule the UI update on the Tk main thread
                 if root is not None:
                     root.after(0, self.callback)
 
-    def start_config_watcher(callback):
+    def start_json_file_watcher(callback, file_path_to_watch):
         obs = Observer()
-        handler = ConfigHandler(callback)
-        obs.schedule(handler, str(cc.CONFIG_PATH.parent), recursive=False)
+        handler = JsonFileWatcher(callback, file_path_to_watch)
+        watch_dir = os.path.dirname(file_path_to_watch)
+        if not os.path.exists(watch_dir):
+            os.makedirs(watch_dir)
+        obs.schedule(handler, watch_dir, recursive=False)
         obs.start()
         # keep it running in background
         threading.Thread(target=obs.join, daemon=True).start()
@@ -156,7 +164,7 @@ def launch_gui() -> None:
     load_counters()  # initial
 
      # start watching the JSON for changes
-    start_config_watcher(load_counters)
+    start_json_file_watcher(load_counters, cc.CONFIG_PATH)
 
 
     # ── Grid weights ─────────────────────────────────────────────────────
@@ -223,11 +231,20 @@ def launch_gui() -> None:
     internet_label.grid(   row=0, column=2, sticky="ew", padx=5)
     version_label.grid(  row=0, column=3, sticky="e",  padx=5)
 
-    def update_label(new_text):
-        adb_var.set(new_text)
+    def update_label():
+        try:
+            with open(ADBController.json_path, "r") as f:
+                data = json.load(f)
+            adb_id = data.get("ADB ID", "--")
+            adb_var.set(f"ADB ID: {adb_id}")
+        except (FileNotFoundError, json.JSONDecodeError):
+            adb_id = "--"
+
+    update_label()
+    start_json_file_watcher(update_label,Path(ADBController.json_path))
 
 # # this returns immediately and never blocks your mainloop
-    MainController.start_adb_track_thread(root, update_label)
+    #MainController.start_adb_track_thread(root, update_label)
 
 
     def update_internet_status():
@@ -287,7 +304,7 @@ def launch_gui() -> None:
         relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
 
     update_timestamps()
-    start_config_watcher(update_timestamps)
+    start_json_file_watcher(update_timestamps, JH.get_json_path())
 
 
     row = ttk.Frame(ctrl)
@@ -633,6 +650,7 @@ def launch_gui() -> None:
         )
     # initial fill
     load_data_table()
+    start_json_file_watcher(load_data_table, JH.get_json_path())
     
 
     # ── QSTAF update page ─────────────────────────────────────────────────────

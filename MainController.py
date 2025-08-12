@@ -10,6 +10,7 @@ from tkinter import messagebox
 import json, threading, time
 import logging
 
+import ADBController
 import KillProcess
 import StartTestCase
 import QutsController
@@ -448,55 +449,6 @@ def get_all_speedtest_results():
 
 
 
-def start_adb_track_thread(root, update_fn, *_, **__):
-    def initial_snapshot():
-        try:
-            out = subprocess.check_output(["adb", "devices"], text=True)
-            for line in out.splitlines()[1:]:
-                parts = line.split()
-                if len(parts) >= 2 and parts[1] == "device":
-                    return f"ADB ID: {parts[0]}"
-        except Exception:
-            pass
-        return "ADB ID: --"
-
-    def worker():
-        last_display = initial_snapshot()
-        root.after(0, update_fn, last_display)
-
-        popen_args = dict(
-            args=["adb", "track-devices"],
-            stdout=subprocess.PIPE,
-            text=True,
-            bufsize=1
-        )
-
-        # ── hide console window on Windows ─────────────────────────────
-        if os.name == "nt":                                     # win32
-            popen_args["creationflags"] = subprocess.CREATE_NO_WINDOW
-            # (Older alternative: use STARTUPINFO with STARTF_USESHOWWINDOW)
-        # ────────────────────────────────────────────────────────────────
-
-        try:
-            proc = subprocess.Popen(**popen_args) # type: ignore
-        except FileNotFoundError:
-            root.after(0, update_fn, "ADB ID: --  (adb not found)")
-            return
-
-        proc.stdout.readline()  # type: ignore # skip header
-        for line in proc.stdout: # type: ignore
-            parts = line.strip().split()
-            if len(parts) < 2:
-                continue
-            serial, state = parts[0], parts[1]
-            display = f"ADB ID: {str(serial)[4:]}" if state == "device" and serial else "ADB ID: --"
-            if display != last_display:
-                root.after(0, update_fn, display)
-                last_display = display
-
-        root.after(0, update_fn, "ADB ID: --")  # adb exited
-
-    threading.Thread(target=worker, daemon=True).start()
 
 
 # def check_wifi_type(toggle_var,wifi_config):
@@ -544,6 +496,12 @@ def start_adb_track_thread(root, update_fn, *_, **__):
 
 
 def main() -> None:
+    
+    t3 = threading.Thread(
+        target=ADBController.run_adb_track_devices,
+        daemon=True  # auto‑stops when the main program exits
+    )
+    t3.start()
 
     # Start the watcher in a daemon thread
     t = threading.Thread(
@@ -558,6 +516,8 @@ def main() -> None:
         daemon=True  # auto‑stops when the main program exits
     )
     t2.start()
+
+    
  
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

@@ -372,7 +372,7 @@ def get_all_speedtest_results():
             print(f'Exception during speedtest df_csv: {e}')
     if not df_csv.empty:
         df_csv = df_csv.sort_values(by=['end_time'], ascending=False)
-        df_csv.drop(df_csv.index[df_csv['result'] == 'Fail'], inplace=True)
+        df_csv = df_csv[df_csv['result'] == 'Pass']
     if len(df_csv) > 10:
         df_csv = df_csv.head(10)
 

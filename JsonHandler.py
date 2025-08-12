@@ -7,9 +7,10 @@ import MainController as mc
 LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
 
+
 def _ensure_dir() -> None:
     os.makedirs(LOG_DIR, exist_ok=True)
-
+    
 def _default_cfg() -> dict:
     return {
         "aws_scheduler_enabled": "true",
@@ -65,3 +66,6 @@ def save_json(cfg: dict) -> None:
     _ensure_dir()
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
+
+def get_json_path():
+    return CONFIG_FILE

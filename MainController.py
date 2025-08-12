@@ -361,9 +361,11 @@ def SpeedTest(callback=None):
 
 
 def get_all_speedtest_results():
+
     speedtest_list = []
 
     speedtest_csvs = glob.glob(LOG_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+
     df_csv = pd.DataFrame()
     for speedtest_csv in speedtest_csvs:
         try:
@@ -376,7 +378,9 @@ def get_all_speedtest_results():
     if len(df_csv) > 10:
         df_csv = df_csv.head(10)
 
+
     dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+
     dl_stats_df = pd.DataFrame()
     rfband_df = pd.DataFrame()
     for dl_stats_csv in dl_stats_csvs:
@@ -399,7 +403,7 @@ def get_all_speedtest_results():
         except Exception as e:
             print(f'Exception during rfband_rf : {e}')
 
-    gps_monitor_csvs = glob.glob(LOG_DIR + '\\**\\*qstaf_gps_monitor.csv', recursive=True)
+    gps_monitor_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*qstaf_gps_monitor.csv'), recursive=True)
     gps_df = pd.DataFrame()
     for gps_monitor_csv in gps_monitor_csvs:
         try:
@@ -437,6 +441,7 @@ def get_all_speedtest_results():
             print(f'Exception during Speedtest LOCATION for entry-{i}: {e}')
             speedtest_dict['LOCATION'] = 'UNKNOWN'
 
+
         try:
             if not rfband_df.empty:
                 rfband_df_filtered = rfband_df[
@@ -449,6 +454,7 @@ def get_all_speedtest_results():
                     speedtest_dict['BAND'] = rfband_df_filtered.loc[rfband_df_filtered['BAND'].str.len().idxmax()]['BAND']
                 else:
                     speedtest_dict['BAND'] = 'UNKNOWN'
+
             else:
                 speedtest_dict['BAND'] = 'UNKNOWN'
         except Exception as e:
@@ -460,6 +466,7 @@ def get_all_speedtest_results():
     cfg = JH.load_json()
     cfg["SpeedTestData"] = speedtest_list
     JH.save_json(cfg)
+    print("Speedtest results collected and saved to JSON.")
 
 
 

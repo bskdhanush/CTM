@@ -3,6 +3,15 @@ import subprocess
 import re
 import os
 
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Construct the base path to the config directory
+template_path = os.path.join(script_dir, "config")
+output_config_path = r"C:\QSTAF\CTM_logs\config"
+
+# Ensure the output directory exists
+os.makedirs(output_config_path, exist_ok=True)
+
 adb_id = None
 
 def run_command(command):
@@ -119,15 +128,18 @@ def update_3_slo_config_owrt(Config):
     if Config != '':
         ssid_suffix = '_Test'
 
-    if not os.path.exists(f'config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json'):
-        with open('config/OWRT_TC_ondevice_3slo.json', 'r') as f:
+    file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json')
+    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo.json')
+
+    if not os.path.exists(file_to_check):
+        with open(template_file, 'r') as f:
             json_content = f.read()
         updated_json_content = json_content.replace('_SLO', f'_SLO_{adb_id}{ssid_suffix}')
-        with open(f'config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json', 'w') as f:
+        with open(file_to_check, 'w') as f:
             f.write(updated_json_content)
 
     run_command("adb root")
-    run_command(f"adb push config/OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    run_command(f"adb push {file_to_check} /data/dapp/TC_ondevice.json")
     run_command("adb reboot")
 
 def update_2g5g_mlo_config_owrt(Config):
@@ -139,15 +151,18 @@ def update_2g5g_mlo_config_owrt(Config):
     if Config != '':
         ssid_suffix = '_Test'
 
-    if not os.path.exists(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json'):
-        with open('config/OWRT_TC_ondevice_25mlo.json', 'r') as f:
+    file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json')
+    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo.json')
+
+    if not os.path.exists(file_to_check):
+        with open(template_file, 'r') as f:
             json_content = f.read()
         updated_json_content = json_content.replace('_MLO', f'_MLO_{adb_id}{ssid_suffix}')
-        with open(f'config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json', 'w') as f:
+        with open(file_to_check, 'w') as f:
             f.write(updated_json_content)
     
     run_command("adb root")
-    run_command(f"adb push config/OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json /data/dapp/TC_ondevice.json")
+    run_command(f"adb push {file_to_check} /data/dapp/TC_ondevice.json")
     print("Pushed OWRT_TC_ondevice_25mlo.json")
     run_command("adb reboot")
     print("done")

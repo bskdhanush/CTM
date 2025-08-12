@@ -361,7 +361,8 @@ def SpeedTest(callback=None):
 
 
 def get_all_speedtest_results():
-    speedtest_csvs = glob.glob(LOG_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+    print("Collecting speedtest results")
+    speedtest_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*vpid1111_seqno1_SpeedTest.csv'), recursive=True)
     df_csv = pd.DataFrame()
 
     for speedtest_csv in speedtest_csvs:
@@ -372,7 +373,7 @@ def get_all_speedtest_results():
         df_csv = df_csv.head(10)
     speedtest_list = []
 
-    dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+    dl_stats_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*QSH_DL_STATS.csv'), recursive=True)
     
     dl_stats_df = pd.DataFrame()
     rfband_df = pd.DataFrame()
@@ -393,7 +394,7 @@ def get_all_speedtest_results():
         rfband_df = rfband_df.merge(dl_stats_df[['INDEX', 'TIMESTAMP']], on='INDEX', how='left')
         rfband_df = rfband_df.drop_duplicates(subset='INDEX')
 
-    gps_monitor_csvs = glob.glob(LOG_DIR + '\\**\\*qstaf_gps_monitor.csv', recursive=True)
+    gps_monitor_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*qstaf_gps_monitor.csv'), recursive=True)
     gps_df = pd.DataFrame()
     for gps_monitor_csv in gps_monitor_csvs:
         try:
@@ -430,9 +431,9 @@ def get_all_speedtest_results():
 
         if not rfband_df.empty:
             rfband_df_filtered = rfband_df[
-                (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') >= pd.to_datetime(
+                (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') >= pd.to_datetime(
                     speedtest_dict['START_TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')) & (
-                        pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') <= pd.to_datetime(
+                        pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') <= pd.to_datetime(
                     speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S'))]
 
             if not rfband_df_filtered.empty:
@@ -446,6 +447,7 @@ def get_all_speedtest_results():
     cfg = JH.load_json()
     cfg["SpeedTestData"] = speedtest_list
     JH.save_json(cfg)
+    print("Speedtest results collected and saved to JSON.")
 
 
 

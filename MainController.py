@@ -361,20 +361,26 @@ def SpeedTest(callback=None):
 
 
 def get_all_speedtest_results():
-    print("Collecting speedtest results")
-    speedtest_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*vpid1111_seqno1_SpeedTest.csv'), recursive=True)
-    df_csv = pd.DataFrame()
 
-    for speedtest_csv in speedtest_csvs:
-        df_csv = pd.concat([df_csv, pd.read_csv(speedtest_csv)], axis=0)
-    df_csv = df_csv.sort_values(by=['end_time'], ascending=False)
-    df_csv.drop(df_csv.index[df_csv['result'] == 'Fail'], inplace=True)
-    if len(df_csv) > 10:
-        df_csv = df_csv.head(10)
     speedtest_list = []
 
-    dl_stats_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*QSH_DL_STATS.csv'), recursive=True)
-    
+    speedtest_csvs = glob.glob(LOG_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+
+    df_csv = pd.DataFrame()
+    for speedtest_csv in speedtest_csvs:
+        try:
+            df_csv = pd.concat([df_csv, pd.read_csv(speedtest_csv)], axis=0)
+        except Exception as e:
+            print(f'Exception during speedtest df_csv: {e}')
+    if not df_csv.empty:
+        df_csv = df_csv.sort_values(by=['end_time'], ascending=False)
+        df_csv = df_csv[df_csv['result'] == 'Pass']
+    if len(df_csv) > 10:
+        df_csv = df_csv.head(10)
+
+
+    dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+
     dl_stats_df = pd.DataFrame()
     rfband_df = pd.DataFrame()
     for dl_stats_csv in dl_stats_csvs:
@@ -384,15 +390,18 @@ def get_all_speedtest_results():
             print(f'Exception during dl_stats_df: {e}')
 
     if not dl_stats_df.empty:
-        dl_stats_df = dl_stats_df.sort_values(by=['DEVICE_TIMESTAMP'])
-        dl_stats_df['TIME_DIFF'] = abs((pd.to_datetime(dl_stats_df['DEVICE_TIMESTAMP'])) - pd.to_datetime(
-            dl_stats_df['DEVICE_TIMESTAMP'].shift(1, fill_value=0)))
-        dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
-        dl_stats_df.loc[0, 'MICRO_SEC'] = 0
-        dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 80000).gt(0).cumsum() - 1
-        rfband_df = dl_stats_df.groupby('INDEX')['BAND'].apply(lambda x: '+'.join(x)).reset_index()
-        rfband_df = rfband_df.merge(dl_stats_df[['INDEX', 'TIMESTAMP']], on='INDEX', how='left')
-        rfband_df = rfband_df.drop_duplicates(subset='INDEX')
+        try:
+            dl_stats_df = dl_stats_df.sort_values(by=['DEVICE_TIMESTAMP'])
+            dl_stats_df['TIME_DIFF'] = abs((pd.to_datetime(dl_stats_df['DEVICE_TIMESTAMP'])) - pd.to_datetime(
+                dl_stats_df['DEVICE_TIMESTAMP'].shift(1, fill_value=0)))
+            dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
+            dl_stats_df.loc[0, 'MICRO_SEC'] = 0
+            dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 80000).gt(0).cumsum() - 1
+            rfband_df = dl_stats_df.groupby('INDEX')['BAND'].apply(lambda x: '+'.join(x)).reset_index()
+            rfband_df = rfband_df.merge(dl_stats_df[['INDEX', 'TIMESTAMP']], on='INDEX', how='left')
+            rfband_df = rfband_df.drop_duplicates(subset='INDEX')
+        except Exception as e:
+            print(f'Exception during rfband_rf : {e}')
 
     gps_monitor_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*qstaf_gps_monitor.csv'), recursive=True)
     gps_df = pd.DataFrame()
@@ -407,41 +416,51 @@ def get_all_speedtest_results():
     time_window = pd.Timedelta(minutes=5)
 
     for i in range(len(df_csv)):
+        try:
+            speedtest_dict = {
+                'DL': df_csv['download_speed_Mbps'].iloc[i],
+                'UL': df_csv['upload_speed_Mbps'].iloc[i],
+                'BAND': 'UNKNOWN',
+                'ADBID': df_csv['Metadata_device'].iloc[i],
+                'START_TIMESTAMP': df_csv['start_time'].iloc[i],
+                'TIMESTAMP': df_csv['end_time'].iloc[i]
+            }
+            if not gps_df.empty:
+                gps_df_filtered = gps_df[(pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') >= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') <= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
 
-        speedtest_dict = {
-            'DL': df_csv['download_speed_Mbps'].iloc[i],
-            'UL': df_csv['upload_speed_Mbps'].iloc[i],
-            'BAND': 'UNKNOWN',
-            'ADBID': df_csv['Metadata_device'].iloc[i],
-            'START_TIMESTAMP': df_csv['start_time'].iloc[i],
-            'TIMESTAMP': df_csv['end_time'].iloc[i]
-        }
-        if not gps_df.empty:
-            gps_df_filtered = gps_df[(pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') >= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') - time_window) & (pd.to_datetime(gps_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') <= pd.to_datetime(speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') + time_window)]
-
-            if not gps_df_filtered.empty:
-                closest = gps_df_filtered.loc[
-                    (pd.to_datetime(gps_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') - pd.to_datetime(
-                        speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
-                speedtest_dict['LOCATION'] = f'{closest['LATITUDE'].replace('latitude: ', '')}, {closest['LONGITUDE'].replace('longitude: ', '')}'
+                if not gps_df_filtered.empty:
+                    closest = gps_df_filtered.loc[
+                        (pd.to_datetime(gps_df_filtered['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S.%f') - pd.to_datetime(
+                            speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')).abs().idxmin()]
+                    speedtest_dict['LOCATION'] = f'{closest['LATITUDE'].replace('latitude: ', '')}, {closest['LONGITUDE'].replace('longitude: ', '')}'
+                else:
+                    speedtest_dict['LOCATION'] = 'UNKNOWN'
             else:
                 speedtest_dict['LOCATION'] = 'UNKNOWN'
-        else:
+        except Exception as e:
+            print(f'Exception during Speedtest LOCATION for entry-{i}: {e}')
             speedtest_dict['LOCATION'] = 'UNKNOWN'
 
-        if not rfband_df.empty:
-            rfband_df_filtered = rfband_df[
-                (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') >= pd.to_datetime(
-                    speedtest_dict['START_TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')) & (
-                        pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S') <= pd.to_datetime(
-                    speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S'))]
 
-            if not rfband_df_filtered.empty:
-                speedtest_dict['BAND'] = rfband_df_filtered.loc[rfband_df_filtered['BAND'].str.len().idxmax()]['BAND']
+        try:
+            if not rfband_df.empty:
+                rfband_df_filtered = rfband_df[
+                    (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') >= pd.to_datetime(
+                        speedtest_dict['START_TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S')) & (
+                            pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') <= pd.to_datetime(
+                        speedtest_dict['TIMESTAMP'], format='%Y-%m-%d_%H_%M_%S'))]
+
+                if not rfband_df_filtered.empty:
+                    speedtest_dict['BAND'] = rfband_df_filtered.loc[rfband_df_filtered['BAND'].str.len().idxmax()]['BAND']
+                else:
+                    speedtest_dict['BAND'] = 'UNKNOWN'
+
             else:
                 speedtest_dict['BAND'] = 'UNKNOWN'
-        else:
+        except Exception as e:
+            print(f'Exception during Speedtest BAND for entry-{i}: {e}')
             speedtest_dict['BAND'] = 'UNKNOWN'
+
         speedtest_list.append(speedtest_dict)
 
     cfg = JH.load_json()

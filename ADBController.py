@@ -21,7 +21,7 @@ def run_adb_track_devices():
     global last_adb_id
     cmd = ["adb", "track-devices"]
     
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
     #print("[INFO] Tracking devices... (Press Ctrl+C to stop)")
 
     header_skipped = False

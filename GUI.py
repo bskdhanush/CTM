@@ -633,7 +633,6 @@ def launch_gui() -> None:
     def load_data_table():
         """Read JSON list and (re)populate the table."""
         data = JH.load_json().get("SpeedTestData", []) 
-        print("call back")
         tree.delete(*tree.get_children())  # <-- adjust key to your JSON
     # Clear
         for row in data:

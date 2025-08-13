@@ -1,6 +1,8 @@
 import os, threading, subprocess,sys
+import time
 import GUI
 import MainController
+import CopyCsv
 
 
 KEY = "****** Stop Main #"
@@ -36,9 +38,11 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
         for line in proc.stdout:
             sys.stdout.write(line)  # optional mirroring
             if KEY in line:
+                CopyCsv.get_speedtest_csv_list()
+                time.sleep(5)  # wait for the last line to be processed
                 MainController.get_all_speedtest_results()
+
                 if callback:
-                    # Schedule callback to run on main thread
                     GUI.root.after(0, callback) # type: ignore
 
                 proc.terminate()

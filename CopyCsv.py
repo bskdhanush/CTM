@@ -79,6 +79,18 @@ def get_copy_csv_list(base_dir, csv_patterns):
     # print(csv_copy_list)
     return csv_copy_list
 
+def get_speedtest_csv_list():
+    csv_speedtest_list = []
+    speedtest_csv_patterns = ['\\**\\*vpid1111_seqno1_SpeedTest.csv']
+
+    try:
+        csv_speedtest_list = get_copy_csv_list(TRAFFIC_BASE, speedtest_csv_patterns)
+    except Exception as e:
+        print(f'Exception during get_speedtest_csv_list: {e}')
+
+    for csv in csv_speedtest_list:
+        print(f'Copying {csv}')
+        shutil.copy(csv, LOG_DIR)
 
 def get_total_copy_csv_list():
     csv_copy_list = []

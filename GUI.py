@@ -6,6 +6,7 @@ import os
 from functools import partial
 import json
 from pathlib import Path
+import platform
 import tkinter as tk
 from tkinter import ttk ,filedialog, messagebox
 from tkinter import filedialog
@@ -31,6 +32,92 @@ import JsonHandler as JH
 import gitReleases as gr
 import QSTAFInstaller 
 
+
+def add_copy_support(root: tk.Tk) -> None:
+    is_mac = platform.system() == 'Darwin'
+    accel = 'Command-C' if is_mac else 'Control-c'
+
+    menu = tk.Menu(root, tearoff=0)
+
+    def label_text(w):
+        try:
+            txt = w.cget("text")
+            if not txt:
+                var = w.cget("textvariable")
+                if var:
+                    txt = root.getvar(var)
+            return str(txt)
+        except Exception:
+            return ""
+
+    def copy_from_widget(widget=None):
+        w = widget or root.focus_get()
+        # Enable universal copy (labels, text, entries, listbox, treeview, logs)
+
+        if w is None:
+            return
+        sel = ""
+        try:
+            if isinstance(w, (tk.Entry, ttk.Entry)):
+                sel = w.selection_get()
+            elif isinstance(w, (tk.Text, ScrolledText)):
+                try:
+                    sel = w.get("sel.first", "sel.last")
+                except Exception:
+                    # fallback: copy all text (handles disabled Text/ScrolledText)
+                    state = str(w.cget("state"))
+                    if state == "disabled":
+                        w.configure(state="normal")
+                        sel = w.get("1.0", "end-1c")
+                        w.configure(state="disabled")
+                    else:
+                        sel = w.get("1.0", "end-1c")
+            elif isinstance(w, tk.Listbox):
+                indices = w.curselection()
+                sel = "\n".join(w.get(i) for i in indices) if indices else ""
+            elif isinstance(w, ttk.Treeview):
+                items = w.selection()
+                rows = []
+                for iid in items:
+                    vals = w.item(iid, "values")
+                    if vals:
+                        rows.append("\t".join(map(str, vals)))
+                    else:
+                        rows.append(str(w.item(iid, "text")))
+                sel = "\n".join(rows)
+            elif isinstance(w, (ttk.Label, tk.Label)):
+                sel = label_text(w)
+            else:
+                try:
+                    sel = root.selection_get()
+                except Exception:
+                    sel = ""
+        except Exception:
+            sel = ""
+        if sel:
+            root.clipboard_clear()
+            root.clipboard_append(sel)
+
+    def show_menu(e):
+        w = e.widget
+        menu.delete(0, 'end')
+        if isinstance(w, (tk.Entry, tk.Text, ttk.Entry, ScrolledText)):
+            menu.add_command(label="Cut", command=lambda: w.event_generate("<<Cut>>"))
+            menu.add_command(label="Copy", command=lambda: copy_from_widget(w))
+            menu.add_command(label="Paste", command=lambda: w.event_generate("<<Paste>>"))
+            menu.add_separator()
+            menu.add_command(label="Select All", command=lambda: w.event_generate("<<SelectAll>>"))
+        elif isinstance(w, (tk.Listbox, ttk.Treeview, ttk.Label, tk.Label)):
+            menu.add_command(label="Copy", command=lambda: copy_from_widget(w))
+        if menu.index('end') is not None:
+            menu.tk_popup(e.x_root, e.y_root)
+
+    root.bind_all(f'<{accel}>', lambda e: (copy_from_widget(), "break"))
+    # Right-click context menu
+    if is_mac:
+        root.bind_all("<Button-2>", show_menu, add="+")
+    root.bind_all("<Button-3>", show_menu, add="+")
+
 # ───────────────────────────────────────────────────────────────────────────
 #  GUI
 # ───────────────────────────────────────────────────────────────────────────
@@ -54,6 +141,7 @@ def launch_gui() -> None:
     root.geometry("1024x768")
     root.resizable(True, True)
     sv_ttk.set_theme("dark")
+    add_copy_support(root)
 
     # ── Styles ──────────────────────────────────────────────────────────
     style = ttk.Style(root)

@@ -36,10 +36,10 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
     def reader():
         assert proc.stdout
         for line in proc.stdout:
-            sys.stdout.write(line)  # optional mirroring
             if KEY in line:
+                time.sleep(10)
+                
                 CopyCsv.get_speedtest_csv_list()
-                time.sleep(5)  # wait for the last line to be processed
                 MainController.get_all_speedtest_results()
 
                 if callback:

@@ -396,7 +396,7 @@ def get_all_speedtest_results():
                 dl_stats_df['DEVICE_TIMESTAMP'].shift(1, fill_value=0)))
             dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
             dl_stats_df.loc[0, 'MICRO_SEC'] = 0
-            dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 80000).gt(0).cumsum() - 1
+            dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 50000).gt(0).cumsum() - 1
             rfband_df = dl_stats_df.groupby('INDEX')['BAND'].apply(lambda x: '+'.join(x)).reset_index()
             rfband_df = rfband_df.merge(dl_stats_df[['INDEX', 'TIMESTAMP']], on='INDEX', how='left')
             rfband_df = rfband_df.drop_duplicates(subset='INDEX')

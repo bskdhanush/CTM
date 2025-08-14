@@ -17,6 +17,9 @@ def save_to_json(adb_id):
         json.dump(data, f, indent=4)
     #print(f"[INFO] Updated ADB ID → {adb_id}")
 
+    
+
+
 def run_adb_track_devices():
     global last_adb_id
     cmd = ["adb", "track-devices"]

@@ -517,6 +517,7 @@ def get_all_speedtest_results():
 
 
 def main() -> None:
+    ADBController.save_to_json("--")
     
     t3 = threading.Thread(
         target=ADBController.run_adb_track_devices,

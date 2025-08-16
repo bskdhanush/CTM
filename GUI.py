@@ -157,7 +157,6 @@ def launch_gui() -> None:
     header_frame.columnconfigure(1, weight=1)   # left side expands
     
   
-
     meta_var = tk.StringVar(value="Meta : ")
     mpss_var = tk.StringVar(value="MPSS : ")
 

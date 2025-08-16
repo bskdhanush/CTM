@@ -88,15 +88,15 @@ def _extract_archive(src: Path, dest: Path, on_status: StatusCB) -> None:
     raise ValueError("Unsupported archive type. Provide a .zip or .7z file.")
 
 # ------------------------------ BAT runner -----------------------------------
-
+key ="QSTAF and its dependencies have been installed successfully!"
 def _run_batch_wait_exit(
     bat_path: Path,
     on_status: StatusCB,
-    timeout_sec: int = 1800,
+    timeout_sec: int = 300,
 ) -> Tuple[int, str]:
     """
     Run the batch file hidden and stream output to `on_status`.
-    We proceed *after the process exits* (no success-line detection).
+    Proceed immediately when the success KEY is printed.
     Returns (returncode, message).
     """
     import threading, queue
@@ -105,6 +105,7 @@ def _run_batch_wait_exit(
     _status(on_status, f"Launching installer… ({bat_path})")
 
     q: "queue.Queue[Optional[str]]" = queue.Queue()
+    success_event = threading.Event()
 
     try:
         p = subprocess.Popen(
@@ -118,25 +119,29 @@ def _run_batch_wait_exit(
     except Exception as e:
         return -1, f"Failed to run installer: {e}"
 
-    assert p.stdout is not None
-
     def reader():
         try:
             for line in p.stdout:  # type: ignore
                 q.put(line)
+                if key in line:
+                    _status(on_status, "[installer] Success key detected.")
+                    success_event.set()
+                    break
         except Exception:
             pass
-        finally:
-            q.put(None)  # EOF marker
 
     t = threading.Thread(target=reader, daemon=True)
     t.start()
 
     start = time.time()
-    eof = False
-
     while True:
-        # Timeout handling
+        if success_event.is_set():
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            return 0, "Installer key detected – proceeding to next step."
+
         if time.time() - start > timeout_sec:
             try:
                 p.kill()
@@ -147,19 +152,14 @@ def _run_batch_wait_exit(
         try:
             item = q.get(timeout=0.2)
         except queue.Empty:
-            if p.poll() is not None and eof:
-                break
-            continue
-
-        if item is None:
-            eof = True
             if p.poll() is not None:
                 break
             continue
 
-        s = item.rstrip("\r\n")
-        if s:
-            _status(on_status, f"[installer] {s}")
+        if item:
+            s = item.rstrip("\r\n")
+            if s:
+                _status(on_status, f"[installer] {s}")
 
     try:
         rc = p.wait(timeout=5)
@@ -213,7 +213,7 @@ def install_qstaf_from_zip(
     on_status: StatusCB = None,
     on_progress: ProgressCB = None,
     keep_temp: bool = False,
-    timeout_sec: int = 1800,
+    timeout_sec: int = 600,
 ) -> Tuple[bool, str]:
     """Exit-based flow: proceed to replace files after the BAT process exits."""
     apath = Path(archive_path)
@@ -242,6 +242,7 @@ def install_qstaf_from_zip(
 
         rc, msg = _run_batch_wait_exit(bat_path, on_status, timeout_sec=timeout_sec)
         _status(on_status, f"Installer result: rc={rc} – {msg}")
+      
 
         # Proceed regardless of rc, per request. We still report rc in final message.
 

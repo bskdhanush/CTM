@@ -89,10 +89,12 @@ def _extract_archive(src: Path, dest: Path, on_status: StatusCB) -> None:
 
 # ------------------------------ BAT runner -----------------------------------
 
+key ="successfully!"
+
 def _run_batch_wait_exit(
     bat_path: Path,
     on_status: StatusCB,
-    timeout_sec: int = 1800,
+    timeout_sec: int = 300,
 ) -> Tuple[int, str]:
     """
     Run the batch file hidden and stream output to `on_status`.
@@ -118,16 +120,14 @@ def _run_batch_wait_exit(
     except Exception as e:
         return -1, f"Failed to run installer: {e}"
 
-    assert p.stdout is not None
 
     def reader():
-        try:
-            for line in p.stdout:  # type: ignore
-                q.put(line)
-        except Exception:
-            pass
-        finally:
-            q.put(None)  # EOF marker
+        assert p.stdout
+        for line in p.stdout:
+            print(line)
+            if key in line:
+                print("key found")
+                p.terminate()
 
     t = threading.Thread(target=reader, daemon=True)
     t.start()
@@ -213,7 +213,7 @@ def install_qstaf_from_zip(
     on_status: StatusCB = None,
     on_progress: ProgressCB = None,
     keep_temp: bool = False,
-    timeout_sec: int = 1800,
+    timeout_sec: int = 300,
 ) -> Tuple[bool, str]:
     """Exit-based flow: proceed to replace files after the BAT process exits."""
     apath = Path(archive_path)
@@ -242,11 +242,13 @@ def install_qstaf_from_zip(
 
         rc, msg = _run_batch_wait_exit(bat_path, on_status, timeout_sec=timeout_sec)
         _status(on_status, f"Installer result: rc={rc} – {msg}")
+        print("done installing ")
 
         # Proceed regardless of rc, per request. We still report rc in final message.
 
         # 3) Copy files from Replace
         _progress(on_progress, 60)
+        print('Locating "Replace" folder…')
         _status(on_status, "Locating 'Replace' folder…")
         replace_dir = next(
             (p for p in temp_dir.rglob("*") if p.is_dir() and p.name.lower() == "replace"),

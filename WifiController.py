@@ -125,7 +125,7 @@ def update_3_slo_config_owrt(Config):
     adb_id = get_adb_id()
     if not adb_id:
         adb_id = ''
-    if Config != '':
+    if Config == 'Test_SSID':
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json')
@@ -148,7 +148,7 @@ def update_2g5g_mlo_config_owrt(Config):
     adb_id = get_adb_id()
     if not adb_id:
         adb_id = ''
-    if Config != '':
+    if Config == 'Test_SSID':
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json')
@@ -172,10 +172,10 @@ def update_3_mlo_config_owrt(Config):
 
 
 def update_3_slo_config_rdkb(Config):
-    ssid_suffix =''
+    ssid_suffix = ''
     adb_id = get_adb_id()
-    if Config!="":
-        ssid_suffix='_Test'
+    if Config == "Test":
+        ssid_suffix = '_Test'
     slo_2g_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
     slo_5g_ssid = f'QSTAF_5G_SLO_{adb_id}{ssid_suffix}'
     slo_6g_ssid = f'QSTAF_6G_SLO_{adb_id}{ssid_suffix}'     
@@ -198,12 +198,13 @@ def update_3_slo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    setpassword_bandwidths_rdkb()
+    if Config == 'Config_SSID':
+        setpassword_bandwidths_rdkb()
 
 def update_2g_slo_5g6g_mlo_config_rdkb(Config):
     ssid_suffix =''
     adb_id = get_adb_id()
-    if Config!="":
+    if Config == "Test_SSID":
         ssid_suffix = '_test'
     slo_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
     mlo_ssid = f'QSTAF_MLO_{adb_id}{ssid_suffix}'
@@ -218,7 +219,8 @@ def update_2g_slo_5g6g_mlo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    setpassword_bandwidths_rdkb()
+    if Config == 'Config_SSID':
+        setpassword_bandwidths_rdkb()
 
 def setpassword_bandwidths_rdkb():
     commands = [

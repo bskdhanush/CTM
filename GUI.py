@@ -625,7 +625,7 @@ def launch_gui() -> None:
     ttk.Button(
         wifi_sel,
         text="Set config",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Config_SSID"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
@@ -636,14 +636,14 @@ def launch_gui() -> None:
     ttk.Button(
         test_sel,
         text="Set Test SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "_"),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Test_SSID"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 
     ttk.Button(
         test_sel,
         text="Set Default SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), ""),
+        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Default_SSID"),
     ).pack(fill="x", **PADDING)# type: ignore
 
 

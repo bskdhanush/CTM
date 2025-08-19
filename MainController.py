@@ -443,6 +443,7 @@ def get_all_speedtest_results():
 
 
         try:
+            speedtest_timestamp = None
             if not rfband_df.empty:
                 rfband_df_filtered = rfband_df[
                     (pd.to_datetime(rfband_df['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S') >= pd.to_datetime(
@@ -452,6 +453,7 @@ def get_all_speedtest_results():
 
                 if not rfband_df_filtered.empty:
                     speedtest_dict['BAND'] = rfband_df_filtered.loc[rfband_df_filtered['BAND'].str.len().idxmax()]['BAND']
+                    speedtest_timestamp = pd.to_datetime(rfband_df_filtered.loc[rfband_df_filtered['BAND'].str.len().idxmax()]['TIMESTAMP'], format='%Y-%m-%d %H:%M:%S')
                 else:
                     speedtest_dict['BAND'] = 'UNKNOWN'
 
@@ -461,6 +463,22 @@ def get_all_speedtest_results():
             print(f'Exception during Speedtest BAND for entry-{i}: {e}')
             speedtest_dict['BAND'] = 'UNKNOWN'
 
+        # Getting the Connectivity_Mode from RF Band Info
+        try:
+            rfbandinfo_df = pd.DataFrame()
+            rfbandinfo_csvs = glob.glob(LOG_DIR + '\\**\\*RFBandInfo.csv', recursive=True)
+            for rfbandinfo_csv in sorted(rfbandinfo_csvs):
+                rfbandinfo_df = pd.concat([rfbandinfo_df, pd.read_csv(rfbandinfo_csv)], axis=0)
+            if not rfbandinfo_df.empty:
+                rfbandinfo_df = rfbandinfo_df.sort_values(by=["Timestamp"], ascending=False)
+                if speedtest_timestamp:
+                    df_temp = rfbandinfo_df[pd.to_datetime(rfbandinfo_df['Timestamp'], format='%Y-%m-%d %H:%M:%S') < speedtest_timestamp]
+                    if isinstance(df_temp, pd.DataFrame) and not df_temp.empty:
+                        conn_mode = df_temp.iloc[-1]['Connectivity_Mode']
+                        if speedtest_dict['BAND'] != 'UNKNOWN':
+                            speedtest_dict['BAND'] = f"{conn_mode}_{speedtest_dict['BAND']}"
+        except Exception as e:
+            print(f'Exception during Speedtest rfbandinfo_df: {e}')
         speedtest_list.append(speedtest_dict)
 
     cfg = JH.load_json()

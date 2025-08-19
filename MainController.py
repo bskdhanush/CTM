@@ -474,7 +474,7 @@ def get_all_speedtest_results():
                 if speedtest_timestamp:
                     df_temp = rfbandinfo_df[pd.to_datetime(rfbandinfo_df['Timestamp'], format='%Y-%m-%d %H:%M:%S') < speedtest_timestamp]
                     if isinstance(df_temp, pd.DataFrame) and not df_temp.empty:
-                        conn_mode = df_temp.iloc[-1]['Connectivity_Mode']
+                        conn_mode = df_temp.iloc[0]['Connectivity_Mode']
                         if speedtest_dict['BAND'] != 'UNKNOWN':
                             speedtest_dict['BAND'] = f"{conn_mode}_{speedtest_dict['BAND']}"
         except Exception as e:

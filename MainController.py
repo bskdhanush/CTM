@@ -296,8 +296,10 @@ def reset_start_timestamp():
         cfg[f"traffic_start_timestamp"] = "null"
         JH.save_json(cfg)
 
-def SpeedTest(callback=None):
+def SpeedTest(iterationCount, callback=None):
     # Create CONFIG_1_ITERATION_YAML if does not exist
+
+    print(f"iterationCount: {iterationCount}")
     try:
         if not os.path.exists(CONFIG_1_ITERATION_YAML):
             if os.path.exists(CONFIG_YAML):
@@ -350,6 +352,25 @@ def SpeedTest(callback=None):
         print(f'Exception updating config yaml: {e}')
 
     try:
+        if iterationCount >1:
+            with open(CONFIG_1_ITERATION_YAML, 'r') as f:
+                    config = yaml.safe_load(f)
+
+            config['traffic']['iteration_count'] = iterationCount
+
+                # Save the updated content back to the file
+            with open(CONFIG_1_ITERATION_YAML, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False)
+        else: 
+            with open(CONFIG_1_ITERATION_YAML, 'r') as f:
+                    config = yaml.safe_load(f)
+
+            config['traffic']['iteration_count'] =1
+
+                # Save the updated content back to the file
+            with open(CONFIG_1_ITERATION_YAML, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False)
+
         StartTestCase.start_bat_and_watch_stdout(CMD_DIR_TRAFFIC, 'Run_SpeedTest.bat',callback) #, 'traffic'
     except Exception as e:
         messagebox.showerror("Error", str(e))

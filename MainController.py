@@ -417,7 +417,7 @@ def get_all_speedtest_results():
                 dl_stats_df['DEVICE_TIMESTAMP'].shift(1, fill_value=0)))
             dl_stats_df['MICRO_SEC'] = dl_stats_df['TIME_DIFF'].apply(lambda x: x.value / 1000)
             dl_stats_df.loc[0, 'MICRO_SEC'] = 0
-            dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 50000).gt(0).cumsum() - 1
+            dl_stats_df['INDEX'] = (dl_stats_df['MICRO_SEC'] - 10000).gt(0).cumsum() - 1
             rfband_df = dl_stats_df.groupby('INDEX')['BAND'].apply(lambda x: '+'.join(x)).reset_index()
             rfband_df = rfband_df.merge(dl_stats_df[['INDEX', 'TIMESTAMP']], on='INDEX', how='left')
             rfband_df = rfband_df.drop_duplicates(subset='INDEX')
@@ -495,7 +495,7 @@ def get_all_speedtest_results():
                 if speedtest_timestamp:
                     df_temp = rfbandinfo_df[pd.to_datetime(rfbandinfo_df['Timestamp'], format='%Y-%m-%d %H:%M:%S') < speedtest_timestamp]
                     if isinstance(df_temp, pd.DataFrame) and not df_temp.empty:
-                        conn_mode = df_temp.iloc[-1]['Connectivity_Mode']
+                        conn_mode = df_temp.iloc[0]['Connectivity_Mode']
                         if speedtest_dict['BAND'] != 'UNKNOWN':
                             speedtest_dict['BAND'] = f"{conn_mode}_{speedtest_dict['BAND']}"
         except Exception as e:

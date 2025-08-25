@@ -656,11 +656,23 @@ def launch_gui() -> None:
     
     SpeedTest = ttk.LabelFrame(test_pg, text="Start speed test")
     SpeedTest.pack(fill="x", **PADDING)# type: ignore  
+    iterationCount = tk.StringVar(value="1")
+    ttk.Entry(
+    SpeedTest, 
+    textvariable=iterationCount, 
+    width=4).pack(fill="x", **PADDING)# type: ignore
+
+    def get_iteration_count():
+        try:
+            return int(iterationCount.get())
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid integer for iteration count.")
+            return None
 
     ttk.Button(
         SpeedTest,
         text="Start Speed Test",
-        command=lambda:MainController.SpeedTest(load_data_table),
+        command=lambda:MainController.SpeedTest(get_iteration_count(), load_data_table),
     ).pack(fill="x", **PADDING)# type: ignore
 
     # ── Speed Test Data table ───────────────────────────────────────────

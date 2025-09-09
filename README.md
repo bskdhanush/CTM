@@ -1,5 +1,5 @@
-To build the exe with out cmd : pyinstaller MainController.py --name CTM --noconfirm --onefile --windowed
-To build the exe with cmd : pyinstaller MainController.py --name CTM --noconfirm --onefile --console
+To build the exe with out cmd : pyinstaller MainController.py --name CTM --noconfirm --onefile --windowed --add-data "config;config" 
+To build the exe with cmd : pyinstaller MainController.py --name CTM --noconfirm --onefile --console --add-data "config;config" 
 
 
 app_json format:    

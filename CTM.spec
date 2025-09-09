@@ -5,7 +5,7 @@ a = Analysis(
     ['MainController.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('config', 'config')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

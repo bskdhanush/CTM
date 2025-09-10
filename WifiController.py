@@ -14,13 +14,14 @@ os.makedirs(output_config_path, exist_ok=True)
 
 adb_id = None
 
-def run_command(command):
+def run_command(command ):
     output = None
     stderr = None
     max_attempts = 3
 
     for _ in range(max_attempts):
         try:
+            
             print(f"Executing command: {command}")
             process = subprocess.Popen(command,
                                        shell=True,
@@ -107,7 +108,7 @@ def run_dmcli_commands(commands):
     run_command("adb root")
     for command in commands:
         run_command(f"adb shell {command}")
-        time.sleep(1)
+        time.sleep(3)
 
 
 def connectBackhaul():

@@ -1,0 +1,392 @@
+2025-09-08 20:34:50,503 - DEBUG - Refreshing meta/mpss info
+2025-09-08 20:34:50,599 - DEBUG - Meta/MPSS updated - Meta: "Pinnacles.LE.1.2.c2-00019-EBOOT.CPE.WKK-1", MPSS: MPSS.DE.7.0.c9.2-00006-PINNACLES_CPEEMMC_TEST-1
+2025-09-08 20:34:50,602 - DEBUG - Loading counters from JSON
+2025-09-08 20:34:50,602 - DEBUG - Loaded counters - crash: 0, rdkb: 1
+2025-09-08 20:34:50,602 - ERROR - Error updating UI colors: invalid color name "#FFFF"
+2025-09-08 20:34:50,602 - INFO - Starting file watcher for: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:50,602 - INFO - Watcher initialized for: C:\QSTAF\CTM_logs\app_config.json with callback: load_counters
+2025-09-08 20:34:50,602 - INFO - Watching directory: C:\QSTAF\CTM_logs
+2025-09-08 20:34:50,603 - INFO - Observer started successfully
+2025-09-08 20:34:50,603 - DEBUG - Observer thread started
+2025-09-08 20:34:50,606 - DEBUG - Updating ADB label
+2025-09-08 20:34:50,606 - DEBUG - ADB ID updated to: 37ebcaef
+2025-09-08 20:34:50,606 - INFO - Starting file watcher for: C:\QSTAF\CTM_logs\adb_ID.json
+2025-09-08 20:34:50,606 - INFO - Watcher initialized for: C:\QSTAF\CTM_logs\adb_ID.json with callback: update_label
+2025-09-08 20:34:50,607 - INFO - Watching directory: C:\QSTAF\CTM_logs
+2025-09-08 20:34:50,607 - INFO - Observer started successfully
+2025-09-08 20:34:50,607 - DEBUG - Observer thread started
+2025-09-08 20:34:50,607 - DEBUG - Checking QUTS status
+2025-09-08 20:34:50,623 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:34:50,626 - DEBUG - Updating timestamps from JSON
+2025-09-08 20:34:50,627 - DEBUG - Timestamps updated successfully
+2025-09-08 20:34:50,627 - INFO - Starting file watcher for: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:50,627 - INFO - Watcher initialized for: C:\QSTAF\CTM_logs\app_config.json with callback: update_timestamps
+2025-09-08 20:34:50,627 - INFO - Watching directory: C:\QSTAF\CTM_logs
+2025-09-08 20:34:50,628 - INFO - Observer started successfully
+2025-09-08 20:34:50,628 - DEBUG - Observer thread started
+2025-09-08 20:34:50,641 - DEBUG - Loading speed test data table
+2025-09-08 20:34:50,641 - DEBUG - Loaded 10 speed test records
+2025-09-08 20:34:50,691 - INFO - GUI launched successfully
+2025-09-08 20:34:50,692 - DEBUG - Checking internet status
+2025-09-08 20:34:50,692 - DEBUG - Internet status updated: 2
+2025-09-08 20:34:53,633 - DEBUG - Checking QUTS status
+2025-09-08 20:34:53,648 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:34:54,533 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,533 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,533 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,533 - INFO - Target file modified: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,533 - INFO - Target file modified: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,533 - DEBUG - Ignoring file: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,534 - DEBUG - File size: 2726 bytes
+2025-09-08 20:34:54,534 - DEBUG - File size: 2726 bytes
+2025-09-08 20:34:54,534 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,534 - DEBUG - Scheduling UI callback: load_counters
+2025-09-08 20:34:54,534 - DEBUG - Scheduling UI callback: update_timestamps
+2025-09-08 20:34:54,534 - DEBUG - Ignoring file: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,535 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,535 - DEBUG - File event detected: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,535 - DEBUG - Executing UI callback: load_counters
+2025-09-08 20:34:54,535 - INFO - Target file modified: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,535 - INFO - Target file modified: C:\QSTAF\CTM_logs\app_config.json
+2025-09-08 20:34:54,535 - DEBUG - Loading counters from JSON
+2025-09-08 20:34:54,535 - DEBUG - File size: 2726 bytes
+2025-09-08 20:34:54,535 - DEBUG - File size: 2726 bytes
+2025-09-08 20:34:54,536 - DEBUG - Scheduling UI callback: load_counters
+2025-09-08 20:34:54,536 - DEBUG - Loaded counters - crash: 0, rdkb: 1
+2025-09-08 20:34:54,536 - DEBUG - Scheduling UI callback: update_timestamps
+2025-09-08 20:34:54,536 - ERROR - Error updating UI colors: invalid color name "#FFFF"
+2025-09-08 20:34:54,536 - DEBUG - UI callback load_counters completed successfully in 0.001s
+2025-09-08 20:34:54,536 - DEBUG - Executing UI callback: update_timestamps
+2025-09-08 20:34:54,536 - DEBUG - Updating timestamps from JSON
+2025-09-08 20:34:54,537 - DEBUG - Timestamps updated successfully
+2025-09-08 20:34:54,537 - DEBUG - UI callback update_timestamps completed successfully in 0.000s
+2025-09-08 20:34:54,537 - DEBUG - Executing UI callback: load_counters
+2025-09-08 20:34:54,538 - DEBUG - Loading counters from JSON
+2025-09-08 20:34:54,538 - DEBUG - Loaded counters - crash: 0, rdkb: 1
+2025-09-08 20:34:54,538 - ERROR - Error updating UI colors: invalid color name "#FFFF"
+2025-09-08 20:34:54,538 - DEBUG - UI callback load_counters completed successfully in 0.001s
+2025-09-08 20:34:54,538 - DEBUG - Executing UI callback: update_timestamps
+2025-09-08 20:34:54,538 - DEBUG - Updating timestamps from JSON
+2025-09-08 20:34:54,539 - DEBUG - Timestamps updated successfully
+2025-09-08 20:34:54,539 - DEBUG - UI callback update_timestamps completed successfully in 0.000s
+2025-09-08 20:34:55,692 - DEBUG - Checking internet status
+2025-09-08 20:34:55,693 - DEBUG - Internet status updated: 2
+2025-09-08 20:34:56,651 - DEBUG - Checking QUTS status
+2025-09-08 20:34:56,664 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:34:59,665 - DEBUG - Checking QUTS status
+2025-09-08 20:34:59,678 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:00,694 - DEBUG - Checking internet status
+2025-09-08 20:35:00,694 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:02,679 - DEBUG - Checking QUTS status
+2025-09-08 20:35:02,692 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:05,693 - DEBUG - Checking QUTS status
+2025-09-08 20:35:05,706 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:05,707 - DEBUG - Checking internet status
+2025-09-08 20:35:05,707 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:08,714 - DEBUG - Checking QUTS status
+2025-09-08 20:35:08,729 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:10,711 - DEBUG - Checking internet status
+2025-09-08 20:35:10,711 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:11,730 - DEBUG - Checking QUTS status
+2025-09-08 20:35:11,745 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:14,760 - DEBUG - Checking QUTS status
+2025-09-08 20:35:14,773 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:15,714 - DEBUG - Checking internet status
+2025-09-08 20:35:15,715 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:17,787 - DEBUG - Checking QUTS status
+2025-09-08 20:35:17,800 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:20,715 - DEBUG - Checking internet status
+2025-09-08 20:35:20,716 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:20,808 - DEBUG - Checking QUTS status
+2025-09-08 20:35:20,822 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:23,823 - DEBUG - Checking QUTS status
+2025-09-08 20:35:23,838 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:25,724 - DEBUG - Checking internet status
+2025-09-08 20:35:25,725 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:26,844 - DEBUG - Checking QUTS status
+2025-09-08 20:35:26,859 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:29,862 - DEBUG - Checking QUTS status
+2025-09-08 20:35:29,877 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:30,739 - DEBUG - Checking internet status
+2025-09-08 20:35:30,740 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:32,891 - DEBUG - Checking QUTS status
+2025-09-08 20:35:32,905 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:35,750 - DEBUG - Checking internet status
+2025-09-08 20:35:35,751 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:35,908 - DEBUG - Checking QUTS status
+2025-09-08 20:35:35,920 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:38,936 - DEBUG - Checking QUTS status
+2025-09-08 20:35:38,950 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:40,751 - DEBUG - Checking internet status
+2025-09-08 20:35:40,752 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:41,964 - DEBUG - Checking QUTS status
+2025-09-08 20:35:41,977 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:44,982 - DEBUG - Checking QUTS status
+2025-09-08 20:35:44,995 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:45,763 - DEBUG - Checking internet status
+2025-09-08 20:35:45,763 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:47,998 - DEBUG - Checking QUTS status
+2025-09-08 20:35:48,011 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:50,764 - DEBUG - Checking internet status
+2025-09-08 20:35:50,764 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:51,027 - DEBUG - Checking QUTS status
+2025-09-08 20:35:51,040 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:54,049 - DEBUG - Checking QUTS status
+2025-09-08 20:35:54,063 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"
+2025-09-08 20:35:55,771 - DEBUG - Checking internet status
+2025-09-08 20:35:55,771 - DEBUG - Internet status updated: 2
+2025-09-08 20:35:57,064 - DEBUG - Checking QUTS status
+2025-09-08 20:35:57,078 - ERROR - Error updating QUTS status: invalid color name "#FFFF"
+Traceback (most recent call last):
+  File "d:\work\GUI\Quts_tool\GUI.py", line 514, in _update_quts
+    quts_label.config(fg=white_accent if running else red_accent)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1822, in configure
+    return self._configure('configure', cnf, kw)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bsk\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 1812, in _configure
+    self.tk.call(_flatten((self._w, cmd)) + self._options(cnf))
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: invalid color name "#FFFF"

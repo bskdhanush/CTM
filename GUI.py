@@ -14,13 +14,14 @@ from tkinter.scrolledtext import ScrolledText
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
-import time
+import logging
 
 # ── 3rd-party ──────────────────────────────────────────────────────────────
 import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
+from GUI_modules import DataMonitorPage
 import MainController
 import WifiController
 import QutsController
@@ -135,6 +136,32 @@ def launch_gui() -> None:
     """Construct and run the UI."""
     global root 
 
+    # ── json watcher  ──────────────────────────────────────────────────────────
+    class JsonFileWatcher(FileSystemEventHandler):
+        def __init__(self, callback, file_path_to_watch):
+            self.callback = callback
+            self.file_path_to_watch = file_path_to_watch
+
+        def on_modified(self, event):
+            # only react if *that* JSON file changed
+            if event.src_path == str(self.file_path_to_watch):
+                # schedule the UI update on the Tk main thread
+                if root is not None:
+                    root.after(0, self.callback)
+            logging.info(f"JSON Watcher: File modified - {event.src_path}")
+
+    def start_json_file_watcher(callback, file_path_to_watch):
+        obs = Observer()
+        handler = JsonFileWatcher(callback, file_path_to_watch)
+        watch_dir = os.path.dirname(file_path_to_watch)
+        if not os.path.exists(watch_dir):
+            os.makedirs(watch_dir)
+        obs.schedule(handler, watch_dir, recursive=False)
+        obs.start()
+        # keep it running in background
+        threading.Thread(target=obs.join, daemon=True).start()
+   
+
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
     root.title("CPE Test Manager V2.0")
@@ -146,7 +173,6 @@ def launch_gui() -> None:
     # ── Styles ──────────────────────────────────────────────────────────
     style = ttk.Style(root)
     style.configure("Sidebar.TFrame", background="#2a2a2e")
-
 
     # ── header (mini) ───────────────────────────────────────────────────────
     header_frame = ttk.Frame(root)
@@ -201,30 +227,7 @@ def launch_gui() -> None:
         command=cc.rest_counter
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
-    # ­—----- start the app_JSON watcher ­-----—
-    class JsonFileWatcher(FileSystemEventHandler):
-        def __init__(self, callback, file_path_to_watch):
-            self.callback = callback
-            self.file_path_to_watch = file_path_to_watch
-
-        def on_modified(self, event):
-            # only react if *that* JSON file changed
-            if event.src_path == str(self.file_path_to_watch):
-                # schedule the UI update on the Tk main thread
-                if root is not None:
-                    root.after(0, self.callback)
-
-    def start_json_file_watcher(callback, file_path_to_watch):
-        obs = Observer()
-        handler = JsonFileWatcher(callback, file_path_to_watch)
-        watch_dir = os.path.dirname(file_path_to_watch)
-        if not os.path.exists(watch_dir):
-            os.makedirs(watch_dir)
-        obs.schedule(handler, watch_dir, recursive=False)
-        obs.start()
-        # keep it running in background
-        threading.Thread(target=obs.join, daemon=True).start()
-   
+    
     def load_counters():
         cfg = JH.load_json()
         crash_count = cfg.get("crash_counter", 0)
@@ -896,7 +899,7 @@ def launch_gui() -> None:
     ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
     .pack(side="right")
 
-
+    """
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)
     data_pg.grid(row=0, column=0, sticky="nsew")
@@ -938,7 +941,8 @@ def launch_gui() -> None:
     rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
     rdp.periodic_refresh(list_fr)
-
+    """
+    DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
 
 
     # ── Launch ────────────────────────────────────────────────────────────────

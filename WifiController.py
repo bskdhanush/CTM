@@ -120,7 +120,7 @@ def connectBackhaul():
     ]
     run_dmcli_commands(commands)
 
-def update_3_slo_config_owrt(Config):
+def update_3_slo_config_owrt(Config, devicetype):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
@@ -130,7 +130,10 @@ def update_3_slo_config_owrt(Config):
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json')
-    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo.json')
+    if devicetype == "Kobuk":
+        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo_KOBUK.json')
+    else:
+        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo_SDx75.json')       
 
     if not os.path.exists(file_to_check):
         with open(template_file, 'r') as f:
@@ -143,7 +146,7 @@ def update_3_slo_config_owrt(Config):
     run_command(f"adb push {file_to_check} /data/dapp/TC_ondevice.json")
     run_command("adb reboot")
 
-def update_2g5g_mlo_config_owrt(Config):
+def update_2g5g_mlo_config_owrt(Config, devicetype):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
@@ -153,7 +156,10 @@ def update_2g5g_mlo_config_owrt(Config):
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json')
-    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo.json')
+    if devicetype == "Kobuk":
+        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_KOBUK.json')
+    else:
+        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_SDx75.json')   
 
     if not os.path.exists(file_to_check):
         with open(template_file, 'r') as f:
@@ -168,7 +174,7 @@ def update_2g5g_mlo_config_owrt(Config):
     run_command("adb reboot")
     print("done")
 
-def update_3_mlo_config_owrt(Config):
+def update_3_mlo_config_owrt(Confi, devicetyp):
     print("OWRT 3 MLO selected with test SSID")
 
 
@@ -259,8 +265,10 @@ def update_3_mlo_config():
 
 def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
+    result = False
     try:
         meta = get_meta_build_info()
+        result = "LE.1.2" in meta
     except Exception as e:
         raise Exception(e)
 
@@ -279,9 +287,14 @@ def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # elif meta and 'LE.1.2' in meta:
     elif toggle_var == 'OWRT':
         # LE.1.2 - QCMAP_CLI
+        if result:
+            devicetype = "SDx75"
+        else:
+            devicetype = "Kobuk"
+
         if wifi_config == 0:
-            update_3_slo_config_owrt(config)
+            update_3_slo_config_owrt(config, devicetype)
         elif wifi_config == 1:
-            update_2g5g_mlo_config_owrt(config)
+            update_2g5g_mlo_config_owrt(config, devicetype)
         elif wifi_config == 2:
-            update_3_mlo_config_owrt(config)
+            update_3_mlo_config_owrt(config, devicetype)

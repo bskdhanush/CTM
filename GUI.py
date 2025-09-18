@@ -21,6 +21,7 @@ import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
+from GUI_modules import DataMonitorPage
 import MainController
 import WifiController
 import QutsController
@@ -898,7 +899,7 @@ def launch_gui() -> None:
     ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
     .pack(side="right")
 
-
+    """
     # ── DATA MONITOR page ───────────────────────────────────────────────
     data_pg = ttk.Frame(container)
     data_pg.grid(row=0, column=0, sticky="nsew")
@@ -940,7 +941,8 @@ def launch_gui() -> None:
     rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
     rdp.periodic_refresh(list_fr)
-
+    """
+    DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
 
 
     # ── Launch ────────────────────────────────────────────────────────────────

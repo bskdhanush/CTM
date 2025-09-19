@@ -584,6 +584,7 @@ def launch_gui() -> None:
     
     OWRT_CHOICES = ("3 SLO", "2G-5G MLO", "3 MLO")
     RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
+    Kobuk_CHOICES = ("2G SLO", "5G SLO", "6G SLO", "2G-5G MLO", "3 MLO")
 
     toggle_var = tk.StringVar(value="OWRT")
 
@@ -603,6 +604,13 @@ def launch_gui() -> None:
         variable=toggle_var,
         value="RDKB",
     ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
+   
+    ttk.Radiobutton(
+        toggle_fr,
+        text="Kobuk",
+        variable=toggle_var,
+        value="Kobuk",
+    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
 
 
 
@@ -613,7 +621,14 @@ def launch_gui() -> None:
     wifi_dd.pack(padx=20, pady=10)
 
     def _update_choices(*_):
-        choices = OWRT_CHOICES if toggle_var.get() == "OWRT" else RDKB_CHOICES
+        if toggle_var.get() == "OWRT":
+           choices = OWRT_CHOICES
+        elif toggle_var.get() == "RDKB":
+            choices = RDKB_CHOICES
+        elif toggle_var.get() == "Kobuk":
+            choices = Kobuk_CHOICES
+        else:
+            choices = []
         wifi_dd.configure(values=choices)
         # Set current value to first choice if not in choices
         cur = wifi_dd.get()

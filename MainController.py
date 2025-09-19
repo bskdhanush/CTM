@@ -51,7 +51,7 @@ if getattr(sys, 'frozen', False):
     # ensure both crashDump and logs folders exist
     os.makedirs(JH.LOG_DIR, exist_ok=True)
 
-    # redirect stderr into a separate file
+    # redirect stderr into a separate fileg
     sys.stderr = open(os.path.join(JH.LOG_DIR, "app_errors.log"), "w")
 
 def log_exception(exc_type, exc_value, exc_traceback):

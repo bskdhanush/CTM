@@ -120,7 +120,7 @@ def connectBackhaul():
     ]
     run_dmcli_commands(commands)
 
-def update_3_slo_config_owrt(Config, devicetype):
+def update_3_slo_config_owrt(Config):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
@@ -130,10 +130,7 @@ def update_3_slo_config_owrt(Config, devicetype):
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json')
-    if devicetype == "Kobuk":
-        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo_KOBUK.json')
-    else:
-        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo_SDx75.json')       
+    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_3slo_SDx75.json')       
 
     if not os.path.exists(file_to_check):
         with open(template_file, 'r') as f:
@@ -146,7 +143,7 @@ def update_3_slo_config_owrt(Config, devicetype):
     run_command(f"adb push {file_to_check} /data/dapp/TC_ondevice.json")
     run_command("adb reboot")
 
-def update_2g5g_mlo_config_owrt(Config, devicetype):
+def update_2g5g_mlo_config_owrt(Config):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
@@ -156,10 +153,7 @@ def update_2g5g_mlo_config_owrt(Config, devicetype):
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json')
-    if devicetype == "Kobuk":
-        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_KOBUK.json')
-    else:
-        template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_SDx75.json')   
+    template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_SDx75.json')   
 
     if not os.path.exists(file_to_check):
         with open(template_file, 'r') as f:
@@ -174,8 +168,17 @@ def update_2g5g_mlo_config_owrt(Config, devicetype):
     run_command("adb reboot")
     print("done")
 
-def update_3_mlo_config_owrt(Confi, devicetyp):
+def update_3_mlo_config_owrt(Confi):
     print("OWRT 3 MLO selected with test SSID")
+
+
+def Update_3_mlo_config_Kubok(Config):  
+    #template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_KOBUK.json') 
+    print("Kobuk 3 MLO selected with test SSID")
+
+def Update_2_mlo_config_Kubok(Config):
+   # template_file = os.path.join(template_path, 'OWRT_TC_ondevice_2_mlo_KOBUK.json') 
+   print("Kobuk 2 MLO selected with test SSID")
 
 
 def update_3_slo_config_rdkb(Config):
@@ -266,11 +269,11 @@ def update_3_mlo_config():
 def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
     result = False
-    try:
-        meta = get_meta_build_info()
-        result = "LE.1.2" in meta
-    except Exception as e:
-        raise Exception(e)
+    # try:
+    #     meta = get_meta_build_info()
+    #     result = "LE.1.2" in meta
+    # except Exception as e:
+    #     raise Exception(e)
 
     # if meta and 'LE.2.2' in meta:
     if toggle_var == 'RDKB':
@@ -287,14 +290,16 @@ def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # elif meta and 'LE.1.2' in meta:
     elif toggle_var == 'OWRT':
         # LE.1.2 - QCMAP_CLI
-        if result:
-            devicetype = "SDx75"
-        else:
-            devicetype = "Kobuk"
-
         if wifi_config == 0:
-            update_3_slo_config_owrt(config, devicetype)
+            update_3_slo_config_owrt(config)
         elif wifi_config == 1:
-            update_2g5g_mlo_config_owrt(config, devicetype)
+            update_2g5g_mlo_config_owrt(config)
         elif wifi_config == 2:
-            update_3_mlo_config_owrt(config, devicetype)
+            update_3_mlo_config_owrt(config)
+
+    elif toggle_var == 'Kobuk':
+        if wifi_config == 0:
+            Update_3_mlo_config_Kubok(config)
+        elif wifi_config == 1:
+            Update_2_mlo_config_Kubok(config)
+         

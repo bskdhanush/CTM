@@ -269,11 +269,11 @@ def update_3_mlo_config():
 def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
     result = False
-    try:
-        meta = get_meta_build_info()
-        result = "LE.1.2" in meta
-    except Exception as e:
-        raise Exception(e)
+    # try:
+    #     meta = get_meta_build_info()
+    #     result = "LE.1.2" in meta
+    # except Exception as e:
+    #     raise Exception(e)
 
     # if meta and 'LE.2.2' in meta:
     if toggle_var == 'RDKB':

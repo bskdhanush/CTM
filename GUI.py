@@ -130,6 +130,7 @@ red_accent  = "#E95959"
 # ── Global toggle variable ─────────────────────────────────────────────────
 
 root =None
+observers = []  # Global list to track all observers
 
 
 def launch_gui() -> None:
@@ -143,13 +144,22 @@ def launch_gui() -> None:
             self.file_path_to_watch = file_path_to_watch
 
         def on_modified(self, event):
-            # only react if *that* JSON file changed
+    # only react if *that* JSON file changed
             if event.src_path == str(self.file_path_to_watch):
-                # schedule the UI update on the Tk main thread
+                # schedule the UI update on the Tk main thread with safety checks
                 if root is not None:
-                    root.after(0, self.callback)
-            logging.info(f"JSON Watcher: File modified - {event.src_path}")
+                    try:
+                        # Check if the root window still exists and is valid
+                        if root.winfo_exists():
+                            root.after(0, self.callback)
+                            logging.info(f"JSON Watcher: File modified - {event.src_path}")
+                    except tk.TclError:
+                        # Main thread/window no longer exists, ignore silently
+                        pass
 
+    
+
+# Modify start_json_file_watcher function around line 155:
     def start_json_file_watcher(callback, file_path_to_watch):
         obs = Observer()
         handler = JsonFileWatcher(callback, file_path_to_watch)
@@ -158,6 +168,7 @@ def launch_gui() -> None:
             os.makedirs(watch_dir)
         obs.schedule(handler, watch_dir, recursive=False)
         obs.start()
+        observers.append(obs)  # Track the observer
         # keep it running in background
         threading.Thread(target=obs.join, daemon=True).start()
    
@@ -341,34 +352,34 @@ def launch_gui() -> None:
         status = dmc.get_internet_status()
         if status == 1:
             center_var.set("Internet status: GOOD")
-            internet_label.configure(foreground="green", font=("Segoe UI", 14) )
-
+            internet_label.configure(foreground="green", font=("Segoe UI", 14))
         elif status == 0:
             center_var.set("Internet status: DOWN")
             internet_label.configure(foreground="red", font=("Segoe UI", 14))
-
         else:
             center_var.set("Internet status")
             internet_label.configure(foreground="white", font=("Segoe UI", 12))
-            
+        
+        # Safety check before scheduling next update
         if root is not None:
-            root.after(5000, update_internet_status)
-
-
-    root.after(0, update_internet_status)
-
+            try:
+                if root.winfo_exists():
+                    root.after(5000, update_internet_status)
+            except tk.TclError:
+                pass
 
     def _update_quts() -> None:
         running = QutsController.is_service_running("QUTS")
         quts_stat_var.set(f"QUTS: {'Running' if running else 'Stopped'}")
-
-        quts_label.config(
-            fg=white_accent if running else red_accent)
+        quts_label.config(fg=white_accent if running else red_accent)
+        
+        # Safety check before scheduling next update
         if root is not None:
-            root.after(3_000, _update_quts)
-
-  
-    _update_quts()
+            try:
+                if root.winfo_exists():
+                    root.after(3_000, _update_quts)
+            except tk.TclError:
+                pass
 
     # ── MAIN PAGE ─────────────────────────────────────────────────────────
     main_pg = ttk.Frame(container)
@@ -962,6 +973,20 @@ def launch_gui() -> None:
 
     # ── Launch ────────────────────────────────────────────────────────────────
     show("Main")
+
+    def on_closing():
+        global observers
+        for obs in observers:
+            try:
+                obs.stop()
+                obs.join(timeout=1)  # Wait max 1 second
+            except Exception as e:
+                logging.error(f"Error stopping observer: {e}")
+        observers.clear()
+        if root is not None:
+            root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
 

@@ -24,7 +24,7 @@ def get_sorted_dirs(base):
 def get_base(BASE_DIR):
     base_dir_list = []
     dirs = get_sorted_dirs(BASE_DIR)
-    print(dirs)
+    # print(dirs)
     for dir in dirs:
         if os.path.exists(os.path.join(BASE_DIR, dir, 'old_data.txt')):
             continue
@@ -48,7 +48,7 @@ def get_base(BASE_DIR):
                 date = datetime.strptime(date_str, "%Y%m%d%H%M%S")
                 now = datetime.now()
                 delta = now - date
-                print(delta)
+                # print(delta)
                 if int((now-date).total_seconds()) < timeout:
                     base_dir_list.append(os.path.join(BASE_DIR, dir))
                     break
@@ -89,7 +89,7 @@ def get_speedtest_csv_list():
         print(f'Exception during get_speedtest_csv_list: {e}')
 
     for csv in csv_speedtest_list:
-        print(f'Copying {csv}')
+        #print(f'Copying {csv}')
         shutil.copy(csv, LOG_DIR)
 
 def get_total_copy_csv_list():
@@ -119,7 +119,7 @@ def copy_latest_csv():
 
     total_csv_copy_list = get_total_copy_csv_list()
     for csv in total_csv_copy_list:
-        print(f'Copying {csv}')
+        #print(f'Copying {csv}')
         shutil.copy(csv, LOG_DIR)
 
 

@@ -133,44 +133,50 @@ root =None
 observers = []  # Global list to track all observers
 
 
+class JsonFileWatcher(FileSystemEventHandler):
+    def __init__(self, callback, file_path_to_watch, tk_root: tk.Tk):
+        self.callback = callback
+        self.file_path_to_watch = str(file_path_to_watch)
+        self.tk_root = tk_root
+
+
+    def on_modified(self, event):
+        if event.src_path == self.file_path_to_watch:
+            def safe_update():
+                try:
+                    if self.tk_root.winfo_exists():
+                        self.callback()
+                except tk.TclError:
+                    pass
+            try:
+                self.tk_root.after(0, safe_update)
+                logging.info(f"JSON Watcher: File modified - {event.src_path}")
+            except tk.TclError:
+                pass
+
+
+
+
+def start_json_file_watcher(callback, file_path_to_watch, tk_root: tk.Tk):
+    obs = Observer()
+    handler = JsonFileWatcher(callback, file_path_to_watch, tk_root)
+
+
+    watch_dir = os.path.dirname(file_path_to_watch)
+    if not os.path.exists(watch_dir):
+        os.makedirs(watch_dir)
+
+
+    obs.schedule(handler, watch_dir, recursive=False)
+    obs.start()
+    observers.append(obs)
+
+
 def launch_gui() -> None:
     """Construct and run the UI."""
     global root 
 
     # ── json watcher  ──────────────────────────────────────────────────────────
-    class JsonFileWatcher(FileSystemEventHandler):
-        def __init__(self, callback, file_path_to_watch):
-            self.callback = callback
-            self.file_path_to_watch = file_path_to_watch
-
-        def on_modified(self, event):
-    # only react if *that* JSON file changed
-            if event.src_path == str(self.file_path_to_watch):
-                # schedule the UI update on the Tk main thread with safety checks
-                if root is not None:
-                    try:
-                        # Check if the root window still exists and is valid
-                        if root.winfo_exists():
-                            root.after(0, self.callback)
-                            logging.info(f"JSON Watcher: File modified - {event.src_path}")
-                    except tk.TclError:
-                        # Main thread/window no longer exists, ignore silently
-                        pass
-
-    
-
-# Modify start_json_file_watcher function around line 155:
-    def start_json_file_watcher(callback, file_path_to_watch):
-        obs = Observer()
-        handler = JsonFileWatcher(callback, file_path_to_watch)
-        watch_dir = os.path.dirname(file_path_to_watch)
-        if not os.path.exists(watch_dir):
-            os.makedirs(watch_dir)
-        obs.schedule(handler, watch_dir, recursive=False)
-        obs.start()
-        observers.append(obs)  # Track the observer
-        # keep it running in background
-        threading.Thread(target=obs.join, daemon=True).start()
    
 
     # ── Window ──────────────────────────────────────────────────────────
@@ -265,7 +271,7 @@ def launch_gui() -> None:
     load_counters()  # initial
 
      # start watching the JSON for changes
-    start_json_file_watcher(load_counters, cc.CONFIG_PATH)
+    start_json_file_watcher(load_counters, cc.CONFIG_PATH,root)
 
 
     # ── Grid weights ─────────────────────────────────────────────────────
@@ -342,7 +348,7 @@ def launch_gui() -> None:
             adb_id = "--"
 
     update_label()
-    start_json_file_watcher(update_label,Path(ADBController.json_path))
+    start_json_file_watcher(update_label,Path(ADBController.json_path), root)
 
 # # this returns immediately and never blocks your mainloop
     #MainController.start_adb_track_thread(root, update_label)
@@ -405,7 +411,7 @@ def launch_gui() -> None:
         relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
 
     update_timestamps()
-    start_json_file_watcher(update_timestamps, JH.get_json_path())
+    start_json_file_watcher(update_timestamps, JH.get_json_path(), root)
 
 
     row = ttk.Frame(ctrl)

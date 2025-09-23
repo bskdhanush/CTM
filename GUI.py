@@ -1,19 +1,15 @@
 from __future__ import annotations          # for | typing in <3.10
 
 # ── stdlib ──────────────────────────────────────────────────────────────────
-import  datetime as dt
 import os
-from functools import partial
 import json
 from pathlib import Path
 import platform
 import tkinter as tk
-from tkinter import ttk ,filedialog, messagebox
-from tkinter import filedialog
+from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import threading
 import logging
 
 # ── 3rd-party ──────────────────────────────────────────────────────────────
@@ -21,17 +17,15 @@ import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
-from GUI_modules import DataMonitorPage
+from GUI_modules import DataMonitorPage, HomePage, QutsPage, SpeedTestPage, QSTAFInstallerPage, WIFIRenaimngPage
 import MainController
 import WifiController
 import QutsController
-import AwsScheduler as aws
 import DataMonitorController as dmc
-import PlotDynamicRender as rdp
 import CrashCountController as cc
 import JsonHandler as JH
-import gitReleases as gr
-import QSTAFInstaller 
+
+
 
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -153,10 +147,6 @@ class JsonFileWatcher(FileSystemEventHandler):
                 logging.info(f"JSON Watcher: File modified - {event.src_path}")
             except tk.TclError:
                 pass
-
-
-
-
 def start_json_file_watcher(callback, file_path_to_watch, tk_root: tk.Tk):
     obs = Observer()
     handler = JsonFileWatcher(callback, file_path_to_watch, tk_root)
@@ -349,11 +339,6 @@ def launch_gui() -> None:
 
     update_label()
     start_json_file_watcher(update_label,Path(ADBController.json_path), root)
-
-# # this returns immediately and never blocks your mainloop
-    #MainController.start_adb_track_thread(root, update_label)
-
-
     def update_internet_status():
         status = dmc.get_internet_status()
         if status == 1:
@@ -386,598 +371,29 @@ def launch_gui() -> None:
                     root.after(3_000, _update_quts)
             except tk.TclError:
                 pass
+    _update_quts()
 
-    # ── MAIN PAGE ─────────────────────────────────────────────────────────
-    main_pg = ttk.Frame(container)
-    main_pg.grid(row=0, column=0, sticky="nsew")
-    pages["Main"] = main_pg
-    add_nav("Main", "Main")
+    # ── MAIN PAGE ────────────────────────────────────────────────────────────
+    HomePage.create_Home_Page(container, pages, add_nav, root)
 
-    # Framework control
-    ctrl = ttk.LabelFrame(main_pg, text="Framework Control")
-    ctrl.pack(fill="x", **PADDING)# type: ignore
-    control_ts_var = tk.StringVar(value="Control: Not started")
-    traffic_ts_var = tk.StringVar(value="Traffic: Not started")
-    relaunch_timer=tk.StringVar(value="The frameworks will restart in:")
-    rest_timer=tk.StringVar(value="none")
 
-    def update_timestamps():
-        cfg = JH.load_json()
-        cts = cfg.get("control_start_timestamp")
-        tts = cfg.get("traffic_start_timestamp")
-        rest_timer=cfg.get("relaunch_timer")
-        control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
-        traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
-        relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
+    # ── QUTS page ────────────────────────────────────────────────────────────
+    QutsPage.create_Quts_Page(container, pages, add_nav)
 
-    update_timestamps()
-    start_json_file_watcher(update_timestamps, JH.get_json_path(), root)
+    # ── WIFI CONFIG page ─────────────────────────────────────────────────────
+    WIFIRenaimngPage.create_wifi_renaming_page(container, pages, add_nav)
 
+    # ── Speed test page ──────────────────────────────────────────────────────
+    SpeedTestPage.create_speed_Test_page(container, pages, add_nav)
 
-    row = ttk.Frame(ctrl)
-    row.pack(fill="x", **PADDING)# type: ignore
-    row_s = ttk.Frame(ctrl)
-    row_s.pack(fill="x", **PADDING)# type: ignore
-    row_text=ttk.Frame(ctrl)
-    row_text.pack(fill="x", **PADDING)# type: ignore
-    row_text.columnconfigure(0, weight=1)
-    row_text.columnconfigure(1, weight=1)
-    row_relaunch = ttk.Frame(ctrl)
-    row_relaunch.pack(fill="x", **PADDING)# type: ignore
+    # ── QSTAF installer page ─────────────────────────────────────────────────
+    QSTAFInstallerPage. create_Qstaf_install_page(container, pages, add_nav)
 
-    ttk.Button(
-        row,
-        text="Launch Control Framework",
-        command=lambda:MainController.start_framework("control"), # type: ignore
-        width=18,
-    ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
-
-    ttk.Button(
-        row,
-        text="Launch Traffic Framework",
-        command=lambda:MainController.start_framework("traffic"), # type: ignore
-        width=18,
-    ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
-
-    ttk.Button(
-        row_s,
-        text="Stop Control Framework",
-        command=partial(MainController.stop_framework,"control"),
-        width=18,
-    ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
-
-    ttk.Button(
-        row_s,
-        text="Stop Traffic Framework",
-        command=partial(MainController.stop_framework,"traffic"),
-        width=18,
-    ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
-
-    ttk.Label(
-        row_text,
-        textvariable=control_ts_var,
-        anchor="center"
-    ).grid(row=0, column=0, sticky="ew", padx=5, pady=6)
-
-    ttk.Label(
-        row_text,
-        textvariable=traffic_ts_var,
-        anchor="center"
-    ).grid(row=0, column=1, sticky="ew", padx=5, pady=6)
-
-    ttk.Label(
-        row_relaunch,
-        textvariable=relaunch_timer,
-    ).pack(side="left", expand=True, fill="x", padx=(20, 6), ipady=6)
-    
-    reset_val_var = tk.StringVar(value=" ")
-    ttk.Entry(
-    row_relaunch, 
-    textvariable=reset_val_var, 
-    width=4
-    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
-
-    ttk.Button(
-        row_relaunch,
-        text="Update Restart Timer",
-        command=lambda: set_manual_count()
-    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
-    
-    def set_manual_count() -> None:
-        try:
-            new_count = int(reset_val_var.get())
-        except ValueError:
-        # could pop up a warning here instead
-            return
-
-        cfg = JH.load_json()
-        cfg["relaunch_timer"] = new_count
-    # if you also want to set the RDKB counter too, uncomment:
-    # cfg["rdkbcrash_counter"] = new_count
-
-        JH.save_json(cfg)
-        update_timestamps()    
-
-
-
-    # AWS S3 uploader
-    aws_fr = ttk.LabelFrame(main_pg, text="AWS S3 Uploader")
-    aws_fr.pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        aws_fr,
-        text="Run S3 Uploader",
-        command=MainController.run_s3_uploader,
-    ).pack(fill="x", padx=16, pady=8, ipady=8)
-
-    aws_var = tk.BooleanVar(value=aws.is_enabled())
-
-    def _toggle_aws() -> None:
-        aws.set_enabled(aws_var.get())
-
-    ttk.Checkbutton(
-        aws_fr,
-        text="Auto-run daily at 4 PM",
-        variable=aws_var,
-        command=_toggle_aws,
-    ).pack(anchor="w", padx=16)
-
-
-
-    # ── QUTS page ────────────────────────────────────────────────────────
-    quts_pg = ttk.Frame(container)
-    quts_pg.grid(row=0, column=0, sticky="nsew")
-    pages["QUTS"] = quts_pg
-    add_nav("QUTS Tools", "QUTS")
-
-    # Select which tools to manage (side-by-side)
-    tools_fr = ttk.LabelFrame(quts_pg, text="Select Tools")
-    tools_fr.pack(fill="x", **PADDING) # type: ignore
-
-    quts_var = tk.BooleanVar(value=False)
-    pcat_var = tk.BooleanVar(value=True)
-    qxdm_var = tk.BooleanVar(value=False)
-
-    # Use a little inner frame so the LabelFrame text stays above
-    inner = ttk.Frame(tools_fr)
-    inner.pack(padx=10, pady=6, fill="x")
-
-    ttk.Checkbutton(inner, text="QUTS Service", variable=quts_var)\
-        .grid(row=0, column=0, padx=8, pady=4, sticky="w")
-    ttk.Checkbutton(inner, text="PCAT", variable=pcat_var)\
-        .grid(row=0, column=1, padx=8, pady=4, sticky="w")
-    ttk.Checkbutton(inner, text="QXDM", variable=qxdm_var)\
-        .grid(row=0, column=2, padx=8, pady=4, sticky="w")
-
-    # Start/Stop buttons
-    btn_fr = ttk.Frame(quts_pg)
-    btn_fr.pack(fill="x", **PADDING) # type: ignore
-
-    def start_selected_tools():
-        if quts_var.get() and pcat_var.get() and qxdm_var.get():
-            MainController.start_all()
-        else:
-            if quts_var.get():
-                QutsController.start_quts()
-            if pcat_var.get():
-                MainController.start_Pact_only()
-            if qxdm_var.get():
-                MainController.start_QXDM_only()
-
-    def stop_selected_tools():
-        if quts_var.get():
-            QutsController.stop_quts()
-        if pcat_var.get():
-            MainController.stop_pcat_only()
-        if qxdm_var.get():
-            MainController.stop_qxdm_only()
-
-    ttk.Button(
-        btn_fr,
-        text="Start",
-        command=start_selected_tools,
-        width=18,
-    ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
-
-    ttk.Button(
-        btn_fr,
-        text="Stop",
-        command=stop_selected_tools,
-        width=18,
-    ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
-
-    # ── WIFI CONFIG page ────────────────────────────────────────────────
-    wifi_pg = ttk.Frame(container)
-    wifi_pg.grid(row=0, column=0, sticky="nsew")
-    pages["Wifi"] = wifi_pg
-    add_nav("Set/Rename WIFI", "Wifi")
-
-        # ── Toggle Options ────────────────────────────────────────────────────
-
-    toggle_fr = ttk.LabelFrame(wifi_pg, text="Toggle Options")
-    toggle_fr.pack(fill="x", **PADDING) # type: ignore
-
-    
-    OWRT_CHOICES = ("3 SLO", "2G-5G MLO", "3 MLO")
-    RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    Kobuk_CHOICES = ("2G SLO", "5G SLO", "6G SLO", "2G-5G MLO", "3 MLO")
-
-    toggle_var = tk.StringVar(value="OWRT")
-
-    # Two radiobuttons share the same StringVar, so only one can be “on” at a time
-
-
-    ttk.Radiobutton(
-        toggle_fr,
-        text="OWRT (ATT)",
-        variable=toggle_var,
-        value="OWRT",
-    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
-
-    ttk.Radiobutton(
-        toggle_fr,
-        text="RDKB (TMO)",
-        variable=toggle_var,
-        value="RDKB",
-    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
-   
-    ttk.Radiobutton(
-        toggle_fr,
-        text="Kobuk",
-        variable=toggle_var,
-        value="Kobuk",
-    ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
-
-
-
-    wifi_sel = ttk.LabelFrame(wifi_pg, text="Select Config Type" )
-    wifi_sel.pack(fill="x", **PADDING)# type: ignore
-
-    wifi_dd = ttk.Combobox(wifi_sel, state="readonly")
-    wifi_dd.pack(padx=20, pady=10)
-
-    def _update_choices(*_):
-        if toggle_var.get() == "OWRT":
-           choices = OWRT_CHOICES
-        elif toggle_var.get() == "RDKB":
-            choices = RDKB_CHOICES
-        elif toggle_var.get() == "Kobuk":
-            choices = Kobuk_CHOICES
-        else:
-            choices = []
-        wifi_dd.configure(values=choices)
-        # Set current value to first choice if not in choices
-        cur = wifi_dd.get()
-        wifi_dd.set(cur if cur in choices and cur else choices[0])
-
-    toggle_var.trace_add("write", _update_choices)
-    _update_choices() 
-
-
-   
-
-    ttk.Button(
-        wifi_sel,
-        text="Set config",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Config_SSID"),
-    ).pack(fill="x", **PADDING)# type: ignore
-
-
-    test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest")
-    test_sel.pack(fill="x", **PADDING )# type: ignore  
-
-
-    ttk.Button(
-        test_sel,
-        text="Set Test SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Test_SSID"),
-    ).pack(fill="x", **PADDING)# type: ignore
-
-
-    ttk.Button(
-        test_sel,
-        text="Set Default SSID",
-        command=lambda: WifiController.update_cpe_wifi_config(toggle_var.get(),wifi_dd.current(), "Default_SSID"),
-    ).pack(fill="x", **PADDING)# type: ignore
-
-
-    # ── TESTING page ─────────────────────────────────────────────────────
-    test_pg = ttk.Frame(container)
-    test_pg.grid(row=0, column=0, sticky="nsew")
-    pages["Testing"] = test_pg
-    add_nav("SpeedTest", "Testing")
-
-    
-    SpeedTest = ttk.LabelFrame(test_pg, text="Start speed test")
-    SpeedTest.pack(fill="x", **PADDING)# type: ignore  
-
-    ttk.Label(
-    SpeedTest,
-    text="Enter the number of iterations:",
-    anchor="w"
-    ).pack(side="left", fill="x", expand=True,padx=(20, 0))
-
-    iterationCount = tk.StringVar(value="1")
-    ttk.Entry(
-        SpeedTest,
-        textvariable=iterationCount,
-        width=4
-    ).pack(side="left", padx=(8, 0))
-
-    def get_iteration_count():
-        try:
-            return int(iterationCount.get())
-        except ValueError:
-            messagebox.showerror("Invalid Input", "Please enter a valid integer for iteration count.")
-            return None
-
-    ttk.Button(
-        SpeedTest,
-        text="Start Speed Test",
-        command=lambda:MainController.SpeedTest(get_iteration_count(), load_data_table),
-    ).pack(fill="x", **PADDING)# type: ignore
-
-    # ── Speed Test Data table ───────────────────────────────────────────
-    
-    SpeedTest_table = ttk.LabelFrame(test_pg, text="Speed Test Data")
-    SpeedTest_table.pack(fill="both", expand=True, **PADDING)  # type: ignore
-
-    # Make the LabelFrame act like a grid container
-    SpeedTest_table.rowconfigure(0, weight=0)   # table row grows
-    SpeedTest_table.columnconfigure(0, weight=1)
-
-    COLUMNS = ("DL", "UL", "Band Info","Location","TimeStamp","adbid")  # include Location
-
-    tree = ttk.Treeview(
-        SpeedTest_table,
-        columns=COLUMNS,
-        show="headings",
-        height=4,  # visible rows
-    )
-
-    # Headings
-    tree.heading("TimeStamp", text="TimeStamp")
-    tree.heading("DL",        text="DL (Mbps)")
-    tree.heading("UL",        text="UL (Mbps)")
-    tree.heading("adbid",     text="ADB ID")
-    tree.heading("Location",    text="Location")
-    tree.heading("Band Info",    text="Band Info")
-
-    # Column widths; set some stretch=False so total width exceeds widget -> enables X scroll
-    tree.column("TimeStamp", width=170, anchor="center", stretch=False)
-    tree.column("DL",        width=120, anchor="center", stretch=False)
-    tree.column("UL",        width=120, anchor="center", stretch=False)
-    tree.column("adbid",     width=140, anchor="center", stretch=False)
-    tree.column("Location",    width=180, anchor="center", stretch=True)
-    tree.column("Band Info",    width=180, anchor="center", stretch=True)
-
-    # Scrollbars
-    vscroll = ttk.Scrollbar(SpeedTest_table, orient="vertical",   command=tree.yview)
-    hsb     = ttk.Scrollbar(SpeedTest_table, orient="horizontal", command=tree.xview)
-
-    # Wire scrollbars to the tree
-    tree.configure(yscrollcommand=vscroll.set, xscrollcommand=hsb.set)
-
-    # Layout (tree row 0, hsb row 1, button row 2; vscroll spans rows 0-1)
-    tree.grid(row=0, column=0, sticky="nsew")
-    vscroll.grid(row=0, column=1, sticky="ns", rowspan=2)
-    hsb.grid(row=1, column=0, sticky="ew")
-
-    # Refresh button BELOW the hscrollbar (row 2)
-    ttk.Button(
-        SpeedTest_table,
-        text="Refresh Data",
-        command=lambda: (MainController.get_all_speedtest_results(), load_data_table()),
-    ).grid(row=2, column=0, sticky="ew", padx=10, pady=(6, 0))
-
-
-    def load_data_table():
-        """Read JSON list and (re)populate the table."""
-        data = JH.load_json().get("SpeedTestData", []) 
-        tree.delete(*tree.get_children())  # <-- adjust key to your JSON
-    # Clear
-        for row in data:
-            tree.insert(
-            "",
-            "end",
-            values=(
-                row.get("DL", ""),
-                row.get("UL", ""),
-                row.get("BAND", ""),
-                row.get("LOCATION", ""),
-                row.get("TIMESTAMP", ""),
-                row.get("ADBID", "")
-            )
-        )
-    # initial fill
-    load_data_table()
-    #start_json_file_watcher(load_data_table, JH.get_json_path())
-    
-
-    # ── QSTAF update page ─────────────────────────────────────────────────────
-    QSTAF_pg = ttk.Frame(container)
-    QSTAF_pg.grid(row=0, column=0, sticky="nsew")
-    pages["QSTAF"] = QSTAF_pg
-    add_nav("Install QSTAF", "QSTAF")
-    # avaible_ver=gr.get_all_tags()
-
-    # ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
-    # ver_sel.pack(fill="x", **PADDING)# type: ignore  
-
-    # select_ver = ttk.Combobox(ver_sel, values=avaible_ver, state="readonly")
-    # select_ver.current(0)
-    # select_ver.pack(padx=20, pady=10)
-    # selected_zip = tk.StringVar(value="No file selected")
-
-    # ttk.Button(
-        # ver_sel,
-        # text="Download",
-        # command=lambda:gr.download_asset_by_tag(avaible_ver[select_ver.current()], "."),
-    # ).pack(fill="x", **PADDING)# type: ignore
-
-
-    Qstaf_install = ttk.LabelFrame(QSTAF_pg, text="Select and install QSTAF")
-    Qstaf_install.pack(fill="x", **PADDING)  # type: ignore
-
-# Path label (with hint style)
-    selected_zip = tk.StringVar(value='No file selected — click "Choose archive…"')
-    style.configure("Hint.TLabel", foreground="#6b7280")
-
-    zip_label = ttk.Label(
-        Qstaf_install,
-        textvariable=selected_zip,
-        anchor="w",
-        style="Hint.TLabel",
-    )
-    zip_label.pack(fill="x", **PADDING)  # type: ignore
-
-# --- Progress  Logs ----------------------------------------------------------
-    progress_var = tk.IntVar(value=0)
-    progress_bar = ttk.Progressbar(Qstaf_install, maximum=100, variable=progress_var, mode="determinate")
-    progress_bar.pack(fill="x", padx=16, pady=(0, 8))
-
-    log_box = ScrolledText(Qstaf_install, height=10, wrap="word", state="disabled")
-    log_box.pack(fill="both", expand=False, padx=16, pady=(0, 12))
-
-    def _log(msg: str):
-            ts = dt.datetime.now().strftime("%H:%M:%S")  # type: ignore
-            log_box.configure(state="normal")
-            log_box.insert("end", f"[{ts}] {msg}\n")
-            log_box.see("end")
-            log_box.configure(state="disabled")
-
-    def _run_install(path: str) -> None:
-        """Run QSTAF installer asynchronously and update GUI elements."""
-        # Reset UI and start indeterminate progress
-        progress_var.set(0)
-        progress_bar.configure(mode="indeterminate")
-        progress_bar.start(10)
-        _log(f"Starting install for: {path}")
-
-        top = QSTAF_pg.winfo_toplevel()
-
-        def ui_status(msg: str):
-            # Schedule status log update on the Tk main thread
-            top.after(0, lambda: _log(msg))
-
-        def ui_progress(pct: int):
-            """Update determinate progress bar from 0‑100."""
-            def _upd():
-                # If we are still in indeterminate mode switch first
-                if progress_bar['mode'] == 'indeterminate':
-                    progress_bar.stop()
-                    progress_bar.configure(mode='determinate')
-                progress_var.set(max(0, min(100, int(pct))))
-            top.after(0, _upd)
-
-        def worker():
-            ok = False
-            msg = ""
-            try:
-                ok, msg = QSTAFInstaller.install_qstaf_from_zip(
-                    path,
-                    on_status=ui_status,
-                    on_progress=ui_progress,
-                    keep_temp=False,  # set True if you want to inspect temp folder
-                )
-            except Exception as e:
-                ok, msg = False, str(e)
-            finally:
-                # Always run this to tidy the UI (no pop‑ups)
-                def done():
-                    progress_bar.stop()
-                    progress_bar.configure(mode='determinate')
-                    progress_var.set(100 if ok else 0)
-                    if ok:
-                        _log("Completed." if not msg else f"Completed: {msg}")
-                    else:
-                        _log(f"Failed: {msg or 'Unknown error.'}")
-                top.after(0, done)
-
-        threading.Thread(target=worker, daemon=True).start()
-
-    def _pick_zip() -> None:
-        filePath = filedialog.askopenfilename(
-            title="Select QSTAF archive",
-            filetypes=[
-            ("Archives", "*.zip *.7z"),
-            ("ZIP archives", "*.zip"),
-            ("7z archives", "*.7z"),
-            ("All files", "*.*"),
-        ],
-    )
-        if not filePath:
-            return
-        if not filePath.lower().endswith((".zip", ".7z")):
-            messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
-            return
-
-        selected_zip.set(filePath)
-        zip_label.configure(style="TLabel")  # switch from hint to normal
-        _run_install(filePath)
-
-    btn_row = ttk.Frame(Qstaf_install)
-    btn_row.pack(fill="x", padx=16, pady=(0, 8))
-
-    ttk.Button(btn_row, text="Choose archive…", command=_pick_zip, width=18)\
-    .pack(side="left")
-
-    def _clear_logs():
-        log_box.configure(state="normal")
-        log_box.delete("1.0", "end")
-        log_box.configure(state="disabled")
-
-    ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
-    .pack(side="right")
-
-    """
-    # ── DATA MONITOR page ───────────────────────────────────────────────
-    data_pg = ttk.Frame(container)
-    data_pg.grid(row=0, column=0, sticky="nsew")
-    pages["Data"] = data_pg
-    add_nav("CPE Data Monitor", "Data")
-    
-    # scrollable canvas ---------------------------------------------------
-    canvas   = tk.Canvas(data_pg, borderwidth=0, highlightthickness=0)
-    scroll   = ttk.Scrollbar(data_pg, orient="vertical", command=canvas.yview)
-    list_fr  = ttk.Frame(canvas)
-
-    def _on_mousewheel(evt: tk.Event) -> None:
-        direction = -1 if (evt.delta or evt.num == 4) > 0 else 1  # cross-platform
-        canvas.yview_scroll(direction, "units")
-
-    def _bind(_: tk.Event) -> None:
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
-        canvas.bind_all("<Button-4>", _on_mousewheel)
-        canvas.bind_all("<Button-5>", _on_mousewheel)
-
-    def _unbind(_: tk.Event) -> None:
-        canvas.unbind_all("<MouseWheel>")
-        canvas.unbind_all("<Button-4>")
-        canvas.unbind_all("<Button-5>")
-
-    list_fr.bind("<Enter>", _bind)
-    list_fr.bind("<Leave>", _unbind)
-    list_fr.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-
-    canvas.create_window((0, 0), window=list_fr, anchor="nw")
-    canvas.configure(yscrollcommand=scroll.set)
-
-    canvas.pack(side="left", fill="both", expand=True)
-    scroll.pack(side="right", fill="y")
-
-    # populate dynamically --------------------------------------------------
-
-    # draw the first plot immediately
-    rdp.draw_all_plots(list_fr)
-    # then kick off the background refresher
-    rdp.periodic_refresh(list_fr)
-    """
+    # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
 
 
-    # ── Launch ────────────────────────────────────────────────────────────────
+    # ── Launch ──────────────────────────────────────────────────────────────
     show("Main")
 
     def on_closing():

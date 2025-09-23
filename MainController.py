@@ -47,22 +47,7 @@ LOG_DIR = r'C:\QSTAF\CTM_logs'
 # CrashCountController.run_watch()
 
 # Set up logging for debugging EXE issues
-if getattr(sys, 'frozen', False):
-    # ensure both crashDump and logs folders exist
-    os.makedirs(JH.LOG_DIR, exist_ok=True)
 
-    # redirect stderr into a separate fileg
-    sys.stderr = open(os.path.join(JH.LOG_DIR, "app_errors.log"), "w")
-
-def log_exception(exc_type, exc_value, exc_traceback):
-    """Log uncaught exceptions"""
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    
-    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-    
-sys.excepthook = log_exception
 
 def get_qstaf_version():
     """Read and return the version string from the given text file."""

@@ -339,6 +339,7 @@ def launch_gui() -> None:
 
     update_label()
     start_json_file_watcher(update_label,Path(ADBController.json_path), root)
+
     def update_internet_status():
         status = dmc.get_internet_status()
         if status == 1:
@@ -358,6 +359,7 @@ def launch_gui() -> None:
                     root.after(5000, update_internet_status)
             except tk.TclError:
                 pass
+    update_internet_status()
 
     def _update_quts() -> None:
         running = QutsController.is_service_running("QUTS")

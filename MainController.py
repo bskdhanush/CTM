@@ -46,9 +46,6 @@ LOG_DIR = r'C:\QSTAF\CTM_logs'
 
 # CrashCountController.run_watch()
 
-# Set up logging for debugging EXE issues
-
-
 def get_qstaf_version():
     """Read and return the version string from the given text file."""
     try:

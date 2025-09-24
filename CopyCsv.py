@@ -3,6 +3,9 @@ import re
 import glob
 import shutil
 from datetime import datetime
+import time as time_module
+import LogHandler
+
 
 LOG_DIR = r'C:\QSTAF\CTM_logs'
 QSTAF_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy'
@@ -11,20 +14,21 @@ TRAFFIC_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Traffic')
 file_time_dict = {}
 
 timeout = 2 * 60 * 60  # 2 hours
-del_timeout = (2 * 60 * 60) + 30
+del_timeout = (2* 60 * 60) + 30
+SubDirCount=100
 
 
 def get_sorted_dirs(base):
     sorted_dirs = []
     if os.path.exists(base):
         sorted_dirs = sorted([d for d in os.listdir(base)])
+    #print(f'Found directories: {sorted_dirs}')
     return sorted_dirs
 
 
 def get_base(BASE_DIR):
     base_dir_list = []
     dirs = get_sorted_dirs(BASE_DIR)
-    # print(dirs)
     for dir in dirs:
         if os.path.exists(os.path.join(BASE_DIR, dir, 'old_data.txt')):
             continue
@@ -38,7 +42,7 @@ def get_base(BASE_DIR):
                 if int((now - date).total_seconds()) < timeout:
                     base_dir_list.append(os.path.join(BASE_DIR, dir))
                     continue
-
+        
         csv_files = glob.glob(os.path.join(BASE_DIR, dir) + '\\**\\*.csv', recursive=True)
         for csv in csv_files:
             csv_name = csv.split('\\')[-1]
@@ -61,6 +65,15 @@ def get_copy_csv_list(base_dir, csv_patterns):
     control_base_list = get_base(base_dir)
 
     for control_base_dir in control_base_list:
+        try:
+            subdir_count = sum(1 for entry in os.scandir(control_base_dir) if entry.is_dir())
+            if subdir_count > SubDirCount:
+                LogHandler.sendLog(f'Skipping {control_base_dir} - too many subdirectories ({subdir_count})')
+                continue
+        except (OSError, PermissionError) as e:
+            LogHandler.sendLog(f'Error accessing {control_base_dir}: {e}')
+            continue
+
         for csv_pattern in csv_patterns:
             csv_files = glob.glob(control_base_dir + csv_pattern, recursive=True)
 
@@ -109,6 +122,7 @@ def get_total_copy_csv_list():
 
     try:
         csv_copy_list.extend(get_copy_csv_list(TRAFFIC_BASE, traffic_csv_patterns))
+        
     except Exception as e:
         print(f'Exception during get_control_copy_csv_list: {e}')
 
@@ -118,6 +132,7 @@ def get_total_copy_csv_list():
 def copy_latest_csv():
 
     total_csv_copy_list = get_total_copy_csv_list()
+
     for csv in total_csv_copy_list:
         #print(f'Copying {csv}')
         shutil.copy(csv, LOG_DIR)

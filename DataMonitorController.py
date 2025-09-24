@@ -56,11 +56,11 @@ def get_df(csv_type):
             else:
                 df = pd.concat([df, pd.read_csv(csv_file, index_col=False)], axis=0)
 
-    df.columns = df.columns.str.upper()
-    if isinstance(df, pd.DataFrame) and 'TIMESTAMP' in df:
-        df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
-
-    df = df.sort_values(by=['TIMESTAMP'])
+    if isinstance(df, pd.DataFrame) and not df.empty:
+        df.columns = df.columns.str.upper()
+        if 'TIMESTAMP' in df:
+            df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
+        df = df.sort_values(by=['TIMESTAMP'])
     return df
 
 ################### TRAFFIC CSV PROCESSING START #######################################
@@ -230,9 +230,15 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
     fig = None
 
     try:
-        df.columns = df.columns.str.upper()
-        df_rf_indexed = get_rfband_df(df)
-        df_rf_indexed = df_rf_indexed.sort_values(by=['TIMESTAMP'])
+        if df is not None:
+            df.columns = df.columns.str.upper()
+            df_rf_indexed = get_rfband_df(df)
+            if df_rf_indexed is not None:
+                df_rf_indexed = df_rf_indexed.sort_values(by=['TIMESTAMP'])
+            else:
+                return None
+        else:
+            return None
 
         fig = Figure(figsize, dpi=100)
         ax = [fig.add_subplot(111)]

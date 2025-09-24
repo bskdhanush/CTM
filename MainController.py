@@ -46,24 +46,6 @@ LOG_DIR = r'C:\QSTAF\CTM_logs'
 
 # CrashCountController.run_watch()
 
-# Set up logging for debugging EXE issues
-if getattr(sys, 'frozen', False):
-    # ensure both crashDump and logs folders exist
-    os.makedirs(JH.LOG_DIR, exist_ok=True)
-
-    # redirect stderr into a separate fileg
-    sys.stderr = open(os.path.join(JH.LOG_DIR, "app_errors.log"), "w")
-
-def log_exception(exc_type, exc_value, exc_traceback):
-    """Log uncaught exceptions"""
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    
-    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-    
-sys.excepthook = log_exception
-
 def get_qstaf_version():
     """Read and return the version string from the given text file."""
     try:
@@ -177,7 +159,7 @@ def check_restart_timer():
 
             # **IGNORE** if no timestamp or explicitly "null"
             if not ts_str or ts_str.lower() == "null":
-                print(f"invalid time stamp found for {mode}")
+                #print(f"invalid time stamp found for {mode}")
                 continue
 
             # parse & check elapsed
@@ -506,54 +488,6 @@ def get_all_speedtest_results():
     cfg["SpeedTestData"] = speedtest_list
     JH.save_json(cfg)
     print("Speedtest results collected and saved to JSON.")
-
-
-
-
-
-# def check_wifi_type(toggle_var,wifi_config):
-#     #set_wifi_config(wifi_config, toggle_var)
-#     if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
-#         print(f"OWRT 3 SLO selected {toggle_var, wifi_config}")
-#         WifiController.update_cpe_wifi_config(toggle_var,wifi_config,"") #test SSID
-#          #method call here
-#     elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO
-#         print(f"OWRT 2G SLO + 5G-6G MLO selected {toggle_var, wifi_config}")
-#         WifiController.update_cpe_wifi_config(toggle_var,wifi_config,"") #test SSID
-#     elif toggle_var == "RDKB":
-#         print(f"RDKB selected {toggle_var, wifi_config}")
-#         WifiController.connectBackhaul()
-#         WifiController.setpassword_bandwidths_rdkb()
-         
-
-# def check_Rename_SSID(toggle_var,wifi_config,rename_type):
-#     if toggle_var == "OWRT" and wifi_config == 0: # 3 SLO
-#         if rename_type == "_":  #test SSID
-#             print(f"OWRT 3 SLO selected with test SSID")
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
-#         else:
-#             print(f"OWRT 3 SLO selected with default SSID")
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config,rename_type)
-#         #method call here
-#     elif toggle_var == "OWRT" and wifi_config == 1: # 2G SLO + 5G-6G MLO  
-#         if rename_type == "_":  #test SSID
-#             print(f"OWRT 2G SLO + 5G-6G MLO selected with test SSID")
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
-#         else:
-#             print(f"OWRT 2G SLO + 5G-6G MLO with default SSID")
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
-
-#     elif toggle_var == "RDKB":
-#         if rename_type == "_":  #test SSID
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "_")
-#         else:
-#             WifiController.update_cpe_wifi_config(toggle_var,wifi_config, "")
-       
-        
-
-
-    
-
 
 def main() -> None:
     ADBController.save_to_json("--")

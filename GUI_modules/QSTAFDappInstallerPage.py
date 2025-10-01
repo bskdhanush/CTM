@@ -188,8 +188,8 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
         zip_Dapp_label.configure(style="TLabel")  # switch from hint to normal
         DappInstaller.InstallDapp(filePath)
 
-    ttk.Button(Dapp_install, text="Choose archive… /Install", command=getSetDappZipPath, width=18)\
-    .pack(side="left", padx=16, pady=(0, 8))     
+    ttk.Button(Dapp_install, text="Choose archive… /Install", command=getSetDappZipPath, width=20)\
+    .pack(fill="x", **PADDING)  # type: ignore  
 
 
 

@@ -1,4 +1,4 @@
-import os, threading, subprocess,sys
+import os, threading, subprocess
 import time
 import GUI
 import MainController

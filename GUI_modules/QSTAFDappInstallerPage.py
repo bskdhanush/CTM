@@ -37,7 +37,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
     QSTAF_pg = ttk.Frame(container)
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")
     pages["QSTAF"] = QSTAF_pg
-    add_nav("Install QSTAF", "QSTAF")
+    add_nav("Dapp/QSTAF Install", "QSTAF")
     # avaible_ver=gr.get_all_tags()
 
     # ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
@@ -165,6 +165,13 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
     style = ttk.Style()
     style.configure("Hint.TLabel", foreground="#6b7280")
 
+    tk.Label(Dapp_install, 
+             text="Note: Make sure the device is connected via ADB before installing Dapp.", 
+             fg="red",
+             font=("Arial", 12),
+             anchor="w"
+             ).pack(fill="x", **PADDING) # type: ignore
+
     zip_Dapp_label = ttk.Label(
         Dapp_install,
         textvariable=selected_Dapp_zip,
@@ -173,13 +180,15 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
     )
     zip_Dapp_label.pack(fill="x", **PADDING)  # type: ignore
 
+    
+
     def getSetDappZipPath():
         filePath = _pick_zip()
         selected_Dapp_zip.set(filePath)
         zip_Dapp_label.configure(style="TLabel")  # switch from hint to normal
         DappInstaller.InstallDapp(filePath)
 
-    ttk.Button(Dapp_install, text="Choose archive…", command=getSetDappZipPath, width=18)\
+    ttk.Button(Dapp_install, text="Choose archive… /Install", command=getSetDappZipPath, width=18)\
     .pack(side="left", padx=16, pady=(0, 8))     
 
 

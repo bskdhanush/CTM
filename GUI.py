@@ -17,7 +17,7 @@ import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
-from GUI_modules import DataMonitorPage, HomePage, QutsPage, SpeedTestPage, QSTAFInstallerPage, WIFIRenaimngPage
+from GUI_modules import DataMonitorPage, HomePage, QutsPage, SpeedTestPage, QSTAFInstallerPage, WIFIRenaimngPage,DeviceConfigurationPage
 import MainController
 import WifiController
 import QutsController
@@ -393,6 +393,10 @@ def launch_gui() -> None:
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
+
+
+     # ── CPE config monitor page ────────────────────────────────────────────────
+    DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav)
 
 
     # ── Launch ──────────────────────────────────────────────────────────────

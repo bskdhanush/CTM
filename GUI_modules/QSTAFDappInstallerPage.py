@@ -6,17 +6,38 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 import  datetime as dt
-import QSTAFInstaller
+import QSTAFInstaller,DappInstaller
 
 
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
-def create_Qstaf_install_page(container, pages, add_nav):
+
+
+
+def _pick_zip() -> str:
+        filePath = filedialog.askopenfilename(
+            title="Select QSTAF archive",
+            filetypes=[
+            ("Archives", "*.zip *.7z"),
+            ("ZIP archives", "*.zip"),
+            ("7z archives", "*.7z"),
+            ("All files", "*.*"),
+        ],
+    )
+        if not filePath:
+            return ""
+        if not filePath.lower().endswith((".zip", ".7z")):
+            messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
+            return ""
+        return filePath
+
+
+def create_Qstaf_dapp_install_page(container, pages, add_nav):
 # ── QSTAF update page ─────────────────────────────────────────────────────
     QSTAF_pg = ttk.Frame(container)
     QSTAF_pg.grid(row=0, column=0, sticky="nsew")
     pages["QSTAF"] = QSTAF_pg
-    add_nav("Install QSTAF", "QSTAF")
+    add_nav("Dapp/QSTAF Install", "QSTAF")
     # avaible_ver=gr.get_all_tags()
 
     # ver_sel = ttk.LabelFrame(QSTAF_pg, text="select the version and download")
@@ -115,22 +136,8 @@ def create_Qstaf_install_page(container, pages, add_nav):
 
         threading.Thread(target=worker, daemon=True).start()
 
-    def _pick_zip() -> None:
-        filePath = filedialog.askopenfilename(
-            title="Select QSTAF archive",
-            filetypes=[
-            ("Archives", "*.zip *.7z"),
-            ("ZIP archives", "*.zip"),
-            ("7z archives", "*.7z"),
-            ("All files", "*.*"),
-        ],
-    )
-        if not filePath:
-            return
-        if not filePath.lower().endswith((".zip", ".7z")):
-            messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
-            return
-
+    def getSetQstafZipPath():
+        filePath = _pick_zip()
         selected_zip.set(filePath)
         zip_label.configure(style="TLabel")  # switch from hint to normal
         _run_install(filePath)
@@ -138,7 +145,7 @@ def create_Qstaf_install_page(container, pages, add_nav):
     btn_row = ttk.Frame(Qstaf_install)
     btn_row.pack(fill="x", padx=16, pady=(0, 8))
 
-    ttk.Button(btn_row, text="Choose archive…", command=_pick_zip, width=18)\
+    ttk.Button(btn_row, text="Choose archive…", command=getSetQstafZipPath, width=18)\
     .pack(side="left")
 
     def _clear_logs():
@@ -148,5 +155,44 @@ def create_Qstaf_install_page(container, pages, add_nav):
 
     ttk.Button(btn_row, text="Clear logs", command=_clear_logs, width=12)\
     .pack(side="right")
+
+
+   #--- Isntall Dapp --------------------------------------------------------------
+    Dapp_install = ttk.LabelFrame(QSTAF_pg, text="Select and install Dapp")
+    Dapp_install.pack(fill="x", **PADDING)  # type: ignore
+
+    selected_Dapp_zip = tk.StringVar(value='No file selected — click "Choose archive…"')
+    style = ttk.Style()
+    style.configure("Hint.TLabel", foreground="#6b7280")
+
+    tk.Label(Dapp_install, 
+             text="Note: Make sure the device is connected via ADB before installing Dapp.", 
+             fg="red",
+             font=("Arial", 12),
+             anchor="w"
+             ).pack(fill="x", **PADDING) # type: ignore
+
+    zip_Dapp_label = ttk.Label(
+        Dapp_install,
+        textvariable=selected_Dapp_zip,
+        anchor="w",
+        style="Hint.TLabel",
+    )
+    zip_Dapp_label.pack(fill="x", **PADDING)  # type: ignore
+
+    
+
+    def getSetDappZipPath():
+        filePath = _pick_zip()
+        selected_Dapp_zip.set(filePath)
+        zip_Dapp_label.configure(style="TLabel")  # switch from hint to normal
+        DappInstaller.InstallDapp(filePath)
+
+    ttk.Button(Dapp_install, text="Choose archive… /Install", command=getSetDappZipPath, width=18)\
+    .pack(side="left", padx=16, pady=(0, 8))     
+
+
+
+
     
     return QSTAF_pg

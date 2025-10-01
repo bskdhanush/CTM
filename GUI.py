@@ -17,7 +17,7 @@ import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
-from GUI_modules import DataMonitorPage, HomePage, QutsPage, SpeedTestPage, QSTAFInstallerPage, WIFIRenaimngPage
+from GUI_modules import DataMonitorPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WIFIRenaimngPage,DeviceConfigurationPage
 import MainController
 import WifiController
 import QutsController
@@ -389,10 +389,14 @@ def launch_gui() -> None:
     SpeedTestPage.create_speed_Test_page(container, pages, add_nav)
 
     # ── QSTAF installer page ─────────────────────────────────────────────────
-    QSTAFInstallerPage. create_Qstaf_install_page(container, pages, add_nav)
+    QSTAFDappInstallerPage. create_Qstaf_dapp_install_page(container, pages, add_nav)
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
+
+
+     # ── CPE config monitor page ────────────────────────────────────────────────
+    DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav)
 
 
     # ── Launch ──────────────────────────────────────────────────────────────

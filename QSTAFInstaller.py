@@ -73,14 +73,16 @@ def _extract_7z_with_cli(src: Path, dest: Path) -> None:
     if proc.returncode != 0:
         raise RuntimeError(f"7-Zip failed (code {proc.returncode}): {proc.stderr.strip()}")
 
-def _extract_archive(src: Path, dest: Path, on_status: StatusCB) -> None:
+def _extract_archive(src: Path, dest: Path, on_status: StatusCB,type: str) -> None:
     ext = src.suffix.lower()
     if ext == ".zip":
-        _status(on_status, "Extracting ZIP…")
+        if type=="QSTAF":
+            _status(on_status, "Extracting ZIP…")
         _extract_zip(src, dest)
         return
     if ext == ".7z":
-        _status(on_status, "Extracting 7z…")
+        if type=="QSTAF":
+            _status(on_status, "Extracting 7z…")
         if _extract_7z_with_py7zr(src, dest):
             return
         _extract_7z_with_cli(src, dest)
@@ -227,7 +229,7 @@ def install_qstaf_from_zip(
         # 1) Extract
         _status(on_status, "Preparing to extract…")
         _progress(on_progress, 5)
-        _extract_archive(apath, temp_dir, on_status)
+        _extract_archive(apath, temp_dir, on_status,"QSTAF")
         _progress(on_progress, 25)
 
         # 2) Run installer

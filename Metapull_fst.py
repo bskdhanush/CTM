@@ -13,8 +13,8 @@ PORT = int(os.getenv("SFTP_PORT", 22))  # usually 21
 USER = os.getenv('SFTP_USER')
 PASS = os.getenv("SFTP_PASS")
 
-remote_path="/CPE-Markets/LV/"
-local_path="D:/work/GUI/Quts_tool"
+remote_path="/Incoming/"
+#local_path="D:/work/GUI/Quts_tool"
 
 Meta_Mpss_list = []
 
@@ -56,15 +56,19 @@ def read_directory_files():
                 date = "Unknown"
             if item.filename.startswith('v') or item.filename.startswith('Kobuk') or item.filename.startswith('Pinnacle'):
                 Meta_Mpss_list.append(item.filename)
-                #print(f"{filename} - {date}")
+                print(f"{filename} - {date}")
+        sftp.close()
+        transport.close()
         return Meta_Mpss_list
            
-def download_file(sftp, transport, remote_path, local_path):
-        read_directory_files()
+def download_file(local_path,filename):
+    sftp,transport=connect_Server()
     #if auto_download:
+    if sftp is not None:
         try:
-            filename = os.path.basename(remote_path + "124")  # Extract filename
-            full_local_path = os.path.join(local_path, filename)  # Full local path
+            # Extract filename from remote_path
+            #filename = os.path.basename(remote_path)  # Extract filename
+            full_local_path = os.path.join(local_path, filename).replace("\\", "/")  # Full local path
             sftp.get(remote_path, full_local_path)
             print(f"Downloaded: {remote_path} to {full_local_path}")
         except Exception as e:
@@ -74,13 +78,5 @@ def download_file(sftp, transport, remote_path, local_path):
             transport.close()
   
 
-        
-
-
-
-
-
-
-
 if __name__ == "__main__":
-    connect_Server()
+    read_directory_files()

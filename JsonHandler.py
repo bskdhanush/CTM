@@ -27,6 +27,8 @@ def _default_cfg() -> dict:
         "relaunch_timer": 6,
         "relaunch_traffic": "false",
         "traffic_start_timestamp": "null",
+        "Local_downloadPath": "",
+        "Auto_download": "false",
         "SpeedTestData":[],
     }
 

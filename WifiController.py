@@ -268,38 +268,37 @@ def update_3_mlo_config():
 
 def update_cpe_wifi_config(toggle_var,wifi_config,config):
     # Read Meta
-    result = False
-    # try:
-    #     meta = get_meta_build_info()
-    #     result = "LE.1.2" in meta
-    # except Exception as e:
-    #     raise Exception(e)
+    try:
+        meta = get_meta_build_info()
+    except Exception as e:
+         raise Exception(e)
 
-    # if meta and 'LE.2.2' in meta:
-    if toggle_var == 'RDKB':
-        # RDKB, use dmcli commands
+    if meta and 'LE.2.2' in meta:
+        if toggle_var == 'RDKB':
+            # RDKB, use dmcli commands
 
-        if wifi_config == 0:
-            update_3_slo_config_rdkb(config)
-        elif wifi_config == 1:
-            update_2g_slo_5g6g_mlo_config_rdkb(config)
-        elif wifi_config == 2:
-            #update_3_mlo_config_rdkb(config)
-            pass
+            if wifi_config == 0:
+                update_3_slo_config_rdkb(config)
+            elif wifi_config == 1:
+                update_2g_slo_5g6g_mlo_config_rdkb(config)
+            elif wifi_config == 2:
+                #update_3_mlo_config_rdkb(config)
+                pass
 
-    # elif meta and 'LE.1.2' in meta:
-    elif toggle_var == 'OWRT':
-        # LE.1.2 - QCMAP_CLI
-        if wifi_config == 0:
-            update_3_slo_config_owrt(config)
-        elif wifi_config == 1:
-            update_2g5g_mlo_config_owrt(config)
-        elif wifi_config == 2:
-            update_3_mlo_config_owrt(config)
+    elif meta and 'LE.1.2' in meta:
+        if toggle_var == 'OWRT':
+            # LE.1.2 - QCMAP_CLI
+            if wifi_config == 0:
+                update_3_slo_config_owrt(config)
+            elif wifi_config == 1:
+                update_2g5g_mlo_config_owrt(config)
+            elif wifi_config == 2:
+                update_3_mlo_config_owrt(config)
 
-    elif toggle_var == 'Kobuk':
-        if wifi_config == 0:
-            Update_3_mlo_config_Kubok(config)
-        elif wifi_config == 1:
-            Update_2_mlo_config_Kubok(config)
+    elif meta and 'LE.1.1' in meta:
+        if toggle_var == 'Kobuk':
+            if wifi_config == 0:
+                Update_3_mlo_config_Kubok(config)
+            elif wifi_config == 1:
+                Update_2_mlo_config_Kubok(config)
          

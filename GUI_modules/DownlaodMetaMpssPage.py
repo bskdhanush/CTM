@@ -15,10 +15,10 @@ def _get_download_path() -> str:
 
 
 
-def create_Meta_Mpss_downlaod(container, pages, add_nav):
+def create_Meta_Mpss_downlaod(container, pages, add_nav, meta) :
+    print(f"Meta/Mpss selected: {meta}")
 
-
-    items = Metapull_fst.read_directory_files()
+    items = Metapull_fst.list_files(meta)
 
     MMdownload= ttk.Frame(container)
     MMdownload.grid(row=0, column=0, sticky="nsew")
@@ -52,8 +52,8 @@ def create_Meta_Mpss_downlaod(container, pages, add_nav):
         selected_indices = file_listbox.curselection()
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
-            #print(local_path.get())
-            Metapull_fst.download_file(local_path.get(), selected_item)
+            print(local_path.get(),selected_item)
+            Metapull_fst.download_file( selected_item,local_path.get())
 
 
 
@@ -97,10 +97,12 @@ def create_Meta_Mpss_downlaod(container, pages, add_nav):
 
    
     if items is None:
+        print("No items found on the server.")
         items = []
 
     for item in items:
-        file_listbox.insert(tk.END, item)
+        print(f"Found item: {item}")
+        file_listbox.insert(tk.END, item["name"])
 
     
 

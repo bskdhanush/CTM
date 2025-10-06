@@ -1,82 +1,182 @@
-import paramiko
-from dotenv import load_dotenv
+#!/usr/bin/env python3
+"""
+Fast SFTP downloader using ssh2-python (libssh2).
+Install: pip install ssh2-python python-dotenv
+"""
+
 import os
+import socket
+import time
 from datetime import datetime
+from dotenv import load_dotenv
 
-
-import WifiController 
+from ssh2.session import Session
+from ssh2.sftp import (
+    LIBSSH2_FXF_READ,
+    LIBSSH2_SFTP_S_IRUSR,
+)
 
 load_dotenv()
 
 HOST = os.getenv("SFTP_HOST")
-PORT = int(os.getenv("SFTP_PORT", 22))  # usually 21
-USER = os.getenv('SFTP_USER')
+PORT = int(os.getenv("SFTP_PORT", 22))
+USER = os.getenv("SFTP_USER")
 PASS = os.getenv("SFTP_PASS")
-
-remote_path="/Incoming/"
-#local_path="D:/work/GUI/Quts_tool"
-
-Meta_Mpss_list = []
+REMOTE_PATH = "Incoming/"
 
 
-def connect_Server():
-    if HOST is None:
-        raise ValueError("SFTP_HOST environment variable is not set.")
-    transport = paramiko.Transport((HOST, PORT))
-    if USER is None or PASS is None:
-        raise ValueError("SFTP_USER or SFTP_PASS environment variable is not set.")
-    transport.connect(username=USER, password=PASS)
+def connect_sftp(connect_timeout=10):
+    if not HOST or not USER or PASS is None:
+        raise ValueError("SFTP connection details (SFTP_HOST, SFTP_USER, SFTP_PASS) required in .env")
 
-    sftp = paramiko.SFTPClient.from_transport(transport)
-    return sftp, transport
+    sock = socket.create_connection((HOST, PORT), timeout=connect_timeout)
+    sess = Session()
+    sess.handshake(sock)
+    sess.userauth_password(USER, PASS)
+    sftp = sess.sftp_init()
+    return sess, sftp, sock
 
-    
 
-# pull the latest meta name form the list based on the connected device
-def get_lates_meta():
-    current_meta=WifiController.get_meta_build_info()
+def list_files(device_filter=""):
+    """
+    Return a list of dicts: [{'name': <str>, 'size': <int|None>, 'mtime': <int|None>}...]
+    Uses sftp.opendir() and handle.readdir()
+    """
 
-    
-    
-    pass
+
+    device_filter = device_filter.strip('"')
+    device_filter = device_filter.split('.')[0]
 
 
 
-def read_directory_files():
-    sftp, transport = connect_Server()
-    if sftp is not None:
-        print("Connected successfully to SFTP server.")
+    print(f"Listing files for device filter: '{device_filter}'")
+    sess, sftp, sock = connect_sftp()
+    try:
+        files = []
+        # Use opendir to get a handle; iterate handle.readdir()
+        with sftp.opendir(REMOTE_PATH) as dh:
+            for entry in dh.readdir():  # yields tuples (name_len, name_bytes, attrs) in many builds
+                # Some versions yield (size, buf, attrs) or (name_len, name_buf, attrs)
+                # Normalize extraction:
+                if len(entry) == 3:
+                    _, name_buf, attrs = entry
+                else:
+                    # fallback: try to unpack first two as name bytes and attrs
+                    name_buf = entry[1] if len(entry) > 1 else entry[0]
+                    attrs = entry[-1] if len(entry) > 1 else None
 
-        for item in sftp.listdir_attr(remote_path):
-            filename = item.filename
-            modified_time = item.st_mtime
-            if modified_time is not None:
-                date = datetime.fromtimestamp(modified_time).strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                date = "Unknown"
-            if item.filename.startswith('v') or item.filename.startswith('Kobuk') or item.filename.startswith('Pinnacle'):
-                Meta_Mpss_list.append(item.filename)
-                print(f"{filename} - {date}")
-        sftp.close()
-        transport.close()
-        return Meta_Mpss_list
-           
-def download_file(local_path,filename):
-    sftp,transport=connect_Server()
-    #if auto_download:
-    if sftp is not None:
+                name = name_buf.decode() if isinstance(name_buf, (bytes, bytearray)) else str(name_buf)
+                if device_filter and device_filter not in name:
+                    continue
+
+                filesize = getattr(attrs, "filesize", None) if attrs is not None else None
+                mtime = getattr(attrs, "mtime", None) if attrs is not None else None
+
+                files.append({"name": name, "size": filesize, "mtime": mtime})
+        return files
+    finally:
         try:
-            # Extract filename from remote_path
-            #filename = os.path.basename(remote_path)  # Extract filename
-            full_local_path = os.path.join(local_path, filename).replace("\\", "/")  # Full local path
-            sftp.get(remote_path, full_local_path)
-            print(f"Downloaded: {remote_path} to {full_local_path}")
-        except Exception as e:
-            print(f"Failed to download {remote_path}. Error: {e}")
+            sess.disconnect()
+        except Exception:
+            pass
+        try:
+            sock.close()
+        except Exception:
+            pass
+
+
+def download_file(remote_filename, local_dir, chunk_size=1024 * 1024, progress_interval=0.5):
+    """
+    Download a remote file via libssh2 with large chunk reads.
+    """
+    sess, sftp, sock = connect_sftp()
+    try:
+        remote_path = REMOTE_PATH.rstrip("/") + "/" + remote_filename
+        os.makedirs(local_dir, exist_ok=True)
+        local_path = os.path.join(local_dir, remote_filename)
+
+        # Open remote file for reading
+        fh = sftp.open(remote_path, LIBSSH2_FXF_READ, LIBSSH2_SFTP_S_IRUSR)
+        try:
+            fstat = fh.fstat()
+            file_size = getattr(fstat, "filesize", None)
+            if file_size is None:
+                print("Could not determine remote file size; proceeding anyway.")
+                file_size = float("inf")
+
+            print(f"Downloading: {remote_filename}  size={file_size}")
+
+            transferred = 0
+            start = time.time()
+            last_time = start
+            last_transferred = 0
+
+            with open(local_path, "wb") as lf:
+                while True:
+                    to_read = chunk_size if transferred + chunk_size <= file_size else int(file_size - transferred)
+                    # fh.read returns (rc, data) in some bindings; in others it returns data directly.
+                    chunk = fh.read(to_read)
+                    # normalize:
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        rc, data = chunk
+                        if rc <= 0 or not data:
+                            break
+                    else:
+                        # chunk is bytes or None
+                        data = chunk
+                        if not data:
+                            break
+
+                    if not isinstance(data, (bytes, bytearray)):
+                        raise TypeError("Expected bytes from fh.read(), got: {}".format(type(data)))
+                    lf.write(data)
+                    transferred += len(data)
+
+                    now = time.time()
+                    if now - last_time >= progress_interval or transferred == file_size:
+                        delta = transferred - last_transferred
+                        dt = now - last_time if now - last_time > 0 else 1e-6
+                        speed_bps = delta / dt
+                        speed_mbps = speed_bps * 8 / (1024 * 1024)
+                        pct = (transferred / file_size * 100) if file_size and file_size != float("inf") else 0
+                        print(f"\r{transferred}/{file_size if file_size!=float('inf') else 'unknown'} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
+                        last_time = now
+                        last_transferred = transferred
+
+            total_time = time.time() - start
+            avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
+            print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
+
         finally:
-            sftp.close()
-            transport.close()
-  
+            try:
+                fh.close()
+            except Exception:
+                pass
+
+    finally:
+        try:
+            sess.disconnect()
+        except Exception:
+            pass
+        try:
+            sock.close()
+        except Exception:
+            pass
+
 
 if __name__ == "__main__":
-    read_directory_files()
+    # Basic example: list and download first matching file
+    device = "Kobuk"
+    files = list_files(device)
+    if not files:
+        print("No matching files found.")
+    else:
+        print("Found files:")
+        for f in files:
+            mtime = datetime.fromtimestamp(f["mtime"]).strftime("%Y-%m-%d %H:%M:%S") if f["mtime"] else "Unknown"
+            print(f" - {f['name']}  size={f['size']}  mtime={mtime}")
+
+        # Download the first file
+        target = files[0]["name"]
+        print(f"Downloading first file: {target}")
+        #download_file(target, "./downloads")

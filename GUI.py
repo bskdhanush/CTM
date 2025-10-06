@@ -125,6 +125,7 @@ red_accent  = "#E95959"
 
 root =None
 observers = []  # Global list to track all observers
+meta=""
 
 
 class JsonFileWatcher(FileSystemEventHandler):
@@ -399,7 +400,7 @@ def launch_gui() -> None:
     DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav)
 
     # ── Meta/Mpss download page ────────────────────────────────────────────────
-    DownlaodMetaMpssPage.create_Meta_Mpss_downlaod(container, pages, add_nav)
+    DownlaodMetaMpssPage.create_Meta_Mpss_downlaod(container, pages, add_nav, meta_var.get().split(': ')[1])
 
 
 

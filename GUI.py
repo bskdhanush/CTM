@@ -402,8 +402,7 @@ def launch_gui() -> None:
      # ── CPE config monitor page ────────────────────────────────────────────────
     DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav)
 
-   
-
+  
 
     # ── Launch ──────────────────────────────────────────────────────────────
     show("Main")

@@ -3,10 +3,13 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 
-from GUI_modules import MetaPage
+from GUI_modules import DeviceConfigNavigator
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
-def create_device_Configuaration_page(container, pages, add_nav):
+def create_device_Configuaration_page(container, pages, add_nav, device_name):
+
+
+    section_names = ["Meta", "Mpss", "QCN", "NVs","End_to_End"]
     # Page container
     configPage = ttk.Frame(container)
     configPage.grid(row=0, column=0, sticky="nsew")
@@ -33,25 +36,30 @@ def create_device_Configuaration_page(container, pages, add_nav):
     content_stack.columnconfigure(0, weight=1)
 
     # Create 5 content frames
-    frames: dict[int, ttk.Frame] = {}
+    frames: dict[str, ttk.Frame] = {}
 
-    def make_frame(index: int) -> ttk.Frame:
+    def make_frame(Pagename: str) -> ttk.Frame:
         fr = ttk.Frame(content_stack)
         fr.grid(row=0, column=0, sticky="nsew")
 
 
-        if index == 1:
+        if Pagename  == "Meta":
             # Build and mount the external section 1 UI
-            section_ui = MetaPage.Meta_page(fr)
+            section_ui = DeviceConfigNavigator.Meta_page(fr,Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=8)
+
+        elif Pagename == "Mpss":
+            section_ui = DeviceConfigNavigator.Mpss_page(fr,Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
+
         else:
             # Placeholder for other sections
-            demo = ttk.Label(fr, text=f"UI for section {index}", font=("Segoe UI", 12))
+            demo = ttk.Label(fr, text=f"UI for section {Pagename}", font=("Segoe UI", 12))
             demo.pack(padx=16, pady=16)
         return fr
 
-    for idx in range(1, 6):
-        frames[idx] = make_frame(idx)
+    for Pagename in  section_names:
+        frames[Pagename] = make_frame(Pagename)
 
     # Raise the selected frame and update button styles
     style = ttk.Style()
@@ -59,24 +67,31 @@ def create_device_Configuaration_page(container, pages, add_nav):
     style.configure("TabButton.TButton", padding=(8, 6))
     style.configure("TabButton.Active.TButton", padding=(8, 6), relief="sunken")
 
-    current_idx = tk.IntVar(value=1)
-
-    def show(idx: int):
-        frames[idx].tkraise()
-        current_idx.set(idx)
-        # Update button styles
-        for j, b in buttons.items():
-            b.configure(style="TabButton.Active.TButton" if j == idx else "TabButton.TButton")
+    current_name = tk.StringVar(value=section_names[0])
+    def show(Pagename: str):
+        frames[Pagename].tkraise()
+        current_name.set(Pagename)
+        for n, b in buttons.items():
+            b.configure(style="TabButton.Active.TButton" if n == Pagename else "TabButton.TButton")
 
     # Create buttons
-    buttons: dict[int, ttk.Button] = {}
-    for i in range(1, 6):
-        btn = ttk.Button(button_bar, text=str(i), style="TabButton.TButton", command=lambda k=i: show(k))
-        btn.grid(row=0, column=i-1, padx=4, pady=6, sticky="ew")
-        buttons[i] = btn
+    for i in range(len(section_names)):
+        button_bar.columnconfigure(i, weight=1)
+
+    buttons: dict[str, ttk.Button] = {}
+
+    for i, Pagename in enumerate(section_names):
+        btn = ttk.Button(
+            button_bar,
+            text=Pagename,
+            style="TabButton.TButton",
+            command=lambda nm=Pagename: show(nm)
+        )
+        btn.grid(row=0, column=i, padx=4, pady=6, sticky="ew")
+        buttons[Pagename] = btn
 
     # Initialize with first tab visible
-    show(1)
+    show(section_names[0])
 
 
 

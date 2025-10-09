@@ -37,19 +37,23 @@ def connect_sftp(connect_timeout=10):
     return sess, sftp, sock
 
 
-def list_files(device_filter=""):
+def list_files(device_filter="", pageName=""):
     """
     Return a list of dicts: [{'name': <str>, 'size': <int|None>, 'mtime': <int|None>}...]
     Uses sftp.opendir() and handle.readdir()
     """
+    keywords = []
+    if pageName == "Meta":
+        filter = device_filter.strip('"')
+        filter = filter.split('.')[0]
+        keywords= [filter]
+    
+    elif pageName == "Mpss":
+        keywords= ["BF","MPSS"]
 
 
-    device_filter = device_filter.strip('"')
-    device_filter = device_filter.split('.')[0]
 
-
-
-    print(f"Listing files for device filter: '{device_filter}'")
+    #print(f"Listing files for device filter: '{filter}'")
     sess, sftp, sock = connect_sftp()
     try:
         files = []
@@ -58,6 +62,7 @@ def list_files(device_filter=""):
             for entry in dh.readdir():  # yields tuples (name_len, name_bytes, attrs) in many builds
                 # Some versions yield (size, buf, attrs) or (name_len, name_buf, attrs)
                 # Normalize extraction:
+                print(f"printing entry : {entry[1]}")
                 if len(entry) == 3:
                     _, name_buf, attrs = entry
                 else:
@@ -66,7 +71,7 @@ def list_files(device_filter=""):
                     attrs = entry[-1] if len(entry) > 1 else None
 
                 name = name_buf.decode() if isinstance(name_buf, (bytes, bytearray)) else str(name_buf)
-                if device_filter and device_filter not in name:
+                if keywords and not any(k in name for k in keywords):
                     continue
 
                 filesize = getattr(attrs, "filesize", None) if attrs is not None else None

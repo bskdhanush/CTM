@@ -17,7 +17,7 @@ import sv_ttk
 
 # ── local app modules ──────────────────────────────────────────────────────
 import ADBController
-from GUI_modules import DataMonitorPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WIFIRenaimngPage,DeviceConfigurationPage, DownlaodMetaMpssPage
+from GUI_modules import DataMonitorPage, Get_Downlaod_MetaMpss, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WIFIRenaimngPage,DeviceConfigurationPage
 import MainController
 import WifiController
 import QutsController
@@ -393,14 +393,14 @@ def launch_gui() -> None:
     QSTAFDappInstallerPage. create_Qstaf_dapp_install_page(container, pages, add_nav)
     
     # ── Meta/Mpss download page ────────────────────────────────────────────────
-    DownlaodMetaMpssPage.create_Meta_Mpss_downlaod(container, pages, add_nav, meta_var.get().split(': ')[1])
+    #DownlaodMetaMpssPage.create_Meta_Mpss_downlaod(container, pages, add_nav, meta_var.get().split(': ')[1])
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
 
 
      # ── CPE config monitor page ────────────────────────────────────────────────
-    DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav)
+    DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
 
   
 

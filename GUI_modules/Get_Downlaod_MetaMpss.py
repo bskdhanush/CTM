@@ -15,15 +15,17 @@ def _get_download_path() -> str:
 
 
 
-def create_Meta_Mpss_downlaod(container, pages, add_nav, meta) :
-    print(f"Meta/Mpss selected: {meta}")
+def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
+    print(f"Meta/Mpss selected: {device_name}")
 
-    items = Metapull_fst.list_files(meta)
+    items = Metapull_fst.list_files("Kobuk", Pagename)
 
-    MMdownload= ttk.Frame(container)
-    MMdownload.grid(row=0, column=0, sticky="nsew")
-    pages["MMdownload"] = MMdownload
-    add_nav("Meta/Mpss ⇩ ", "MMdownload")
+    # MMdownload= ttk.Frame(container)
+    # MMdownload.grid(row=0, column=0, sticky="nsew")
+    # pages["MMdownload"] = MMdownload
+    # add_nav("Meta/Mpss ⇩ ", "MMdownload")
+
+    MMdownload = ttk.Frame(container)
 
    
 
@@ -55,14 +57,16 @@ def create_Meta_Mpss_downlaod(container, pages, add_nav, meta) :
             print(local_path.get(),selected_item)
             Metapull_fst.download_file( selected_item,local_path.get())
 
+        
+
 
 
     # Manula download section
-    MetaMpassSelection_frame = ttk.LabelFrame(MMdownload, text="Select the required Meta/Mpss")
-    MetaMpassSelection_frame.pack(fill="x", **PADDING)  # type: ignore
+    Selection_frame = ttk.LabelFrame(MMdownload, text=f"Select and download {Pagename} files")
+    Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
     # First row: label (left), button (right) in a horizontal frame
-    top_row = tk.Frame(MetaMpassSelection_frame)
+    top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
     local_path = tk.StringVar(value='Path not selected')
@@ -77,11 +81,11 @@ def create_Meta_Mpss_downlaod(container, pages, add_nav, meta) :
     button.pack(side="right", anchor="e", padx=(0, 10))
 
     # Separator below the row
-    separator = ttk.Separator(MetaMpassSelection_frame, orient='horizontal')
+    separator = ttk.Separator(Selection_frame, orient='horizontal')
     separator.pack(fill='x', padx=40, pady=(12, 12))
 
     # Frame for listbox and scrollbar (center)
-    list_container = tk.Frame(MetaMpassSelection_frame)
+    list_container = tk.Frame(Selection_frame)
     list_container.pack(fill="x", padx=20)
 
     file_listbox = tk.Listbox(
@@ -107,18 +111,18 @@ def create_Meta_Mpss_downlaod(container, pages, add_nav, meta) :
     
 
     # Centered download button below the list
-    separator = ttk.Separator(MetaMpassSelection_frame, orient='horizontal')
+    separator = ttk.Separator(Selection_frame, orient='horizontal')
     separator.pack(fill='x', padx=100, pady=(12,0))
 
 
-    select_btn = ttk.Button(MetaMpassSelection_frame, text="Download", command=download_selected_Meta_Mpss)
+    select_btn = ttk.Button(Selection_frame, text="Download", command=download_selected_Meta_Mpss)
     select_btn.pack(pady=(15, 10))
     select_btn.pack_configure(anchor="center")
 
     auto_download_checkBox = tk.BooleanVar(value=_is_auto_downlaod_enabled())
 
     ttk.Checkbutton(
-    MetaMpassSelection_frame,
+    Selection_frame,
     text="Enable auto download",
     variable=auto_download_checkBox,
     command=toggle_auto_downloader

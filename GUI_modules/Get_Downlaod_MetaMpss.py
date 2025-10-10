@@ -17,8 +17,11 @@ def _get_download_path() -> str:
 
 def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
     print(f"Meta/Mpss selected: {device_name}")
-
-    items = Metapull_fst.list_files("Kobuk", Pagename)
+    try:
+        items = Metapull_fst.list_files(device_name, Pagename)
+    except Exception as e:
+        print(f'Exception during list_files: {e}')
+        items = None
 
     # MMdownload= ttk.Frame(container)
     # MMdownload.grid(row=0, column=0, sticky="nsew")

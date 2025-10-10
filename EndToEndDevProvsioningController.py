@@ -7,6 +7,7 @@ import shutil
 PROV_BASE = r'C:\Dropbox\BuildLoadProvisioning\CTM_Prov_Base'
 META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
 MPSS_BASE = r'C:\temp\mpss'
+META_BASE = r'C:\temp\meta'
 
 def update_mpss_in_config(mpss_path, meta_mpss_txt):
     with open(meta_mpss_txt, 'r') as f:
@@ -43,7 +44,7 @@ def set_meta_file_path(filepath):
         shutil.rmtree(META_PATH)
     os.makedirs(META_PATH)
 
-    QSTAFInstaller._extract_zip(filepath, META_PATH)
+    QSTAFInstaller._extract_zip(filepath, META_PATH) # type: ignore
     update_meta_in_config(META_PATH, META_MPSS_TXT)
     trigger_prov_meta(PROV_BASE)
 
@@ -61,7 +62,7 @@ def set_mpss_file_path(filepath):
         shutil.rmtree(MPSS_PATH)
     os.makedirs(MPSS_PATH)
 
-    QSTAFInstaller._extract_zip(filepath, MPSS_PATH)
+    QSTAFInstaller._extract_zip(filepath, MPSS_PATH) # type: ignore
     update_mpss_in_config(MPSS_PATH, META_MPSS_TXT)
     trigger_prov_mpss(PROV_BASE)
 
@@ -91,16 +92,21 @@ def trigger_prov_meta(PROV_BASE):
 
 
 def load_qcn():
+    print("Load QCN triggered")
     pass
     
-def activate_mbn():
+def activate_mbn(selected_mbn):
+    print(f"Selected MBN to activate: {selected_mbn}")
     pass
     
-def deactivate_mbn():
+def deactivate_mbn(selected_mbn):
+    print(f"Selected MBN to deactivate: {selected_mbn}")
     pass
     
 def write_nv():
+    print("Write NV triggered")
     pass
     
 def full_provisioning():
+    print("Full Provisioning triggered")
     pass

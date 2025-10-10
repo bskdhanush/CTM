@@ -50,7 +50,7 @@ def run_wifi_command_with_loading(parent, func, msg, success_msg="Operation comp
         finally:
             parent.after(0, lambda: hide_loading_popup(loading_popup))
     
-    start_thread(target=worker, daemon=True)
+    start_thread(target_func=worker, daemon=True)
 
 
 def create_wifi_renaming_page(container, pages, add_nav):

@@ -14,15 +14,23 @@ def getzippath(label_var):
         label_var.set(filepath)
         return filepath
 
-def getFilePath(label_var):
+def getFilePath(label_var, identifier):
         filepath = filedialog.askopenfilename(
-            title="Select a text file",
+            title=f"Select {identifier} path",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
         )
         if filepath:
             label_var.set(filepath)
         return filepath
 
+def getFolderPath(label_var, identifier):
+    folderpath = filedialog.askdirectory(
+        title=f"Select {identifier} folder"
+    )
+    if folderpath:
+        label_var.set(folderpath)
+    return folderpath
+    
 def Meta_page(parent,Pagename,device_name):
 
     Meta_frame = FzDownloadPage.create_Meta_Mpss_download(parent, Pagename, device_name)
@@ -40,8 +48,17 @@ def Meta_page(parent,Pagename,device_name):
 
     button = ttk.Button(
         top_row,
-        text="select Meta file",
-        command=lambda:start_thread(EndToEndDevProvsioningController.set_meta_file_path(getzippath(local_path)), daemon=True)
+        text="Select Meta path to load",
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_meta_from_path(getFolderPath(local_path, 'Meta')),
+                                     daemon=True)
+    )
+    button.pack(side="right", anchor="e", padx=(0, 10))
+
+    button = ttk.Button(
+        top_row,
+        text="select Meta zip to load",
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_meta_from_zip(getzippath(local_path)),
+                                    daemon=True)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -64,8 +81,17 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
 
     button = ttk.Button(
         top_row,
-        text="select MPSS file",
-        command=lambda:start_thread(EndToEndDevProvsioningController.set_mpss_file_path(getzippath(local_path)), daemon=True)
+        text="Select MPSS path to load",
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_mpss_from_path(getFolderPath(local_path, 'MPSS')),
+                                     daemon=True)
+    )
+    button.pack(side="right", anchor="e", padx=(0, 10))
+
+    button = ttk.Button(
+        top_row,
+        text="Select MPSS zip to load",
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_mpss_from_zip(getzippath(local_path)),
+                                    daemon=True)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 

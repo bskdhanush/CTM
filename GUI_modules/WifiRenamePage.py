@@ -1,8 +1,8 @@
-import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import WifiController
+from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
@@ -50,16 +50,10 @@ def run_wifi_command_with_loading(parent, func, msg, success_msg="Operation comp
         finally:
             parent.after(0, lambda: hide_loading_popup(loading_popup))
     
-    threading.Thread(target=worker, daemon=True).start()
-
-
-
-
-
+    start_thread(target=worker, daemon=True)
 
 
 def create_wifi_renaming_page(container, pages, add_nav):
-
 
     # ── WiFi Renaming page ─────────────────────────────────────────────────────
     wifi_pg = ttk.Frame(container)
@@ -128,8 +122,6 @@ def create_wifi_renaming_page(container, pages, add_nav):
     toggle_var.trace_add("write", _update_choices)
     _update_choices() 
 
-
-   
 
     ttk.Button(
     wifi_sel,

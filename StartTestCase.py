@@ -1,9 +1,9 @@
-import os, threading, subprocess
+import os, subprocess
 import time
 import GUI
 import MainController
 import CopyCsv
-
+from Threading import *
 
 KEY = "****** Stop Main #"
 
@@ -47,5 +47,4 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
 
                 proc.terminate()
              
-    threading.Thread(target=reader, daemon=True).start()
-
+    start_thread(target=reader, daemon=True)

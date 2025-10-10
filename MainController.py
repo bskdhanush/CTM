@@ -3,12 +3,15 @@ from __future__ import annotations
 from gc import callbacks
 import sys
 import subprocess
-import time
 from datetime import datetime
 import ctypes
 from tkinter import messagebox
-import json, threading, time
+import json, time
 import logging
+import psutil
+import yaml
+import glob
+import pandas as pd
 
 import ADBController
 import KillProcess
@@ -18,10 +21,8 @@ import WifiController
 import GUI as gui
 import CrashCountController as cc
 import JsonHandler as JH
-import psutil
-import yaml
-import glob
-import pandas as pd
+
+from Threading import *
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -492,28 +493,13 @@ def get_all_speedtest_results():
 def main() -> None:
     ADBController.save_to_json("--")
     
-    t3 = threading.Thread(
-        target=ADBController.run_adb_track_devices,
-        daemon=True  # auto‑stops when the main program exits
-    )
-    t3.start()
+    # auto‑stops when the main program exits
+    start_thread(ADBController.run_adb_track_devices, daemon=True)
 
-    # Start the watcher in a daemon thread
-    t = threading.Thread(
-        target=cc.run_watchdog,
-        daemon=True        # auto‑stops when the main program exits
-    )
-    t.start()
+    start_thread(cc.run_watchdog, daemon=True)
     
-    
-    t2 = threading.Thread(
-        target=check_restart_timer,
-        daemon=True  # auto‑stops when the main program exits
-    )
-    t2.start()
+    start_thread(check_restart_timer, daemon=True)
 
-    
- 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
 

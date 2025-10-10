@@ -2,7 +2,7 @@
 
 import os
 import time
-import threading
+from Threading import *
 import logging
 from pathlib import Path
 from datetime import datetime, date, time as dt_time, timedelta
@@ -21,8 +21,7 @@ MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
 
 # Lock for thread-safe config I/O
-_cfg_lock = threading.Lock()
-
+_cfg_lock = thread_lock()
 
 def most_recent_subdir(root: Path) -> Path | None:
     if not root.is_dir():

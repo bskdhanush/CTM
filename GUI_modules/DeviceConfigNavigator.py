@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from GUI_modules import Get_Downlaod_MetaMpss, QSTAFDappInstallerPage
+from GUI_modules import FzDownloadPage, QSTAFDappInstallerPage
 import EndToEndDevProvsioningController
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
@@ -25,7 +25,7 @@ def getFilePath(label_var):
 
 def Meta_page(parent,Pagename,device_name):
 
-    Meta_frame=Get_Downlaod_MetaMpss.create_Meta_Mpss_downlaod(parent, Pagename, device_name)
+    Meta_frame = FzDownloadPage.create_Meta_Mpss_download(parent, Pagename, device_name)
 
     Selection_frame = ttk.LabelFrame(Meta_frame, text=f"Select Meta to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
@@ -50,7 +50,7 @@ def Meta_page(parent,Pagename,device_name):
 
 
 def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
-    Mpss_frame= Get_Downlaod_MetaMpss.create_Meta_Mpss_downlaod(parent, Pagename, device_name)
+    Mpss_frame= FzDownloadPage.create_Meta_Mpss_download(parent, Pagename, device_name)
     Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 

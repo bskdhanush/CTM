@@ -75,8 +75,8 @@ def trigger_prov_mpss(PROV_BASE):
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'MPSS Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print("MPSS Upgrade launched in a new cmd prompt")
 
 def trigger_prov_meta(PROV_BASE):
     os.chdir(PROV_BASE)
@@ -87,8 +87,8 @@ def trigger_prov_meta(PROV_BASE):
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'Meta Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print("Meta Upgrade launched in a new cmd prompt")
 
 
 def load_qcn():
@@ -100,8 +100,8 @@ def load_qcn():
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'Meta Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print('Load_QCN launched in a new cmd prompt')
     
 def activate_mbn():
     os.chdir(PROV_BASE)
@@ -112,8 +112,8 @@ def activate_mbn():
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'Meta Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print("MBN Activation launched in a new cmd prompt")
     
 def deactivate_mbn():
     pass
@@ -127,8 +127,8 @@ def write_nv():
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'Meta Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print("NV Load launched in a new cmd prompt")
     
 def full_provisioning():
     os.chdir(PROV_BASE)
@@ -139,5 +139,5 @@ def full_provisioning():
         "--meta_option", "2",
         "--device_serial", "m"
     ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    print(f'Meta Upgrade Result: {result.stdout}')
+    subprocess.run(command, shell=True)
+    print("Full Provisioning launched in a new cmd prompt")

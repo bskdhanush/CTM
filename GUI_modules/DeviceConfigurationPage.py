@@ -48,6 +48,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
         elif Pagename == "Mpss":
             section_ui = DeviceConfigNavigator.Mpss_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
             
         elif Pagename == "QCN":
             section_ui = DeviceConfigNavigator.QCN_page(fr, Pagename, device_name)

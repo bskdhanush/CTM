@@ -11,10 +11,10 @@ Usage from any UI:
     aws.run_now()                 -> launch the BAT immediately
 """
 from __future__ import annotations
-import os,threading, time, subprocess, schedule, logging
+import os, time, subprocess, schedule, logging
 
 import JsonHandler as JH
-
+from Threading import *
 
 # -------------------------------------------------------------------- #
 # Configurable paths & constants
@@ -69,12 +69,9 @@ def _loop() -> None:
 def _start_loop_once() -> None:
     global _loop_started
     if not _loop_started:
-        threading.Thread(target=_loop, daemon=True).start()
+        start_thread(target=_loop, daemon=True)
         _loop_started = True
 
-# -------------------------------------------------------------------- #
-#  Public API
-# -------------------------------------------------------------------- #
 def is_enabled() -> bool:
     return bool(JH.load_cfg().get("aws_scheduler_enabled", False))
 

@@ -4,21 +4,17 @@ from tkinter import filedialog
 from tkinter import messagebox
 
 import JsonHandler
-import Metapull_fst
+import FzHandler
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 def _get_download_path() -> str:
     return str(JsonHandler.load_cfg().get("Local_downloadPath", ""))
 
-
-
-
-
-def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
+def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     print(f"Meta/Mpss selected: {device_name}")
     try:
-        items = Metapull_fst.list_files(device_name, Pagename)
+        items = FzHandler.list_files(device_name, Pagename)
     except Exception as e:
         print(f'Exception during list_files: {e}')
         items = None
@@ -29,8 +25,6 @@ def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
     # add_nav("Meta/Mpss ⇩ ", "MMdownload")
 
     MMdownload = ttk.Frame(container)
-
-   
 
     def browse_path():
         # Open directory selection dialog
@@ -43,7 +37,7 @@ def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
             print(f"Selected path: {selected_path}")
 
 
-    def _is_auto_downlaod_enabled() -> bool:
+    def _is_auto_download_enabled() -> bool:
         #print("entered auto download check")
         return bool(JsonHandler.load_cfg().get("Auto_download", False))
 
@@ -58,13 +52,9 @@ def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
-            Metapull_fst.download_file( selected_item,local_path.get())
+            FzHandler.download_file( selected_item,local_path.get())
 
-        
-
-
-
-    # Manula download section
+    # Manual download section
     Selection_frame = ttk.LabelFrame(MMdownload, text=f"Select and download {Pagename} files")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
@@ -110,19 +100,17 @@ def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
     for item in items:
         print(f"Found item: {item}")
         file_listbox.insert(tk.END, item["name"])
-
     
 
     # Centered download button below the list
     separator = ttk.Separator(Selection_frame, orient='horizontal')
-    separator.pack(fill='x', padx=100, pady=(12,0))
-
+    separator.pack(fill='x', padx=100, pady=(12, 0))
 
     select_btn = ttk.Button(Selection_frame, text="Download", command=download_selected_Meta_Mpss)
     select_btn.pack(pady=(15, 10))
     select_btn.pack_configure(anchor="center")
 
-    auto_download_checkBox = tk.BooleanVar(value=_is_auto_downlaod_enabled())
+    auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
 
     ttk.Checkbutton(
     Selection_frame,
@@ -130,6 +118,5 @@ def create_Meta_Mpss_downlaod(container, Pagename, device_name) -> ttk.Frame:
     variable=auto_download_checkBox,
     command=toggle_auto_downloader
     ).pack(side="left", padx=16)
-                
 
     return MMdownload

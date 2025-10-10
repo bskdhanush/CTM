@@ -1,6 +1,4 @@
-from __future__ import annotations          # for | typing in <3.10
-
-# ── stdlib ──────────────────────────────────────────────────────────────────
+from __future__ import annotations
 import os
 import json
 from pathlib import Path
@@ -12,20 +10,16 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import logging
 
-# ── 3rd-party ──────────────────────────────────────────────────────────────
 import sv_ttk
 
-# ── local app modules ──────────────────────────────────────────────────────
 import ADBController
-from GUI_modules import DataMonitorPage, Get_Downlaod_MetaMpss, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WIFIRenaimngPage,DeviceConfigurationPage
+from GUI_modules import DataMonitorPage, FzDownloadPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage
 import MainController
 import WifiController
 import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc
 import JsonHandler as JH
-
-
 
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -118,22 +112,20 @@ def add_copy_support(root: tk.Tk) -> None:
 # ───────────────────────────────────────────────────────────────────────────
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 white_accent = "#FFFFFF"
-red_accent  = "#E95959"
+red_accent = "#E95959"
 
 
 # ── Global toggle variable ─────────────────────────────────────────────────
 
-root =None
+root = None
 observers = []  # Global list to track all observers
-meta=""
-
+meta = ""
 
 class JsonFileWatcher(FileSystemEventHandler):
     def __init__(self, callback, file_path_to_watch, tk_root: tk.Tk):
         self.callback = callback
         self.file_path_to_watch = str(file_path_to_watch)
         self.tk_root = tk_root
-
 
     def on_modified(self, event):
         if event.src_path == self.file_path_to_watch:
@@ -152,27 +144,21 @@ def start_json_file_watcher(callback, file_path_to_watch, tk_root: tk.Tk):
     obs = Observer()
     handler = JsonFileWatcher(callback, file_path_to_watch, tk_root)
 
-
     watch_dir = os.path.dirname(file_path_to_watch)
     if not os.path.exists(watch_dir):
         os.makedirs(watch_dir)
-
 
     obs.schedule(handler, watch_dir, recursive=False)
     obs.start()
     observers.append(obs)
 
-
 def launch_gui() -> None:
     """Construct and run the UI."""
     global root 
 
-    # ── json watcher  ──────────────────────────────────────────────────────────
-   
-
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
-    root.title("CPE Test Manager V2.0")
+    root.title("CPE Test Manager V3.0")
     root.geometry("1024x768")
     root.resizable(True, True)
     sv_ttk.set_theme("dark")
@@ -190,7 +176,6 @@ def launch_gui() -> None:
        header_frame.columnconfigure(col, weight=0)
     header_frame.columnconfigure(1, weight=1)   # left side expands
     
-  
     meta_var = tk.StringVar(value="Meta : ")
     mpss_var = tk.StringVar(value="MPSS : ")
 
@@ -262,8 +247,7 @@ def launch_gui() -> None:
     load_counters()  # initial
 
      # start watching the JSON for changes
-    start_json_file_watcher(load_counters, cc.CONFIG_PATH,root)
-
+    start_json_file_watcher(load_counters, cc.CONFIG_PATH, root)
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content
@@ -384,7 +368,7 @@ def launch_gui() -> None:
     QutsPage.create_Quts_Page(container, pages, add_nav)
 
     # ── WIFI CONFIG page ─────────────────────────────────────────────────────
-    WIFIRenaimngPage.create_wifi_renaming_page(container, pages, add_nav)
+    WifiRenamePage.create_wifi_renaming_page(container, pages, add_nav)
 
     # ── Speed test page ──────────────────────────────────────────────────────
     SpeedTestPage.create_speed_Test_page(container, pages, add_nav)
@@ -393,7 +377,7 @@ def launch_gui() -> None:
     QSTAFDappInstallerPage. create_Qstaf_dapp_install_page(container, pages, add_nav)
     
     # ── Meta/Mpss download page ────────────────────────────────────────────────
-    #DownlaodMetaMpssPage.create_Meta_Mpss_downlaod(container, pages, add_nav, meta_var.get().split(': ')[1])
+    # DownloadMetaMpssPage.create_Meta_Mpss_download(container, pages, add_nav, meta_var.get().split(': ')[1])
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
@@ -403,7 +387,6 @@ def launch_gui() -> None:
     DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
 
   
-
     # ── Launch ──────────────────────────────────────────────────────────────
     show("Main")
 

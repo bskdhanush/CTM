@@ -8,7 +8,6 @@ from GUI_modules import DeviceConfigNavigator
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
-
     section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning"]
     # Page container
     configPage = ttk.Frame(container)
@@ -42,7 +41,6 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
         fr = ttk.Frame(content_stack)
         fr.grid(row=0, column=0, sticky="nsew")
 
-
         if Pagename  == "Meta":
             # Build and mount the external section 1 UI
             section_ui = DeviceConfigNavigator.Meta_page(fr, Pagename, device_name)
@@ -69,7 +67,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
         return fr
 
-    for Pagename in  section_names:
+    for Pagename in section_names:
         frames[Pagename] = make_frame(Pagename)
 
     # Raise the selected frame and update button styles
@@ -103,7 +101,5 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
     # Initialize with first tab visible
     show(section_names[0])
-
-
 
     

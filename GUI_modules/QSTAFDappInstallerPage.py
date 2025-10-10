@@ -1,18 +1,13 @@
-
-import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
-import  datetime as dt
+import datetime as dt
 import QSTAFInstaller,DappInstaller
-
-
+from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
-
-
 
 def _pick_zip() -> str:
         filePath = filedialog.askopenfilename(
@@ -134,7 +129,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
                         _log(f"Failed: {msg or 'Unknown error.'}")
                 top.after(0, done)
 
-        threading.Thread(target=worker, daemon=True).start()
+        start_thread(target=worker, daemon=True)
 
     def getSetQstafZipPath():
         filePath = _pick_zip()

@@ -9,14 +9,14 @@ PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
 
-    section_names = ["Meta", "Mpss", "QCN", "NVs","End_to_End"]
+    section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning"]
     # Page container
     configPage = ttk.Frame(container)
     configPage.grid(row=0, column=0, sticky="nsew")
     configPage.columnconfigure(0, weight=1)
     configPage.rowconfigure(1, weight=1)  # content area expands
     pages["Config"] = configPage
-    add_nav("Dev Config", "Config")
+    add_nav("Device Provisioning", "Config")
 
     # Top labelframe (title area)
     header_fr = ttk.LabelFrame(configPage, text="Device Configuration")
@@ -45,17 +45,28 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
         if Pagename  == "Meta":
             # Build and mount the external section 1 UI
-            section_ui = DeviceConfigNavigator.Meta_page(fr,Pagename, device_name)
+            section_ui = DeviceConfigNavigator.Meta_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=8)
 
         elif Pagename == "Mpss":
-            section_ui = DeviceConfigNavigator.Mpss_page(fr,Pagename, device_name)
+            section_ui = DeviceConfigNavigator.Mpss_page(fr, Pagename, device_name)
+            
+        elif Pagename == "QCN":
+            section_ui = DeviceConfigNavigator.QCN_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
+            
+        elif Pagename == "MBN":
+            section_ui = DeviceConfigNavigator.MBN_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
+            
+        elif Pagename == "NV":
+            section_ui = DeviceConfigNavigator.NV_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
+            
+        elif Pagename == "Full_Provisioning":
+            section_ui = DeviceConfigNavigator.Full_Provisioning_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=8)
 
-        else:
-            # Placeholder for other sections
-            demo = ttk.Label(fr, text=f"UI for section {Pagename}", font=("Segoe UI", 12))
-            demo.pack(padx=16, pady=16)
         return fr
 
     for Pagename in  section_names:

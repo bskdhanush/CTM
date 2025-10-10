@@ -36,29 +36,26 @@ def Meta_page(parent,Pagename,device_name):
         # unzip the file and set the path in end to end device script
         EndToEndDevProvsioningController.set_meta_file_path(filepath)
 
-
-
-
     return Meta_frame
 
 
 
 def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
     Mpss_frame= Get_Downlaod_MetaMpss.create_Meta_Mpss_downlaod(parent, Pagename, device_name)
-    Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select Meta to install")
+    Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
     # First row: label (left), button (right) in a horizontal frame
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value='Meta not selected')
+    local_path = tk.StringVar(value='MPSS not selected')
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", anchor="w", padx=(10, 0))
 
     button = ttk.Button(
         top_row,
-        text="select Meta file",
+        text="select MPSS file",
         command=lambda:getzippath(),
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
@@ -70,12 +67,24 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
         # unzip the file and set the path in end to end device script
         EndToEndDevProvsioningController.set_mpss_file_path(filepath)
 
-
     return Mpss_frame
 
 
+def QCN_page(parent, Pagename, device_name) -> ttk.Frame:
+    pass
+    # return QCN_frame
+    
+def MBN_page(parent, Pagename, device_name) -> ttk.Frame:
+    pass
+    # return QCN_frame
+    
+def NV_page(parent, Pagename, device_name) -> ttk.Frame:
+    pass
+    # return QCN_frame
 
-
+def Full_Provisioning_page(parent, Pagename, device_name) -> ttk.Frame:
+    pass
+    # return QCN_frame
 
 
 """

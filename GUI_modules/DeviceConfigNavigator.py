@@ -7,6 +7,22 @@ import EndToEndDevProvsioningController
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
+
+
+def getzippath(label_var):
+        filepath = QSTAFDappInstallerPage._pick_zip()
+        label_var.set(filepath)
+        return filepath
+
+def getFilePath(label_var):
+        filepath = filedialog.askopenfilename(
+            title="Select a text file",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if filepath:
+            label_var.set(filepath)
+        return filepath
+
 def Meta_page(parent,Pagename,device_name):
 
     Meta_frame=Get_Downlaod_MetaMpss.create_Meta_Mpss_downlaod(parent, Pagename, device_name)
@@ -25,16 +41,9 @@ def Meta_page(parent,Pagename,device_name):
     button = ttk.Button(
         top_row,
         text="select Meta file",
-        command=lambda:getzippath(),
+        command=lambda:EndToEndDevProvsioningController.set_meta_file_path(getzippath(local_path)),
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
-
-
-    def getzippath():
-        filepath = QSTAFDappInstallerPage._pick_zip()
-        local_path.set(filepath)
-        # unzip the file and set the path in end to end device script
-        EndToEndDevProvsioningController.set_meta_file_path(filepath)
 
     return Meta_frame
 
@@ -56,34 +65,101 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
     button = ttk.Button(
         top_row,
         text="select MPSS file",
-        command=lambda:getzippath(),
+        command=lambda:EndToEndDevProvsioningController.set_mpss_file_path(getzippath(local_path)),
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
-
-
-    def getzippath():
-        filepath = QSTAFDappInstallerPage._pick_zip()
-        local_path.set(filepath)
-        # unzip the file and set the path in end to end device script
-        EndToEndDevProvsioningController.set_mpss_file_path(filepath)
 
     return Mpss_frame
 
 
-def QCN_page(parent, Pagename, device_name) -> ttk.Frame:
-    pass
+def QCN_page(parent, Pagename, device_name) -> ttk.LabelFrame:
+    QCN_frame = ttk.LabelFrame(parent, text=f"Select QCN to install")
+    QCN_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(QCN_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+
+    button = ttk.Button(
+        top_row,
+        text="Load QCN",
+        command=lambda:EndToEndDevProvsioningController.load_qcn,
+    )
+    button.pack(fill="x" ,padx=(0, 10))
+    
+    return QCN_frame
+    
+def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
+    Choices = ["TMO", "ATT", "VZW"]
+
+    MBN_frame = ttk.LabelFrame(parent, text=f"Select MBN to install")
+    MBN_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(MBN_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+    dropdown_var = ttk.Combobox(top_row, values=Choices, state="readonly")
+    dropdown_var.pack(expand=True, fill="x", padx=6, pady=6)
+    dropdown_var.current(0)  # Set default selection
+    
+
+
+    button = ttk.Button(
+        top_row,
+        text="Activate MBN",
+        command=lambda:EndToEndDevProvsioningController.activate_mbn(dropdown_var.get()),
+    )
+    button.pack(fill="x" ,padx=(0, 10))
+
+    button = ttk.Button(
+        top_row,
+        text="Deactivate MBN",
+        command=lambda:EndToEndDevProvsioningController.deactivate_mbn(dropdown_var.get()),
+    )
+    button.pack(fill="x" ,padx=(0, 10))
+    
+    return MBN_frame
     # return QCN_frame
     
-def MBN_page(parent, Pagename, device_name) -> ttk.Frame:
-    pass
-    # return QCN_frame
+def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
+    NV_frame = ttk.LabelFrame(parent, text=f"Select NV's to install")
+    NV_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(NV_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+
+    button = ttk.Button(
+        top_row,
+        text="Load NV",
+        command=lambda:EndToEndDevProvsioningController.write_nv(),
+    )
+    button.pack(fill="x" ,padx=(0, 10))
     
-def NV_page(parent, Pagename, device_name) -> ttk.Frame:
-    pass
+    return NV_frame
+    
     # return QCN_frame
 
-def Full_Provisioning_page(parent, Pagename, device_name) -> ttk.Frame:
-    pass
+def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
+    Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"End to END install")
+    Full_Provisioning_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(Full_Provisioning_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+
+    button = ttk.Button(
+        top_row,
+        text="Load NV",
+        command=lambda:EndToEndDevProvsioningController.full_provisioning(),
+    )
+    button.pack(fill="x" ,padx=(0, 10))
+   
+    return Full_Provisioning_frame
     # return QCN_frame
 
 

@@ -84,7 +84,7 @@ def QCN_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button = ttk.Button(
         top_row,
         text="Load QCN",
-        command=lambda:EndToEndDevProvsioningController.load_qcn,
+        command=lambda:EndToEndDevProvsioningController.load_qcn(),
     )
     button.pack(fill="x" ,padx=(0, 10))
     
@@ -105,23 +105,21 @@ def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     dropdown_var.current(0)  # Set default selection
     
 
-
     button = ttk.Button(
         top_row,
         text="Activate MBN",
         command=lambda:EndToEndDevProvsioningController.activate_mbn(dropdown_var.get()),
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
 
     button = ttk.Button(
         top_row,
         text="Deactivate MBN",
         command=lambda:EndToEndDevProvsioningController.deactivate_mbn(dropdown_var.get()),
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
     
     return MBN_frame
-    # return QCN_frame
     
 def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     NV_frame = ttk.LabelFrame(parent, text=f"Select NV's to install")
@@ -137,14 +135,12 @@ def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
         text="Load NV",
         command=lambda:EndToEndDevProvsioningController.write_nv(),
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
     
     return NV_frame
-    
-    # return QCN_frame
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
-    Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"End to END install")
+    Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"Full Provisioning")
     Full_Provisioning_frame.pack(fill="x", **PADDING)  # type: ignore
 
     # First row: label (left), button (right) in a horizontal frame
@@ -154,13 +150,12 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
 
     button = ttk.Button(
         top_row,
-        text="Load NV",
+        text="Full Provisioning",
         command=lambda:EndToEndDevProvsioningController.full_provisioning(),
     )
-    button.pack(fill="x" ,padx=(0, 10))
-   
+    button.pack(fill="x", padx=(0, 10))
+    
     return Full_Provisioning_frame
-    # return QCN_frame
 
 
 """

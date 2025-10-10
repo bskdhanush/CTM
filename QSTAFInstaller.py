@@ -11,6 +11,7 @@ from typing import Callable, Optional, Tuple, List
 import re
 import os
 import WifiController
+from Threading import *
 
 # --------------------------- Destinations (Windows) ---------------------------
 QSTAF_BASE = Path(r"C:/QSTAF/QSTAFpy")
@@ -101,13 +102,13 @@ def _run_batch_wait_exit(
     Proceed immediately when the success KEY is printed.
     Returns (returncode, message).
     """
-    import threading, queue
+    import queue
 
     cmd = ["cmd", "/d", "/c", "call", bat_path.name]
     _status(on_status, f"Launching installer… ({bat_path})")
 
     q: "queue.Queue[Optional[str]]" = queue.Queue()
-    success_event = threading.Event()
+    success_event = thread_event()
 
     try:
         p = subprocess.Popen(
@@ -132,8 +133,7 @@ def _run_batch_wait_exit(
         except Exception:
             pass
 
-    t = threading.Thread(target=reader, daemon=True)
-    t.start()
+    start_thread(target_func=reader, daemon=True)
 
     start = time.time()
     while True:

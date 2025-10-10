@@ -1,13 +1,12 @@
-import threading
 import time
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk # type: ignore
 import CopyCsv
 import DataMonitorController as dmc
+from Threading import *
 
 # keep this at module scope so state survives between calls
 plot_refs: list[tuple[plt.Figure, FigureCanvasTkAgg, NavigationToolbar2Tk]] = [] # type: ignore
-
 
 PLOT_FUNCS = [
     dmc.traffic_plots,
@@ -68,5 +67,5 @@ def periodic_refresh(parent_frame, interval_secs = 60):
             parent_frame.after(0, clear_plots)
             parent_frame.after(0, lambda: draw_all_plots(parent_frame))
 
-    t = threading.Thread(target=_worker, daemon=True)
-    t.start()
+    start_thread(target_func=_worker, daemon=True)
+    

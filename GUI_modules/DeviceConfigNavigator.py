@@ -4,9 +4,9 @@ from tkinter import ttk
 from tkinter import filedialog
 from GUI_modules import FzDownloadPage, QSTAFDappInstallerPage
 import EndToEndDevProvsioningController
+from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
-
 
 
 def getzippath(label_var):
@@ -41,7 +41,7 @@ def Meta_page(parent,Pagename,device_name):
     button = ttk.Button(
         top_row,
         text="select Meta file",
-        command=lambda:EndToEndDevProvsioningController.set_meta_file_path(getzippath(local_path)),
+        command=lambda:start_thread(EndToEndDevProvsioningController.set_meta_file_path(getzippath(local_path)), daemon=True)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -65,7 +65,7 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
     button = ttk.Button(
         top_row,
         text="select MPSS file",
-        command=lambda:EndToEndDevProvsioningController.set_mpss_file_path(getzippath(local_path)),
+        command=lambda:start_thread(EndToEndDevProvsioningController.set_mpss_file_path(getzippath(local_path)), daemon=True)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -84,9 +84,9 @@ def QCN_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button = ttk.Button(
         top_row,
         text="Load QCN",
-        command=lambda:EndToEndDevProvsioningController.load_qcn,
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_qcn(), daemon=True)
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
     
     return QCN_frame
     
@@ -105,23 +105,21 @@ def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     dropdown_var.current(0)  # Set default selection
     
 
-
     button = ttk.Button(
         top_row,
         text="Activate MBN",
-        command=lambda:EndToEndDevProvsioningController.activate_mbn(dropdown_var.get()),
+        command=lambda:start_thread(EndToEndDevProvsioningController.activate_mbn(dropdown_var.get()), daemon=True)
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
 
-    button = ttk.Button(
-        top_row,
-        text="Deactivate MBN",
-        command=lambda:EndToEndDevProvsioningController.deactivate_mbn(dropdown_var.get()),
-    )
-    button.pack(fill="x" ,padx=(0, 10))
+    # button = ttk.Button(
+        # top_row,
+        # text="Deactivate MBN",
+        # command=lambda:EndToEndDevProvsioningController.deactivate_mbn(dropdown_var.get()),
+    # )
+    # button.pack(fill="x", padx=(0, 10))
     
     return MBN_frame
-    # return QCN_frame
     
 def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     NV_frame = ttk.LabelFrame(parent, text=f"Select NV's to install")
@@ -135,16 +133,14 @@ def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         top_row,
         text="Load NV",
-        command=lambda:EndToEndDevProvsioningController.write_nv(),
+        command=lambda:start_thread(EndToEndDevProvsioningController.write_nv(), daemon=True)
     )
-    button.pack(fill="x" ,padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))
     
     return NV_frame
-    
-    # return QCN_frame
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
-    Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"End to END install")
+    Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"Full Provisioning")
     Full_Provisioning_frame.pack(fill="x", **PADDING)  # type: ignore
 
     # First row: label (left), button (right) in a horizontal frame
@@ -154,13 +150,12 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
 
     button = ttk.Button(
         top_row,
-        text="Load NV",
-        command=lambda:EndToEndDevProvsioningController.full_provisioning(),
+        text="Full Provisioning",
+        command=lambda:start_thread(EndToEndDevProvsioningController.full_provisioning(), daemon=True)
     )
-    button.pack(fill="x" ,padx=(0, 10))
-   
+    button.pack(fill="x", padx=(0, 10))
+    
     return Full_Provisioning_frame
-    # return QCN_frame
 
 
 """

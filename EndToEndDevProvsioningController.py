@@ -1,9 +1,10 @@
 import os
 import re
+import time
 import subprocess
 import shutil
 import QSTAFInstaller
-from WifiController import get_adb_id
+from WifiController import get_adb_id, run_command
 
 # To-do: Set PROV_BASE from json. Update json from user selected path from UI
 PROV_BASE = r'C:\Dropbox\BuildLoadProvisioning\CTM_Prov_Base'
@@ -43,13 +44,13 @@ def update_meta_in_config(meta_path, meta_mpss_txt):
 def load_meta_from_path(filepath):
     # Update filepath for Meta in META_MPSS.txt and trigger load
     filepath = os.path.normpath(filepath)
-    print(filepath)
+    print(f'Meta Path: {filepath}')
     update_meta_in_config(filepath, META_MPSS_TXT)
     trigger_prov_meta(PROV_BASE)
 
 def load_meta_from_zip(filepath):
     # Extract META zip, update META_MPSS.txt and trigger load
-    print(f"Meta path to be set on End to end script: {filepath}")
+    print(f"Meta zip: {filepath}")
     if filepath.endswith(".7z"):
         META_ID = os.path.basename(filepath).strip(".7z")
     if filepath.endswith(".zip"):
@@ -67,13 +68,13 @@ def load_meta_from_zip(filepath):
 def load_mpss_from_path(filepath):
     # Update filepath for MPSS in META_MPSS.txt and trigger load
     filepath = os.path.normpath(filepath)
-    print(filepath)
+    print(f'MPSS Path: {filepath}')
     update_mpss_in_config(filepath, META_MPSS_TXT)
     trigger_prov_mpss(PROV_BASE)
 
 def load_mpss_from_zip(filepath):
     # Extract MPSS zip, update META_MPSS.txt and trigger load
-    print(f"Mpss path to be set on End to end script: {filepath}")
+    print(f"Mpss zip: {filepath}")
     if filepath.endswith(".7z"):
         MPSS_ID = os.path.basename(filepath).strip(".7z")
     if filepath.endswith(".zip"):
@@ -188,3 +189,22 @@ def full_provisioning():
     ]
     subprocess.run(command, shell=True)
     print("Full Provisioning launched in a new cmd prompt")
+
+def load_fota(filepath):
+    # Push FOTA zip to device and trigger load in recovery mode
+    print(f"FOTA Zip: {filepath}")
+    os.chdir(PROV_BASE)
+    if not os.path.exists('command'):
+        print(f'FOTA-command does not exist in {PROV_BASE}. Please check.')
+    else:
+        run_command(f"adb push command /cache/recovery/command")
+        run_command(f"adb push {filepath} /data/update.zip")
+        run_command('adb reboot recovery')
+        time.sleep(1)
+        ref_time = time.time()
+        while get_adb_id() is None and time.time() < ref_time + 60:
+            time.sleep(1)
+        if get_adb_id():
+            print(f'FOTA upgraded successfully')
+        else:
+            print(f'FOTA upgrade failed')

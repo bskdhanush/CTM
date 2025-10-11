@@ -13,7 +13,7 @@ import logging
 import sv_ttk
 
 import ADBController
-from GUI_modules import DataMonitorPage, FzDownloadPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage
+from GUI_modules import DataMonitorPage, FzDownloadPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage,CrashForecastPage
 import MainController
 import WifiController
 import QutsController
@@ -381,6 +381,12 @@ def launch_gui() -> None:
 
      # ── CPE config monitor page ────────────────────────────────────────────────
     DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
+    
+     # ── CPE config monitor page ────────────────────────────────────────────────
+
+    CrashForecastPage.create_crash_forecat_page(container,pages ,add_nav)
+
+
 
   
     # ── Launch ──────────────────────────────────────────────────────────────

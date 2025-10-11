@@ -375,13 +375,9 @@ def launch_gui() -> None:
 
     # ── QSTAF installer page ─────────────────────────────────────────────────
     QSTAFDappInstallerPage. create_Qstaf_dapp_install_page(container, pages, add_nav)
-    
-    # ── Meta/Mpss download page ────────────────────────────────────────────────
-    # DownloadMetaMpssPage.create_Meta_Mpss_download(container, pages, add_nav, meta_var.get().split(': ')[1])
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
-
 
      # ── CPE config monitor page ────────────────────────────────────────────────
     DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])

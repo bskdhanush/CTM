@@ -184,6 +184,28 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     return Full_Provisioning_frame
 
 
+def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
+
+    FOTA_frame = ttk.LabelFrame(parent, text=f"FOTA")
+    FOTA_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(FOTA_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+    local_path = tk.StringVar(value='FOTA zip not selected')
+    label = ttk.Label(top_row, textvariable=local_path)
+    label.pack(side="left", anchor="w", padx=(10, 0))
+
+    button = ttk.Button(
+        top_row,
+        text="FOTA",
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_fota(getzippath(local_path)), daemon=True)
+    )
+    button.pack(fill="x", padx=(0, 10))
+
+    return FOTA_frame
+    
 """
     Returns a frame containing:
       - An entry showing selected text file path

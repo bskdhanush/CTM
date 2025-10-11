@@ -8,7 +8,7 @@ from GUI_modules import DeviceConfigNavigator
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 def create_device_Configuaration_page(container, pages, add_nav, device_name):
 
-    section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning"]
+    section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning", "FOTA"]
     # Page container
     configPage = ttk.Frame(container)
     configPage.grid(row=0, column=0, sticky="nsew")
@@ -66,6 +66,10 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
             section_ui = DeviceConfigNavigator.Full_Provisioning_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=8)
 
+        elif Pagename == "FOTA":
+            section_ui = DeviceConfigNavigator.FOTA_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=8)
+            
         return fr
 
     for Pagename in section_names:

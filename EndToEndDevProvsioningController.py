@@ -61,7 +61,7 @@ def load_meta_from_zip(filepath):
     remove_dir(META_PATH)
     os.makedirs(META_PATH)
 
-    QSTAFInstaller._extract_zip(filepath, META_PATH)
+    QSTAFInstaller._extract_zip(filepath, META_PATH) # type: ignore
     update_meta_in_config(META_PATH, META_MPSS_TXT)
     trigger_prov_meta(PROV_BASE)
 
@@ -84,7 +84,7 @@ def load_mpss_from_zip(filepath):
     remove_dir(MPSS_PATH)
     os.makedirs(MPSS_PATH)
 
-    QSTAFInstaller._extract_zip(filepath, MPSS_PATH)
+    QSTAFInstaller._extract_zip(filepath, MPSS_PATH) # type: ignore
     update_mpss_in_config(MPSS_PATH, META_MPSS_TXT)
     trigger_prov_mpss(PROV_BASE)
 
@@ -95,7 +95,7 @@ def trigger_prov_mpss(PROV_BASE):
         adb_id = get_adb_id()
     except Exception as e:
         print(f'Exception during get_adb_id: {e}')
-    remove_dir(os.path.join(PROV_BASE, adb_id))
+    remove_dir(os.path.join(PROV_BASE, adb_id)) # type: ignore
 
     command = [
         'python', 'End_to_End_device_configuration.py',

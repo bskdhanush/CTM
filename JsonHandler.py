@@ -6,6 +6,7 @@ import MainController as mc
 
 LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
+POV_config_FIle=os.path.join(LOG_DIR, "POV_config.json")
 
 
 def _ensure_dir() -> None:
@@ -32,13 +33,25 @@ def _default_cfg() -> dict:
         "SpeedTestData":[],
     }
 
-def load_cfg() -> dict:
+def _default_POV():
+    return {
+        "POV_Path": "No path Selected",
+    }
+
+def load_cfg():
     _ensure_dir()
+
     if not os.path.exists(CONFIG_FILE):
         save_json(_default_cfg())
+
+    if not os.path.exists(POV_config_FIle):
+        print(" pov check called ")
+        
+        save_POV_json(_default_POV())
+
     try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
     except Exception as e:
         print("Config read failed – using defaults (%s)", e)
         return _default_cfg()
@@ -63,10 +76,20 @@ def load_json() -> dict:
     except Exception as e:
         print("App_json is has no data: %s", e)
         return {}
+def load_POV_json() -> dict:
+    try:
+        return json.loads(Path(POV_config_FIle).read_text("utf-8"))
+    except Exception as e:
+        print("App_json is has no data: %s", e)
+        return {}
 
 def save_json(cfg: dict) -> None:
     _ensure_dir()
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2)
+
+def save_POV_json(cfg):
+    with open(POV_config_FIle,"w", encoding="utf-8")as f:
         json.dump(cfg, f, indent=2)
 
 def get_json_path():

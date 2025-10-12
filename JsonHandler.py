@@ -37,6 +37,9 @@ def _default_POV():
     return {
         "POV_Path": "No path Selected",
         "Magic_string": "No Magic String Found",
+        "Market": "Pls enter market",
+        "Name": "Kiran",
+        "FSTID": "set fst id"
     }
 
 def load_cfg():

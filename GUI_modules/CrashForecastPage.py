@@ -94,7 +94,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     ttk.Button(
         entry_row_frame,
         text="Update Fields",
-        command=lambda: CrashHandler.set_naming_convention,
+        command=lambda: CrashHandler.set_naming_convention(Market_name.get(),Naming.get(),FSTID_name.get()),
     ).pack(fill="x", **PADDING) # type: ignore
     
 

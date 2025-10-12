@@ -8,8 +8,9 @@ from pathlib import Path
 from datetime import datetime, date, time as dt_time, timedelta
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-
+import CrashHandler as CH
 import JsonHandler as JH
+
 
 # — Config —
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
@@ -45,11 +46,12 @@ def process_dir(root: Path,
                 prefix: str,
                 min_size: float,
                 scan_root: bool = False) -> tuple[int, int]:
+     print("Processing crash dir")
      with _cfg_lock:
         cfg = JH.load_json()
 
         # state keys
-        prev_k      = f"previous_{prefix}_dir"
+        prev_k      = f"previous_crash_dir"
         if prefix=='crash' or prefix=='normalcrash':
             count_k     = f"crash_counter"
         else : 
@@ -105,6 +107,8 @@ def process_dir(root: Path,
             cfg[count_k]     = cfg.get(count_k, 0) + 1
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
+
+            CH.crash_forecast(str(p))
 
         JH.save_json(cfg)
         return cfg[count_k]

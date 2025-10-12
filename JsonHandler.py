@@ -36,6 +36,7 @@ def _default_cfg() -> dict:
 def _default_POV():
     return {
         "POV_Path": "No path Selected",
+        "Magic_string": "No Magic String Found",
     }
 
 def load_cfg():

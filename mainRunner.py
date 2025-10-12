@@ -3,7 +3,9 @@ import time
 import WifiController 
 import MainController
 
-from GUI_modules import DeviceConfigurationPage
+from GUI_modules import DeviceConfigurationPage,CrashForecastPage
 
 if __name__ == "__main__":
-   print(DeviceConfigurationPage.get_POV_Script_path_json())
+    mstr=CrashForecastPage.get_magic_string()
+    print(len(mstr))
+  

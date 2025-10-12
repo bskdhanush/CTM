@@ -135,7 +135,7 @@ class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
         if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT_PCAT)):
             time.sleep(120)
-            d, n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
+            n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
 
            # log.info("Crash → Day:%d Night:%d", d, n)
 

@@ -1,9 +1,11 @@
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
+from datetime import date
 
-crash_forecast_path = r"C:\QSTAF\crash_forecast.4.4"
+crash_forecast_path = r"C:"
 LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
 CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
 exe_name = "crash_forecast.exe"
@@ -38,11 +40,39 @@ def get_crash_path():
     cfg =load_json()
     normal_crash_path =cfg.get("previous_normalcrash_dir", "null")
     rdkb_crash_path = cfg.get("previous_rdkbcrash_dir", "null")
+    print(normal_crash_path)
+
 
     # Choose which to run, or run both if needed
-    crash_forecast(normal_crash_path)
-    crash_forecast(rdkb_crash_path)  # Uncomment if needed
+    if normal_crash_path:
+        print("inside mehtod")
+        crash_forecast(normal_crash_path)
+    if rdkb_crash_path:
+        crash_forecast(rdkb_crash_path)  # Uncomment if needed
+
+
+
+def get_naming_convention():
+    Market="LV-CPE "
+    Name="kiran"
+    FstID="sdx-asdjfjsdl-7887"
+    return Market,Name,FstID 
+
+def set_naming_convention():
+    pass
+
+def get_crash_naming():
+    today=date.today()
+    today=today.strftime("%m%d%Y")
+    count=1
+    carrier="TMO"
+    Market,Name,FstID =get_naming_convention()
+    
+    Crash_name=f"{Market}_{Name}_{FstID}_{today}_{carrier}_{count}_TDCxxxxxxxx_LAN_DRi"
+    Crash_name = re.sub(r'\s+', '', Crash_name)
+    return Crash_name
+    
 
 
 if __name__ == "__main__":
-    get_crash_path()
+    print(get_crash_naming())

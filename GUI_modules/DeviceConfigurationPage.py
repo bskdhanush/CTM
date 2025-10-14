@@ -4,24 +4,20 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from GUI_modules import DeviceConfigNavigator
-import JsonHandler
+from JsonHandler import load_prov_json, save_prov_json
 
 
 PADDING: dict[str, int] = {"padx": 12, "pady": 2}
 
+def get_prov_path():
+    cfg = load_prov_json()
+    return cfg.get("provisioning_path")
 
-
-def get_POV_Script_path_json():
-    with open(JsonHandler.POV_config_FIle, "r", encoding="utf-8") as f:
-                 cfg=json.load(f)
-    folderpath =cfg["POV_Path"]
-    #print(f"called{folderpath}")
-    return folderpath 
-def set_POV_Script_path_json(path_var):
-     folderpath=DeviceConfigNavigator.getFolderPath(path_var, "POV")
-     cfg=JsonHandler.load_POV_json()
-     cfg["POV_Path"]=folderpath
-     JsonHandler.save_POV_json(cfg)
+def set_prov_path(path_var):
+     folderpath = DeviceConfigNavigator.getFolderPath(path_var, "provisioning_path")
+     cfg = load_prov_json()
+     cfg.update({"provisioning_path": folderpath})
+     save_prov_json(cfg)
 
 def create_device_Configuaration_page(container, pages, add_nav, device_name):
     section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning", "FOTA"]
@@ -39,7 +35,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
     Header_frame = ttk.LabelFrame(configPage, text="Set Provisioning Script Path")
     Header_frame.pack(side="top", fill="x", padx=12, pady=(8, 8))
 
-    filepath=get_POV_Script_path_json()
+    filepath = get_prov_path()
     
     path_var = tk.StringVar(value=filepath)
     label = ttk.Label(Header_frame, textvariable=path_var)
@@ -48,7 +44,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
     button = ttk.Button(
         Header_frame,
         text="Select Script Path",
-        command=lambda: set_POV_Script_path_json(path_var))
+        command=lambda: set_prov_path(path_var))
     button.pack(side="right", padx=(0, 10), pady=6)
     
     # Main labelframe (title area) - using pack

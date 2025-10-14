@@ -4,91 +4,144 @@ from pathlib import Path
 import re
 import subprocess
 from datetime import date
+import datetime
+import pandas as pd
 from GUI_modules import CrashForecastPage
-import JsonHandler
+from JsonHandler import load_json, load_prov_json, save_prov_json
+from EndToEndDevProvsioningController import get_provisioning_base
+from WifiController import get_adb_id
+from FzHandler import file_upload
 
+LOG_DIR = Path(r"C:\QSTAF\CTM_logs")
+seven_zip_path = r'C:\Program Files\7-Zip\7z.exe'
 
+def crash_forecast(crash_path, timestamp):
+    if crash_path != "null":
+        crash_forecast_exe_path = get_provisioning_base()
+        cfg = load_prov_json()
+        fst_id = cfg.get('fst_id')
+        exe_name = "crash_forecast.exe"
+        magic_number = CrashForecastPage.get_magic_string()
+        _, _, _, operator, _ = get_naming_convention()
+        command = [
+            f"{os.path.join(crash_forecast_exe_path, exe_name)}",
+            '-p', crash_path,
+            '-m', magic_number
+        ]
+        result = subprocess.run(command, capture_output=True, text=True)
 
-crash_forecast_EXE_path = r"C:"
-LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
-CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
-POV_FILE= os.path.join(LOG_DIR, "POV_config.json")
-exe_name = "crash_forecast.exe"
-#magic_number = "eJx1j8FuwyAQRP+F8x4wEOLkVywLYWfrIhnsAq4SRfn37jpR2ks5MW9HM7t3UW8rFnG+iy2kqpU4dxJMD7u0hmQDLcnx02cSChoSw7LM6BNpTfoBotzisMx7zLhkvGxx5f/gC4qzMsZqLY/GgLj46nmCmdM6MYeEaYsCVGtA9tCJUn2uroaIBE+W+zrxEWZMnpFuFCg47NaIpfiJoWWoDpbp6rOnQKskSGgUI79dXSwTQf3HWMfBPUPV0RrizY5DcXgdca1hSTxqJeiejg6Ru3jpr9Htwn1jLuRypeaQJjafOL9R7R709PgcfKq/nhMt9vYsGP/J0tK0Lx+Vv6ZU//7SdbJ/0PsBBs+KUg=="
-tester_name = "XYZ"
-operator = "TMO"
+        root_cause = 'Root Not found'
+        try:
+            for line in result.stdout.split('\n'):
+                m = re.search(r'"Root Cause":.*\"(.*)\"', line)
+                if m:
+                    print(f'Root Cause: {m.group(1)}')
+                    root_cause = m.group(1)
+                    break
+        except Exception as e:
+            print(f'Exception during Crash forecast Root Cause : {e}')
 
+        adb_id = get_adb_id()
+        crash_info_dict = {
+            'ADB_ID': [adb_id],
+            'CRASH_PATH': [crash_path],
+            'TIMESTAMP': [timestamp],
+            'ROOT_CAUSE': [root_cause],
+            'FST_ID': [fst_id]
+        }
+        create_crash_meta_info_csv(crash_info_dict)
 
-def crash_forecast(crash_path: str):
-    if crash_path!= "null":
-        magic_number=CrashForecastPage.get_magic_string()
-        args = f'-p {crash_path} -m {magic_number} -t {tester_name} -o {operator} --publish true'
-        cmd = (
-        f'cmd.exe /K '
-        f'cd /d {crash_forecast_EXE_path} && '
-        f'{exe_name} {args}"'
-    )
-        subprocess.Popen(
-        cmd,
-        creationflags=subprocess.CREATE_NEW_CONSOLE
-    )
     else:
-        print("[INFO] No valid crash path provided.")
+        print("[INFO] Not a valid crash path.")
 
-def load_json(CONFIG_FILE) -> dict:
-    try:
-        return json.loads(Path(CONFIG_FILE).read_text("utf-8"))
-    except Exception as e:
-        print("App_json is has no data: %s", e)
-        return {}
+def create_crash_meta_info_csv(crash_info_dict):
+    # Creates CrashMetaInfo.csv with columns
+    # crash_count, adb_id, crash_path, timestamp, root_cause, fst_id
+
+    df = pd.DataFrame(crash_info_dict)
+    crash_meta_info_csv = os.path.join(LOG_DIR, 'CrashMetaInfo.csv')
+    if os.path.exists(crash_meta_info_csv):
+        df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
+        df = pd.concat([df_csv, df], axis=0)
+        os.remove(crash_meta_info_csv)
+    df.to_csv(crash_meta_info_csv, index=False)
+
+    # display_crash_table(crash_meta_info_csv)
+
+
+def zip_and_upload_crash_dump():
+    # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
+    # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
+    df = pd.read_csv(os.path.join(r'C:\QSTAF\CTM_logs', 'CrashMetaInfo.csv'))
+
+    for index, row in df.iterrows():
+        crash_name = get_crash_naming()
+        crash_path = row.get("CRASH_PATH")
+        if crash_path:
+            # crash_folder = os.path.basename(crash_path)
+            crash_base = os.path.dirname(crash_path)
+            new_crash_path = os.path.join(crash_base, crash_name)
+            if os.path.exists(crash_path):
+                os.rename(crash_path, new_crash_path)
+
+            # Zip
+            if os.path.exists(new_crash_path):
+                output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
+                zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
+
+                result = subprocess.run(zip_command, capture_output=True, text=True)
+
+                file_upload(output_zip, "crash_upload")
+
 
 def get_crash_path():
-    cfg =load_json(CONFIG_FILE)
-    normal_crash_path =cfg.get("previous_crash_dir", "null")
-    rdkb_crash_path = cfg.get("previous_rdkbcrash_dir", "null")
-    magic_number=CrashForecastPage.get_magic_string()
-
-
+    # cfg = load_json(CONFIG_FILE)
+    cfg = load_json()
+    normal_crash_path = cfg.get("previous_crash_dir", "null")
+    # rdkb_crash_path = cfg.get("previous_rdkbcrash_dir", "null")
+    # magic_number = CrashForecastPage.get_magic_string()
 
     # Choose which to run, or run both if needed
     if normal_crash_path:
-        crash_forecast(normal_crash_path)
-    if rdkb_crash_path:
-        crash_forecast(rdkb_crash_path)  # Uncomment if needed
-
+        time_stamp = datetime.fromtimestamp(normal_crash_path.stat().st_mtime).isoformat()
+        crash_forecast(normal_crash_path, time_stamp)
+    # if rdkb_crash_path:
+    #     crash_forecast(rdkb_crash_path)  # Uncomment if needed
 
 
 def get_naming_convention():
-    cfg=load_json(POV_FILE)
-    Market=cfg.get("Market","null")
-    Name=cfg.get("Name","null")
-    FstID=cfg.get("FSTID","null")
-    # Market="LV-CPE "
-    # Name="kiran"
-    # FstID="sdx-asdjfjsdl-7887"
-    return Market,Name,FstID 
+    # cfg = load_json(PROV_FILE)
+    cfg = load_prov_json()
+    market = cfg.get("market", "null")
+    name = cfg.get("name", "null")
+    fst_id = cfg.get("fst_id", "null")
+    operator = cfg.get("operator", "null")
+    tdc_serial = cfg.get("tdc_serial", "null")
+    # market="LV-CPE "
+    # name="kiran"
+    # fst_id="sdx-asdjfjsdl-7887"
+    return market, name, fst_id, operator, tdc_serial
 
-def set_naming_convention(Market,Name,FstID ):
-    cfg=load_json(POV_FILE)
-    cfg["Market"]=Market
-    cfg["Name"]=Name
-    cfg["FSTID"]=FstID
-    JsonHandler.save_POV_json(cfg)
+def set_naming_convention(market, name, fst_id, operator, tdc_serial):
+    # cfg = load_json(PROV_FILE)
+    cfg = load_prov_json()
+    cfg["market"] = market
+    cfg["name"] = name
+    cfg["fst_id"] = fst_id
+    cfg["operator"] = operator
+    cfg["tdc_serial"] = tdc_serial
+    save_prov_json(cfg)
 
 def get_crash_naming():
-    today=date.today()
-    today=today.strftime("%m%d%Y")
-    count=1
-    carrier="TMO"
-    Market,Name,FstID =get_naming_convention()
+    today = date.today()
+    today = today.strftime("%m%d%Y")
+    count = 1
+    market, name, fst_id, operator, tdc_serial = get_naming_convention()
     
-    Crash_name=f"{Market}_{Name}_{FstID}_{today}_{carrier}_{count}_TDCxxxxxxxx_LAN_DRi"
-    Crash_name = re.sub(r'\s+', '', Crash_name)
-    return Crash_name
+    crash_name = f"{market}_{name}_{fst_id}_{today}_{operator}_{count}_{tdc_serial}_LAN_DRI"
+    crash_name = re.sub(r'\s+', '', crash_name)
+    return crash_name
     
-
-
-
 
 if __name__ == "__main__":
     print(get_crash_naming())

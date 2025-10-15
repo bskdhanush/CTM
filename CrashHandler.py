@@ -28,6 +28,13 @@ def crash_forecast(crash_path, timestamp):
             '-p', crash_path,
             '-m', magic_number
         ]
+        subprocess.Popen(
+            ['cmd.exe', '/c', 'start', 'cmd.exe', '/k',
+             f"{os.path.join(crash_forecast_exe_path, exe_name)}",
+             '-p', crash_path,
+             '-m', magic_number
+             ]
+        )
         result = subprocess.run(command, capture_output=True, text=True)
 
         root_cause = 'Root Not found'

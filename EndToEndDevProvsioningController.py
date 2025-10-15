@@ -200,6 +200,7 @@ def write_nv():
     print("NV Load launched in a new cmd prompt")
     
 def full_provisioning():
+    PROV_BASE = get_provisioning_base()
     os.chdir(PROV_BASE)
     command = [
         'python', 'End_to_End_device_configuration.py',

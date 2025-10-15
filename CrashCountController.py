@@ -108,7 +108,7 @@ def process_dir(root: Path,
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
 
-            CH.crash_forecast(str(p), cfg[timestamp_k])
+            start_thread(CH.crash_forecast(str(p), cfg[timestamp_k]))
 
         JH.save_json(cfg)
         return cfg[count_k]

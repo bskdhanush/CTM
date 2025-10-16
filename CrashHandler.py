@@ -26,13 +26,13 @@ def crash_forecast(crash_path, timestamp):
             magic_number = CrashForecastPage.get_magic_string()
             _, _, _, operator, _ = get_naming_convention()
             command = [
-                f"{os.path.join(crash_forecast_exe_path, exe_name)}",
+                f"{os.path.join(crash_forecast_exe_path, exe_name)}", # type: ignore
                 '-p', crash_path,
                 '-m', magic_number
             ]
             subprocess.Popen(
                 ['cmd.exe', '/c', 'start', 'cmd.exe', '/k',
-                 f"{os.path.join(crash_forecast_exe_path, exe_name)}",
+                 f"{os.path.join(crash_forecast_exe_path, exe_name)}", # type: ignore
                  '-p', crash_path,
                  '-m', magic_number
                  ]
@@ -123,7 +123,7 @@ def get_crash_path():
 
     # Choose which to run, or run both if needed
     if normal_crash_path:
-        time_stamp = datetime.fromtimestamp(normal_crash_path.stat().st_mtime).isoformat()
+        time_stamp = datetime.datetime.fromtimestamp(normal_crash_path.stat().st_mtime).isoformat()
         start_thread(crash_forecast(normal_crash_path, time_stamp))
     # if rdkb_crash_path:
     #     crash_forecast(rdkb_crash_path)  # Uncomment if needed

@@ -23,17 +23,24 @@ def create_Home_Page(container, pages, add_nav, root):
     relaunch_timer=tk.StringVar(value="The frameworks will restart in:")
     rest_timer=tk.StringVar(value="none")
 
-    def update_timestamps():
+    def update_timestamps(mode):
         cfg = load_json()
-        cts = cfg.get("control_start_timestamp")
-        tts = cfg.get("traffic_start_timestamp")
+        if mode=="control":
+            cts = cfg.get("control_start_timestamp")
+            control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
+        elif mode=="traffic":
+            tts = cfg.get("traffic_start_timestamp")
+            traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
+        else:
+            cts = cfg.get("control_start_timestamp")
+            control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
+            tts = cfg.get("traffic_start_timestamp")
+            traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
         rest_timer=cfg.get("relaunch_timer")
-        control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
-        traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
         relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
 
-    update_timestamps()
-    GUI.start_json_file_watcher(update_timestamps, APP_CONFIG_JSON, root)
+    update_timestamps("")
+    #GUI.start_json_file_watcher(update_timestamps, APP_CONFIG_JSON, root)
 
     row = ttk.Frame(ctrl)
     row.pack(fill="x", **PADDING)# type: ignore
@@ -49,28 +56,28 @@ def create_Home_Page(container, pages, add_nav, root):
     ttk.Button(
         row,
         text="Launch Control Framework",
-        command=lambda:MainController.start_framework("control"), # type: ignore
+        command=lambda:update_timestamps(MainController.start_framework("control")), 
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row,
         text="Launch Traffic Framework",
-        command=lambda:MainController.start_framework("traffic"), # type: ignore
+        command=lambda:update_timestamps(MainController.start_framework("traffic")), 
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
 
     ttk.Button(
         row_s,
         text="Stop Control Framework",
-        command=partial(MainController.stop_framework,"control"),
+        command=lambda:update_timestamps(MainController.stop_framework("control")),
         width=18,
     ).pack(side="left", expand=True, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row_s,
         text="Stop Traffic Framework",
-        command=partial(MainController.stop_framework,"traffic"),
+        command=lambda:update_timestamps(MainController.stop_framework("traffic")),
         width=18,
     ).pack(side="right", expand=True, fill="x", padx=(6, 0), ipady=6)
 
@@ -117,7 +124,7 @@ def create_Home_Page(container, pages, add_nav, root):
     # cfg["rdkbcrash_counter"] = new_count
 
         save_json(cfg)
-        update_timestamps()    
+        update_timestamps("")    
 
 
 

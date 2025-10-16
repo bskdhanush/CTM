@@ -108,20 +108,26 @@ def start_framework(mode):
         try:
             StartTestCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
             JH.set_time(mode)
+
         except Exception as e:
             messagebox.showerror("Error", str(e))
+        return mode
     elif mode.lower() == 'traffic':
         try:
             StartTestCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
             JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
+        return mode
 
 def stop_framework(mode):
-    found = KillProcess.stop_all_tests(mode)
-    JH.rest_framework_timestamps(mode)
-    msg = "All processes stopped." if found else "No processes found to stop."
-    print(msg)
+    try:
+        found = KillProcess.stop_all_tests(mode)
+        JH.rest_framework_timestamps(mode)
+        msg = "All processes stopped." if found else "No processes found to stop."
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+    return mode
 
 def run_s3_uploader():
     try:

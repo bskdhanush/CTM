@@ -1,11 +1,11 @@
 import logging
 import threading
 
-def start_thread(target_func, thread_name, daemon=True):
+def start_thread(target_func, thread_name, daemon=True, **kwargs):
     """Start a thread with exception handling that logs thread name"""
     def wrapper():
         try:
-            target_func()
+            target_func(**kwargs)
         except Exception as e:
             # Log exception with thread name
             current_thread = threading.current_thread()

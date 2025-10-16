@@ -20,7 +20,7 @@ import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc
 import JsonHandler as JH
-
+from Constants import APP_CONFIG_JSON
 
 def add_copy_support(root: tk.Tk) -> None:
     is_mac = platform.system() == 'Darwin'
@@ -247,7 +247,7 @@ def launch_gui() -> None:
     load_counters()  # initial
 
      # start watching the JSON for changes
-    start_json_file_watcher(load_counters, cc.CONFIG_PATH, root)
+    start_json_file_watcher(load_counters, APP_CONFIG_JSON, root)
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content

@@ -5,9 +5,8 @@ import shutil
 from datetime import datetime
 import time as time_module
 import LogHandler
+from Constants import CTM_LOGS_DIR
 
-
-LOG_DIR = r'C:\QSTAF\CTM_logs'
 QSTAF_OUTPUT_BASE = r'C:\Temp\automation\QSTAF\QSTAFpy'
 CONTROL_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Control')
 TRAFFIC_BASE = os.path.join(QSTAF_OUTPUT_BASE, 'Traffic')
@@ -103,7 +102,7 @@ def get_speedtest_csv_list():
 
     for csv in csv_speedtest_list:
         #print(f'Copying {csv}')
-        shutil.copy(csv, LOG_DIR)
+        shutil.copy(csv, CTM_LOGS_DIR)
 
 def get_total_copy_csv_list():
     csv_copy_list = []
@@ -135,13 +134,13 @@ def copy_latest_csv():
 
     for csv in total_csv_copy_list:
         #print(f'Copying {csv}')
-        shutil.copy(csv, LOG_DIR)
+        shutil.copy(csv, CTM_LOGS_DIR)
 
 
-# Delete old files from LOG_DIR, every del_timeout
+# Delete old files from CTM_LOGS_DIR, every del_timeout
 def delete_old_csv():
     del_csv_list = []
-    csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
+    csv_files = glob.glob(CTM_LOGS_DIR + '\\*.csv', recursive=True)
     current_time = datetime.now()
     for csv in csv_files:
         if csv not in file_time_dict:

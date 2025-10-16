@@ -3,16 +3,11 @@ import json
 import os
 from pathlib import Path
 from Threading import thread_lock
+from Constants import APP_CONFIG_JSON, PROV_CONFIG_JSON, init_dirs
 
-LOG_DIR  = Path(r"C:\QSTAF\CTM_logs")
-CONFIG_FILE  = os.path.join(LOG_DIR, "app_config.json")
-PROV_CONFIG_FILE = os.path.join(LOG_DIR, "prov_config.json")
 app_lock = thread_lock()
 prov_lock = thread_lock()
 
-def _ensure_dir() -> None:
-    os.makedirs(LOG_DIR, exist_ok=True)
-    
 def _default_cfg() -> dict:
     return {
         "aws_scheduler_enabled": "true",
@@ -46,24 +41,21 @@ def _default_prov():
     }
 
 def load_cfg():
-    _ensure_dir()
-
-    if not os.path.exists(CONFIG_FILE):
+    if not os.path.exists(APP_CONFIG_JSON):
         save_json(_default_cfg())
 
-    if not os.path.exists(PROV_CONFIG_FILE):
-        print(" prov check called ")
+    if not os.path.exists(PROV_CONFIG_JSON):
         save_prov_json(_default_prov())
     try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+        with open(APP_CONFIG_JSON, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         print("Config read failed – using defaults (%s)", e)
         return _default_cfg()
     
 def rest_framework_timestamps(mode):
-    cfg=load_json()
-    cfg[f"{mode}_start_timestamp"] = "null"
+    cfg = load_json()
+    cfg.update({f"{mode}_start_timestamp": "null"})
     save_json(cfg)
 
 def set_time(mode):
@@ -77,28 +69,27 @@ def set_time(mode):
 
 def load_json() -> dict:
     try:
-        return json.loads(Path(CONFIG_FILE).read_text("utf-8"))
+        return json.loads(Path(APP_CONFIG_JSON).read_text("utf-8"))
     except Exception as e:
-        print("app_config.json is has no data: %s", e)
+        print(f"{APP_CONFIG_JSON} is has no data: %s", e)
         return {}
 
 def load_prov_json() -> dict:
     try:
-        return json.loads(Path(PROV_CONFIG_FILE).read_text("utf-8"))
+        return json.loads(Path(PROV_CONFIG_JSON).read_text("utf-8"))
     except Exception as e:
-        print("prov_config.json is has no data: %s", e)
+        print(f"{PROV_CONFIG_JSON} is has no data: %s", e)
         return {}
 
 def save_json(cfg: dict) -> None:
-    _ensure_dir()
+    init_dirs()
     with app_lock:
-        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        with open(APP_CONFIG_JSON, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
 
 def save_prov_json(cfg):
+    init_dirs()
     with prov_lock:
-        with open(PROV_CONFIG_FILE, "w", encoding="utf-8")as f:
+        with open(PROV_CONFIG_JSON, "w", encoding="utf-8")as f:
             json.dump(cfg, f, indent=2)
 
-def get_json_path():
-    return CONFIG_FILE

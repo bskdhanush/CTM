@@ -10,6 +10,7 @@ import time
 import shutil
 from datetime import datetime
 from packaging.version import parse as parse_version
+from Constants import CTM_LOGS_DIR
 
 # ── CONFIGURATION ────────────────────────────────────────────────────────────────
 
@@ -22,21 +23,15 @@ GITHUB_PAT    = os.getenv("GITHUB_PAT") or "ghp_M1EXjBybJPLmrMOOofL7mc45v8QZJ13C
 # Bump this on each new build/exe you generate:
 LOCAL_VERSION = "1.2.6"
 
-DOWNLOAD_DIR  = r"C:\QSTAF\CTM_logs"
 EXE_NAME      = "QSTAF_Tool.exe"
-EXE_PATH      = os.path.join(DOWNLOAD_DIR, EXE_NAME)
-EXE_BACKUP    = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool.exe.backup")
+EXE_PATH      = os.path.join(CTM_LOGS_DIR, EXE_NAME)
+EXE_BACKUP    = os.path.join(CTM_LOGS_DIR, "QSTAF_Tool.exe.backup")
 
 # Log file location (adjust as desired):
-LOG_DIR      = os.path.join(DOWNLOAD_DIR, "logs")
-LOG_FILENAME = os.path.join(LOG_DIR, "CheckUpdates.log")
+LOG_FILENAME = os.path.join(CTM_LOGS_DIR, "CheckUpdates.log")
 
 
 # ── SET UP LOGGING ──────────────────────────────────────────────────────────────
-
-# Ensure directories exist
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-os.makedirs(LOG_DIR,       exist_ok=True)
 
 logger = logging.getLogger("CheckUpdates")
 logger.setLevel(logging.INFO)
@@ -118,10 +113,10 @@ def find_latest_exe_asset(release_data: dict) -> (str, str): # type: ignore
 def download_asset_to_temp(asset_api_url: str, asset_name: str) -> str:
     sess = get_session()
     sess.headers.update({"Accept": "application/octet-stream"})
-    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    os.makedirs(CTM_LOGS_DIR, exist_ok=True)
 
     temp_filename = asset_name + ".tmp"
-    temp_path     = os.path.join(DOWNLOAD_DIR, temp_filename)
+    temp_path     = os.path.join(CTM_LOGS_DIR, temp_filename)
 
     log_info(f"Downloading asset to temp file: {temp_path}")
     with sess.get(asset_api_url, stream=True, timeout=60) as r:
@@ -165,7 +160,7 @@ def restore_from_backup(backup_path: str, target_path: str) -> bool:
 
 def create_update_script(temp_path: str, target_path: str, backup_path: str) -> str:
     """
-    Generate a self-deleting batch file (update_helper.bat) under DOWNLOAD_DIR that:
+    Generate a self-deleting batch file (update_helper.bat) under CTM_LOGS_DIR that:
      1) Waits for the updater-EXE to close.
      2) Deletes/moves the old EXE into place.
      3) Waits 5 seconds, then opens a new terminal and runs the new EXE with --skip-updates.
@@ -173,8 +168,8 @@ def create_update_script(temp_path: str, target_path: str, backup_path: str) -> 
 
     Returns the absolute path of the created .bat.
     """
-    batch_script_path = os.path.join(DOWNLOAD_DIR, "update_helper.bat")
-    log_file_path     = os.path.join(LOG_DIR, "update_helper.log")
+    batch_script_path = os.path.join(CTM_LOGS_DIR, "update_helper.bat")
+    log_file_path     = os.path.join(CTM_LOGS_DIR, "update_helper.log")
 
     # Convert forward slashes to backslashes for Windows paths
     temp_clean    = temp_path.replace("/", "\\")
@@ -281,7 +276,7 @@ def download_and_replace(asset_api_url: str, asset_name: str):
     Steps
     -----
     1. Back up the existing EXE (if present).
-    2. Download the new EXE to <DOWNLOAD_DIR>\<asset_name>.tmp.
+    2. Download the new EXE to <CTM_LOGS_DIR>\<asset_name>.tmp.
     3. Generate update_helper.bat that:
           • waits for the updater to exit,
           • moves the new file into place,
@@ -339,11 +334,11 @@ def download_and_replace(asset_api_url: str, asset_name: str):
 
 def launch_updated_exe():
     """
-    Look for the newest “QSTAF_Tool*.exe” inside DOWNLOAD_DIR and run it with
+    Look for the newest “QSTAF_Tool*.exe” inside CTM_LOGS_DIR and run it with
     --skip-updates.  Falls back to the backup if no matching EXE is found.
     """
     # 1) gather candidate EXEs
-    pattern     = os.path.join(DOWNLOAD_DIR, "QSTAF_Tool*.exe")
+    pattern     = os.path.join(CTM_LOGS_DIR, "QSTAF_Tool*.exe")
     candidates  = glob.glob(pattern)
 
     if not candidates:

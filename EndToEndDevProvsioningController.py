@@ -5,12 +5,19 @@ import subprocess
 import shutil
 import QSTAFInstaller
 from WifiController import get_adb_id, run_command
+from JsonHandler import load_prov_json
 
 # To-do: Set PROV_BASE from json. Update json from user selected path from UI
-PROV_BASE = r'C:\Dropbox\BuildLoadProvisioning\CTM_Prov_Base'
-META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
-MPSS_BASE = r'C:\temp\mpss'
-META_BASE = r'C:\temp\meta'
+# PROV_BASE = r'C:\Dropbox\BuildLoadProvisioning\CTM_Prov_Base'
+# PROV_BASE = get_provisioning_base()
+# META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
+MPSS_BASE = r'C:\MPSS'
+META_BASE = r'C:\Meta'
+
+def get_provisioning_base():
+    cfg = load_prov_json()
+    if cfg.get('provisioning_path') and cfg.get('provisioning_path') != 'No path Selected':
+        return cfg.get('provisioning_path')
 
 def remove_dir(dir):
     if os.path.exists(dir):
@@ -43,6 +50,8 @@ def update_meta_in_config(meta_path, meta_mpss_txt):
 
 def load_meta_from_path(filepath):
     # Update filepath for Meta in META_MPSS.txt and trigger load
+    PROV_BASE = get_provisioning_base()
+    META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
     filepath = os.path.normpath(filepath)
     print(f'Meta Path: {filepath}')
     update_meta_in_config(filepath, META_MPSS_TXT)
@@ -51,6 +60,9 @@ def load_meta_from_path(filepath):
 def load_meta_from_zip(filepath):
     # Extract META zip, update META_MPSS.txt and trigger load
     print(f"Meta zip: {filepath}")
+    PROV_BASE = get_provisioning_base()
+    META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
+    META_ID = ''
     if filepath.endswith(".7z"):
         META_ID = os.path.basename(filepath).strip(".7z")
     if filepath.endswith(".zip"):
@@ -67,6 +79,8 @@ def load_meta_from_zip(filepath):
 
 def load_mpss_from_path(filepath):
     # Update filepath for MPSS in META_MPSS.txt and trigger load
+    PROV_BASE = get_provisioning_base()
+    META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
     filepath = os.path.normpath(filepath)
     print(f'MPSS Path: {filepath}')
     update_mpss_in_config(filepath, META_MPSS_TXT)
@@ -75,6 +89,9 @@ def load_mpss_from_path(filepath):
 def load_mpss_from_zip(filepath):
     # Extract MPSS zip, update META_MPSS.txt and trigger load
     print(f"Mpss zip: {filepath}")
+    PROV_BASE = get_provisioning_base()
+    META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
+    MPSS_ID = ''
     if filepath.endswith(".7z"):
         MPSS_ID = os.path.basename(filepath).strip(".7z")
     if filepath.endswith(".zip"):
@@ -121,6 +138,7 @@ def trigger_prov_meta(PROV_BASE):
 
 
 def load_qcn():
+    PROV_BASE = get_provisioning_base()
     os.chdir(PROV_BASE)
     command = [
         'python', 'End_to_End_device_configuration.py',
@@ -145,6 +163,8 @@ def update_mbn_in_config(mbn, meta_mpss_txt):
                 f.write(line)
 
 def activate_mbn(operator):
+    PROV_BASE = get_provisioning_base()
+    META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
     os.chdir(PROV_BASE)
     operator_dict = {
         'TMO': 'Commercial-TMO',
@@ -167,6 +187,7 @@ def deactivate_mbn():
     pass
     
 def write_nv():
+    PROV_BASE = get_provisioning_base()
     os.chdir(PROV_BASE)
     command = [
         'python', 'End_to_End_device_configuration.py',
@@ -179,6 +200,7 @@ def write_nv():
     print("NV Load launched in a new cmd prompt")
     
 def full_provisioning():
+    PROV_BASE = get_provisioning_base()
     os.chdir(PROV_BASE)
     command = [
         'python', 'End_to_End_device_configuration.py',
@@ -193,6 +215,7 @@ def full_provisioning():
 def load_fota(filepath):
     # Push FOTA zip to device and trigger load in recovery mode
     print(f"FOTA Zip: {filepath}")
+    PROV_BASE = get_provisioning_base()
     os.chdir(PROV_BASE)
     if not os.path.exists('command'):
         print(f'FOTA-command does not exist in {PROV_BASE}. Please check.')

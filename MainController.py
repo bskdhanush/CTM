@@ -1,5 +1,6 @@
 # MainController.py
 from __future__ import annotations
+from Constants import init_dirs
 from gc import callbacks
 import sys
 import subprocess
@@ -7,6 +8,7 @@ from datetime import datetime
 import ctypes
 from tkinter import messagebox
 import json, time
+import Constants
 import logging
 import psutil
 import yaml
@@ -21,7 +23,7 @@ import WifiController
 import GUI as gui
 import CrashCountController as cc
 import JsonHandler as JH
-
+from Constants import CTM_LOGS_DIR
 from Threading import *
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
@@ -43,7 +45,6 @@ RUN_SPEEDTEST_BAT = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows\Run_SpeedTest.
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 MODES = ("control", "traffic")
 DEFAULT_TIMER_HOURS = 6
-LOG_DIR = r'C:\QSTAF\CTM_logs'
 
 # CrashCountController.run_watch()
 
@@ -234,8 +235,8 @@ def stop_all_tools_Framework():
    
 #---------to collect logs to txt------------------------
 '''
-LOG_DIR.mkdir(parents=True, exist_ok=True) 
-LOG_PATH = LOG_DIR / "qstaf_tool.log" 
+CTM_LOGS_DIR.mkdir(parents=True, exist_ok=True) 
+LOG_PATH = CTM_LOGS_DIR / "qstaf_tool.log" 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -368,7 +369,7 @@ def get_all_speedtest_results():
 
     speedtest_list = []
 
-    speedtest_csvs = glob.glob(LOG_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
+    speedtest_csvs = glob.glob(CTM_LOGS_DIR + '\\**\\*vpid1111_seqno1_SpeedTest.csv', recursive=True)
 
     df_csv = pd.DataFrame()
     for speedtest_csv in speedtest_csvs:
@@ -383,7 +384,7 @@ def get_all_speedtest_results():
         df_csv = df_csv.head(10)
 
 
-    dl_stats_csvs = glob.glob(LOG_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
+    dl_stats_csvs = glob.glob(CTM_LOGS_DIR + '\\**\\*QSH_DL_STATS.csv', recursive=True)
 
     dl_stats_df = pd.DataFrame()
     rfband_df = pd.DataFrame()
@@ -407,7 +408,7 @@ def get_all_speedtest_results():
         except Exception as e:
             print(f'Exception during rfband_rf : {e}')
 
-    gps_monitor_csvs = glob.glob(os.path.join(LOG_DIR, '**', '*qstaf_gps_monitor.csv'), recursive=True)
+    gps_monitor_csvs = glob.glob(os.path.join(CTM_LOGS_DIR, '**', '*qstaf_gps_monitor.csv'), recursive=True)
     gps_df = pd.DataFrame()
     for gps_monitor_csv in gps_monitor_csvs:
         try:
@@ -470,7 +471,7 @@ def get_all_speedtest_results():
         # Getting the Connectivity_Mode from RF Band Info
         try:
             rfbandinfo_df = pd.DataFrame()
-            rfbandinfo_csvs = glob.glob(LOG_DIR + '\\**\\*RFBandInfo.csv', recursive=True)
+            rfbandinfo_csvs = glob.glob(CTM_LOGS_DIR + '\\**\\*RFBandInfo.csv', recursive=True)
             for rfbandinfo_csv in sorted(rfbandinfo_csvs):
                 rfbandinfo_df = pd.concat([rfbandinfo_df, pd.read_csv(rfbandinfo_csv)], axis=0)
             if not rfbandinfo_df.empty:
@@ -491,6 +492,7 @@ def get_all_speedtest_results():
     print("Speedtest results collected and saved to JSON.")
 
 def main() -> None:
+    init_dirs()
     ADBController.save_to_json("--")
     
     # auto‑stops when the main program exits

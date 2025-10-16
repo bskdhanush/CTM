@@ -11,8 +11,8 @@ from EndToEndDevProvsioningController import get_provisioning_base
 from WifiController import get_adb_id
 from FzHandler import file_upload
 from Threading import start_thread
+from Constants import CTM_LOGS_DIR
 
-LOG_DIR = Path(r"C:\QSTAF\CTM_logs")
 seven_zip_path = r'C:\Program Files\7-Zip\7z.exe'
 
 def crash_forecast(crash_path, timestamp):
@@ -77,7 +77,7 @@ def create_crash_meta_info_csv(crash_info_dict):
     # crash_count, adb_id, crash_path, timestamp, root_cause, fst_id
 
     df = pd.DataFrame(crash_info_dict)
-    crash_meta_info_csv = os.path.join(LOG_DIR, 'CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
         df = pd.concat([df_csv, df], axis=0)
@@ -90,7 +90,7 @@ def create_crash_meta_info_csv(crash_info_dict):
 def zip_and_upload_crash_dump():
     # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
     # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
-    df = pd.read_csv(os.path.join(LOG_DIR, 'CrashMetaInfo.csv'))
+    df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
 
     for index, row in df.iterrows():
         try:
@@ -141,7 +141,6 @@ def get_naming_convention():
     # fst_id="sdx-asdjfjsdl-7887"
     return market, name, fst_id, operator, tdc_serial
 
-
 def set_naming_convention(market, name, fst_id, operator, tdc_serial):
     # cfg = load_json(PROV_FILE)
     cfg = load_prov_json()
@@ -151,7 +150,6 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial):
     cfg["operator"] = operator
     cfg["tdc_serial"] = tdc_serial
     save_prov_json(cfg)
-
 
 def get_crash_naming():
     today = date.today()

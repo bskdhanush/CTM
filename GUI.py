@@ -22,10 +22,7 @@ import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc
 import JsonHandler as JH
-from CrashCountController import crash_update_queue
-
-
-quee=[]
+from Constants import APP_CONFIG_JSON
 
 def add_copy_support(root: tk.Tk) -> None:
     is_mac = platform.system() == 'Darwin'

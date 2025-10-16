@@ -30,7 +30,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     crash_frame = ttk.Frame(container)
     crash_frame.grid(row=0, column=0, sticky="nsew")
     pages["Crash"] = crash_frame
-    add_nav("Crash_Forecast", "Crash")
+    add_nav("Crash Processing", "Crash")
 
     magic_string = get_magic_string()
     path_var = tk.StringVar(value=magic_string)
@@ -62,7 +62,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     # current_string_label.pack(fill="x", **PADDING)  # type: ignore
 
     ttk.Button(
-         crash_page_header, text="Crash_Forecast", command=lambda:CrashHandler.get_crash_path()
+         crash_page_header, text="Crash Processing", command=lambda:CrashHandler.get_crash_path()
     ).pack(fill="x",**PADDING)# type: ignore
 
     crash_page_main = ttk.LabelFrame(crash_frame, text="Crash Renaming and Upload")

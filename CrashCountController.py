@@ -9,18 +9,12 @@ from datetime import datetime, date, time as dt_time, timedelta
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import CrashHandler as CH
-import JsonHandler as JH
-import GUI
-import tkinter as tk
-from tkinter import ttk
-from queue import Queue
-
+from JsonHandler import load_json, save_json
 
 # — Config —
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
-CONFIG_PATH        = Path(r"C:\QSTAF\CTM_logs\app_config.json")
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
@@ -41,12 +35,12 @@ def get_size(p: Path) -> int:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
 
 def rest_counter():
-    
-    cfg = JH.load_json()
+    cfg = load_json()
+
     print("Resetting Counters" )
-    cfg["rdkbcrash_counter"] =0
-    cfg["crash_counter"] =0
-    JH.save_json(cfg)
+    cfg["rdkbcrash_counter"] = 0
+    cfg["crash_counter"] = 0
+    save_json(cfg)
 
 def process_dir(root: Path,
                 prefix: str,
@@ -54,7 +48,7 @@ def process_dir(root: Path,
                 scan_root: bool = False) -> tuple[int, int]:
      print("Processing crash dir")
      with _cfg_lock:
-        cfg = JH.load_json()
+        cfg = load_json()
 
         # state keys
         prev_k      = f"previous_crash_dir"
@@ -123,17 +117,14 @@ def process_dir(root: Path,
             })
             
 
-        JH.save_json(cfg)
+        save_json(cfg)
         return cfg[count_k]
-
-
 
 def get_latest_play():
     latest_playlist_path=most_recent_subdir(DEFAULT_CRASHDUMP) 
     final_path= os.path.join(str(latest_playlist_path),"CrashLogs")
     return Path(final_path)
 
- 
 
 class DefaultCrashHandler(FileSystemEventHandler):
     def on_created(self, e):
@@ -143,7 +134,6 @@ class DefaultCrashHandler(FileSystemEventHandler):
             time.sleep(10)
             n = process_dir(final_path, 'normalcrash', MIN_CRASH_SIZE)
             
-
 class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
         if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT_PCAT)):
@@ -151,7 +141,6 @@ class CrashHandler(FileSystemEventHandler):
             n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
 
            # log.info("Crash → Day:%d Night:%d", d, n)
-
 
 class RdkbHandler(FileSystemEventHandler):
     def on_created(self, e):

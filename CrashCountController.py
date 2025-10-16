@@ -104,7 +104,7 @@ def process_dir(root: Path,
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
 
-            start_thread(CH.crash_forecast(str(p), cfg[timestamp_k]),"Crash forecast Thread")
+            start_thread(CH.crash_forecast,"Crash forecast Thread", daemon=True, crash_path=str(p), timestamp=cfg[timestamp_k])
             print(cfg[count_k])
 
             GUI.data_queue.put({

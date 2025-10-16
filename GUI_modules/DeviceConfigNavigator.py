@@ -49,16 +49,16 @@ def Meta_page(parent,Pagename,device_name):
     button = ttk.Button(
         top_row,
         text="Select Meta path to load",
-        command=lambda: start_thread(EndToEndDevProvsioningController.load_meta_from_path(getFolderPath(local_path, 'Meta')),"Meta install Thread",
-                                     daemon=True)
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_meta_from_path,"Meta install Thread",
+                                     daemon=True, filepath=getFolderPath(local_path, 'Meta'))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
     button = ttk.Button(
         top_row,
         text="select Meta zip to load",
-        command=lambda:start_thread(EndToEndDevProvsioningController.load_meta_from_zip(getzippath(local_path)),"Meta install from ZIP Thread",
-                                    daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_meta_from_zip,"Meta install from ZIP Thread",
+                                    daemon=True, filepath=getzippath(local_path))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -82,16 +82,16 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
     button = ttk.Button(
         top_row,
         text="Select MPSS path to load",
-        command=lambda: start_thread(EndToEndDevProvsioningController.load_mpss_from_path(getFolderPath(local_path, 'MPSS')),"MPSS install Thread",
-                                     daemon=True)
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_mpss_from_path,"MPSS install Thread",
+                                     daemon=True, filepath=getFolderPath(local_path, 'MPSS'))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
     button = ttk.Button(
         top_row,
         text="Select MPSS zip to load",
-        command=lambda:start_thread(EndToEndDevProvsioningController.load_mpss_from_zip(getzippath(local_path)),"MPSS install from ZIP Thread",
-                                    daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_mpss_from_zip,"MPSS install from ZIP Thread",
+                                    daemon=True, filepath=getzippath(local_path))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -110,7 +110,7 @@ def QCN_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button = ttk.Button(
         top_row,
         text="Load QCN",
-        command=lambda:start_thread(EndToEndDevProvsioningController.load_qcn(),"QCN install Thread", daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.load_qcn, "QCN install Thread", daemon=True)
     )
     button.pack(fill="x", padx=(0, 10))
     
@@ -134,7 +134,7 @@ def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         top_row,
         text="Activate MBN",
-        command=lambda:start_thread(EndToEndDevProvsioningController.activate_mbn(dropdown_var.get()),"MBNs install Thread", daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.activate_mbn, "MBNs install Thread", daemon=True, operator=dropdown_var.get())
     )
     button.pack(fill="x", padx=(0, 10))
 
@@ -159,7 +159,7 @@ def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         top_row,
         text="Load NV",
-        command=lambda:start_thread(EndToEndDevProvsioningController.write_nv(),"NVs install Thread",daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.write_nv, "NVs install Thread", daemon=True)
     )
     button.pack(fill="x", padx=(0, 10))
     
@@ -177,7 +177,7 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         top_row,
         text="Full Provisioning",
-        command=lambda:start_thread(EndToEndDevProvsioningController.full_provisioning(),"Full Provisioning Thread", daemon=True)
+        command=lambda:start_thread(EndToEndDevProvsioningController.full_provisioning, "Full Provisioning Thread", daemon=True)
     )
     button.pack(fill="x", padx=(0, 10))
     
@@ -200,7 +200,7 @@ def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button = ttk.Button(
         top_row,
         text="FOTA",
-        command=lambda: start_thread(EndToEndDevProvsioningController.load_fota(getzippath(local_path)),"Fota Thread" ,daemon=True)
+        command=lambda: start_thread(EndToEndDevProvsioningController.load_fota,"Fota Thread" ,daemon=True, filepath=getzippath(local_path))
     )
     button.pack(fill="x", padx=(0, 10))
 

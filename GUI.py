@@ -399,7 +399,7 @@ def launch_gui() -> None:
     
      # ── CPE config monitor page ────────────────────────────────────────────────
 
-    CrashForecastPage.create_crash_forecat_page(container,pages ,add_nav)
+    CrashForecastPage.create_crash_forecast_page(container,pages ,add_nav)
 
 
 

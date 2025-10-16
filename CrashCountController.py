@@ -1,6 +1,7 @@
 # CrashCountController.py
 
 import os
+from queue import Queue
 import time
 from Threading import *
 import logging
@@ -10,6 +11,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import CrashHandler as CH
 from JsonHandler import load_json, save_json
+
 
 # — Config —
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
@@ -36,7 +38,6 @@ def get_size(p: Path) -> int:
 
 def rest_counter():
     cfg = load_json()
-
     print("Resetting Counters" )
     cfg["rdkbcrash_counter"] = 0
     cfg["crash_counter"] = 0

@@ -9,7 +9,6 @@ from tkinter.scrolledtext import ScrolledText
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import logging
-
 from queue import Queue,Empty
 
 import sv_ttk
@@ -20,8 +19,9 @@ import MainController
 import WifiController
 import QutsController
 import DataMonitorController as dmc
-import CrashCountController as cc
+import CrashCountController as cc 
 import JsonHandler as JH
+from CrashCountController import crash_update_queue
 from Constants import APP_CONFIG_JSON
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -204,7 +204,7 @@ def launch_gui() -> None:
     ).grid(row=2, column=2, sticky="w", padx=10, pady=5)
 
     # --- crash counters (hard-right) -------------------------------------------
-    def Reset_label():
+    def Reset_label_counter():
         crash_lbl.config(foreground=white_accent)
         crash_text_lbl.configure(foreground=white_accent)
         crash_var.set("0")
@@ -230,7 +230,7 @@ def launch_gui() -> None:
 
     ttk.Button(
         header_frame, text="Reset Counter", width=12,
-        command=Reset_label
+        command=Reset_label_counter
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
 

@@ -16,14 +16,14 @@ def get_magic_string():
     magic_string = cfg.get("magic_string", "Set magic string")
     return magic_string
 
-def set_magic_sting(path_var,current_label,magic_string:str):
+def set_magic_sting(path_var,magic_string:str):
     print("setting the string")
     cfg = load_prov_json()
     cfg.update({"magic_string": magic_string})
     save_prov_json(cfg)
 
     path_var.set(magic_string)
-    current_label.config(text=f"Current Magic String: \n\n{magic_string}")
+    #current_label.config(text=f"Current Magic String: \n\n{magic_string}")
     return 
 
 def create_crash_forecat_page(container, pages, add_nav):
@@ -50,7 +50,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     ttk.Button(
         row1_frame,
         text="Set Magic String",
-        command=lambda: set_magic_sting(path_var,current_string_label, Text_value.get()),
+        command=lambda: set_magic_sting(path_var, Text_value.get()),
     ).pack(side="right", padx=(10, 0))
     
     separator = ttk.Separator(crash_page_header, orient='horizontal')

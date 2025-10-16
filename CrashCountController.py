@@ -10,6 +10,10 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import CrashHandler as CH
 import JsonHandler as JH
+import GUI
+import tkinter as tk
+from tkinter import ttk
+from queue import Queue
 
 
 # — Config —
@@ -20,6 +24,8 @@ CONFIG_PATH        = Path(r"C:\QSTAF\CTM_logs\app_config.json")
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
+
+crash_update_queue = Queue()
 
 # Lock for thread-safe config I/O
 _cfg_lock = thread_lock()
@@ -35,8 +41,8 @@ def get_size(p: Path) -> int:
     return sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
 
 def rest_counter():
+    
     cfg = JH.load_json()
-
     print("Resetting Counters" )
     cfg["rdkbcrash_counter"] =0
     cfg["crash_counter"] =0
@@ -109,6 +115,13 @@ def process_dir(root: Path,
             cfg[timestamp_k] = mtime.isoformat()
 
             start_thread(CH.crash_forecast(str(p), cfg[timestamp_k]))
+            print(cfg[count_k])
+
+            crash_update_queue.put({
+                'type': prefix,
+                'count': cfg[count_k]
+            })
+            
 
         JH.save_json(cfg)
         return cfg[count_k]
@@ -127,14 +140,14 @@ class DefaultCrashHandler(FileSystemEventHandler):
         final_path= get_latest_play()
         if e.is_directory and e.src_path.startswith(str(final_path)):
             #print(updated_path)
-            time.sleep(120)
+            time.sleep(10)
             n = process_dir(final_path, 'normalcrash', MIN_CRASH_SIZE)
             
 
 class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
         if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT_PCAT)):
-            time.sleep(120)
+            time.sleep(10)
             n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
 
            # log.info("Crash → Day:%d Night:%d", d, n)

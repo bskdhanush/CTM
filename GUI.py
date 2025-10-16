@@ -10,6 +10,8 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import logging
 
+from queue import Queue,Empty
+
 import sv_ttk
 
 import ADBController
@@ -20,7 +22,10 @@ import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc
 import JsonHandler as JH
+from CrashCountController import crash_update_queue
 
+
+quee=[]
 
 def add_copy_support(root: tk.Tk) -> None:
     is_mac = platform.system() == 'Darwin'
@@ -202,6 +207,17 @@ def launch_gui() -> None:
     ).grid(row=2, column=2, sticky="w", padx=10, pady=5)
 
     # --- crash counters (hard-right) -------------------------------------------
+    def Reset_label():
+        crash_lbl.config(foreground=white_accent)
+        crash_text_lbl.configure(foreground=white_accent)
+        crash_var.set("0")
+
+        RDKB_lbl.configure(foreground=white_accent)
+        RDKB_text_lbl.configure(foreground=white_accent)
+        RDKB_var.set("0")
+        cc.rest_counter()
+
+
     crash_var  = tk.StringVar(value="—")
     RDKB_var   = tk.StringVar(value="—")
 
@@ -217,37 +233,38 @@ def launch_gui() -> None:
 
     ttk.Button(
         header_frame, text="Reset Counter", width=12,
-        command=cc.rest_counter
+        command=Reset_label
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
-    
-    def load_counters():
-        cfg = JH.load_json()
-        crash_count = cfg.get("crash_counter", 0)
-        rdkb_count = cfg.get("rdkbcrash_counter", 0)
 
-        # update the StringVars
-        crash_var.set(str(crash_count))
-        RDKB_var.set(str(rdkb_count))
-        if crash_count > 0:
-            crash_lbl.config(foreground=red_accent)
-            crash_text_lbl.configure(foreground=red_accent)
-        else:
-            crash_lbl.configure(foreground=white_accent)
-            crash_text_lbl.configure(foreground=white_accent)
-
-        if rdkb_count > 0:
-            RDKB_lbl.configure(foreground=red_accent)
-            RDKB_text_lbl.configure(foreground=red_accent)
-
-        else:
-            RDKB_lbl.configure(foreground=white_accent)
-            RDKB_text_lbl.configure(foreground=white_accent)
-
-    load_counters()  # initial
-
-     # start watching the JSON for changes
-    start_json_file_watcher(load_counters, cc.CONFIG_PATH, root)
+    def check_crash_queue():
+        try:
+            while True:
+                update = crash_update_queue.get_nowait()
+                
+                # Update based on crash type
+                if update['type'] in ['crash', 'normalcrash']:
+                    crash_var.set(str(update['count']))
+                    if update['count'] > 0:
+                        crash_lbl.config(foreground=red_accent)
+                        crash_text_lbl.configure(foreground=red_accent)
+                elif update['type'] == 'rdkbcrash':
+                    RDKB_var.set(str(update['count']))
+                    if update['count'] > 0:
+                        RDKB_lbl.configure(foreground=red_accent)
+                        RDKB_text_lbl.configure(foreground=red_accent)
+                        
+        except Empty:
+            pass
+        finally:
+            # Check queue again after 100ms
+            if root is not None:
+                try:
+                    if root.winfo_exists():
+                        root.after(100, check_crash_queue)
+                except tk.TclError:
+                    pass
+    check_crash_queue()
 
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content

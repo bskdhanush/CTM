@@ -4,9 +4,9 @@ from functools import partial
 
 import AwsScheduler as aws
 import GUI
-import JsonHandler as JH
+from JsonHandler import load_json, save_json
 import MainController
-
+from Constants import APP_CONFIG_JSON
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 def create_Home_Page(container, pages, add_nav, root):
@@ -24,7 +24,7 @@ def create_Home_Page(container, pages, add_nav, root):
     rest_timer=tk.StringVar(value="none")
 
     def update_timestamps():
-        cfg = JH.load_json()
+        cfg = load_json()
         cts = cfg.get("control_start_timestamp")
         tts = cfg.get("traffic_start_timestamp")
         rest_timer=cfg.get("relaunch_timer")
@@ -33,8 +33,7 @@ def create_Home_Page(container, pages, add_nav, root):
         relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
 
     update_timestamps()
-    GUI.start_json_file_watcher(update_timestamps, JH.get_json_path(), root)
-
+    GUI.start_json_file_watcher(update_timestamps, APP_CONFIG_JSON, root)
 
     row = ttk.Frame(ctrl)
     row.pack(fill="x", **PADDING)# type: ignore
@@ -112,12 +111,12 @@ def create_Home_Page(container, pages, add_nav, root):
         # could pop up a warning here instead
             return
 
-        cfg = JH.load_json()
+        cfg = load_json()
         cfg["relaunch_timer"] = new_count
     # if you also want to set the RDKB counter too, uncomment:
     # cfg["rdkbcrash_counter"] = new_count
 
-        JH.save_json(cfg)
+        save_json(cfg)
         update_timestamps()    
 
 

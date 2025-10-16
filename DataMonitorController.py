@@ -5,14 +5,14 @@ from typing import Literal
 import pandas as pd
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
+from Constants import CTM_LOGS_DIR
 
-LOG_DIR = r"C:\QSTAF\CTM_logs"
 ping_internet_status = 2
 backhaul_internet_status = 2
 
 def get_df(csv_type):
     """Creates dataframe and returns it based on csv_type passed"""
-    csv_files = glob.glob(LOG_DIR + csv_type, recursive=True)
+    csv_files = glob.glob(CTM_LOGS_DIR + csv_type, recursive=True)
     df = pd.DataFrame()
 
     if 'RFBandInfo' in csv_type:
@@ -70,7 +70,7 @@ def traffic_plots(figsize: tuple[Literal[7], Literal[4]]):
 
     global ping_internet_status
     df_all = {}
-    csv_files = glob.glob(LOG_DIR + '\\*.csv', recursive=True)
+    csv_files = glob.glob(CTM_LOGS_DIR + '\\*.csv', recursive=True)
 
     for csv_file in csv_files:
         csv_name = csv_file.split('\\')[-1]
@@ -323,9 +323,38 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
             pass
     return fig
 
+def speedtest_plot(figsize:tuple[Literal[7], Literal[4]]):
+    """Generate Speedtest plot from QSTAFonDevice based on df at CTM_LOGS_DIR"""
+    df = get_df('\\*vpid1111_seqno1_SpeedTest.csv')
+    fig = Figure(figsize, dpi=100)
+    ax = [fig.add_subplot(111)]
+    try:
+        df = df.sort_values(by=['end_time'])
+
+        # Group the data by the 'color' column
+        for label, group in df.groupby('SSID'):
+            ax[0].plot(
+                group['TIMESTAMP'],
+                group['NO_OF_CLIENTS'],
+                label=label,
+                marker='o',
+                linestyle='-'
+            )
+
+        # Set title and labels
+        ax[0].set_title('WifiClients')
+        ax[0].set_xlabel('TIMESTAMP')
+        ax[0].set_ylabel('NO_OF_CLIENTS')
+        ax[0].legend(title='SSID')
+        ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+        fig.autofmt_xdate()
+
+    except Exception as e:
+        pass
+    return fig
 
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
-    """Generate wifi_clients plot from QSTAFonDevice based on df at LOG_DIR"""
+    """Generate wifi_clients plot from QSTAFonDevice based on df at CTM_LOGS_DIR"""
 
     df = get_df('\\*qstaf_monitor_connected_devices.csv')
     fig = Figure(figsize, dpi=100)

@@ -124,7 +124,7 @@ def get_crash_path():
     # Choose which to run, or run both if needed
     if normal_crash_path:
         time_stamp = datetime.datetime.fromtimestamp(normal_crash_path.stat().st_mtime).isoformat()
-        start_thread(crash_forecast(normal_crash_path, time_stamp))
+        start_thread(crash_forecast(normal_crash_path, time_stamp),"Crash Dump forecast")
     # if rdkb_crash_path:
     #     crash_forecast(rdkb_crash_path)  # Uncomment if needed
 

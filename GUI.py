@@ -14,15 +14,15 @@ from queue import Queue,Empty
 import sv_ttk
 
 import ADBController
-from GUI_modules import DataMonitorPage, FzDownloadPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage,CrashForecastPage
+from GUI_modules import DataMonitorPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage,CrashForecastPage
 import MainController
 import WifiController
 import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc 
 import JsonHandler as JH
-from CrashCountController import crash_update_queue
 from Constants import APP_CONFIG_JSON
+
 
 def add_copy_support(root: tk.Tk) -> None:
     is_mac = platform.system() == 'Darwin'
@@ -122,6 +122,7 @@ red_accent = "#E95959"
 root = None
 observers = []  # Global list to track all observers
 meta = ""
+data_queue=Queue()
 
 class JsonFileWatcher(FileSystemEventHandler):
     def __init__(self, callback, file_path_to_watch, tk_root: tk.Tk):
@@ -237,7 +238,7 @@ def launch_gui() -> None:
     def check_crash_queue():
         try:
             while True:
-                update = crash_update_queue.get_nowait()
+                update = data_queue.get_nowait()
                 
                 # Update based on crash type
                 if update['type'] in ['crash', 'normalcrash']:

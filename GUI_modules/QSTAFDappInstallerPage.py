@@ -129,7 +129,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
                         _log(f"Failed: {msg or 'Unknown error.'}")
                 top.after(0, done)
 
-        start_thread(target_func=worker, daemon=True)
+        start_thread(worker,"Qstaf installer Thread",daemon=True)
 
     def getSetQstafZipPath():
         filePath = _pick_zip()

@@ -108,20 +108,26 @@ def start_framework(mode):
         try:
             StartTestCase.start_tests(CMD_DIR_CONTROL, BAT_FILE_CONTROL,'Control')
             JH.set_time(mode)
+
         except Exception as e:
             messagebox.showerror("Error", str(e))
+        return mode
     elif mode.lower() == 'traffic':
         try:
             StartTestCase.start_tests(CMD_DIR_TRAFFIC, BAT_FILE_TRAFFIC,'Traffic')
             JH.set_time(mode)
         except Exception as e:
             messagebox.showerror("Error", str(e))
+        return mode
 
 def stop_framework(mode):
-    found = KillProcess.stop_all_tests(mode)
-    JH.rest_framework_timestamps(mode)
-    msg = "All processes stopped." if found else "No processes found to stop."
-    print(msg)
+    try:
+        found = KillProcess.stop_all_tests(mode)
+        JH.rest_framework_timestamps(mode)
+        msg = "All processes stopped." if found else "No processes found to stop."
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+    return mode
 
 def run_s3_uploader():
     try:
@@ -496,11 +502,11 @@ def main() -> None:
     ADBController.save_to_json("--")
     
     # auto‑stops when the main program exits
-    start_thread(target_func=ADBController.run_adb_track_devices, daemon=True)
+    start_thread(ADBController.run_adb_track_devices, "ADBID_watcher", daemon=True)
 
-    start_thread(target_func=cc.run_watchdog, daemon=True)
+    start_thread(cc.run_watchdog,"Json_watch_dog" ,daemon=True)
     
-    start_thread(target_func=check_restart_timer, daemon=True)
+    start_thread(check_restart_timer,"Relaunch_scenario" ,daemon=True)
 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

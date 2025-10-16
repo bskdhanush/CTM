@@ -69,7 +69,7 @@ def _loop() -> None:
 def _start_loop_once() -> None:
     global _loop_started
     if not _loop_started:
-        start_thread(target_func=_loop, daemon=True)
+        start_thread(_loop,"AWS thread",daemon=True)
         _loop_started = True
 
 def is_enabled() -> bool:

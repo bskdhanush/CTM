@@ -1,27 +1,22 @@
 # CrashCountController.py
 
 import os
-from queue import Queue
 import time
 from Threading import *
-import logging
 from pathlib import Path
-from datetime import datetime, date, time as dt_time, timedelta
+from datetime import datetime, date
+import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from queue import Queue
+
+
 import CrashHandler as CH
+import GUI 
 from JsonHandler import load_json, save_json
+from Constants import DEFAULT_CRASHDUMP,CRASHDUMP_ROOT_PCAT,RDKBCRASH_ROOT,MIN_CRASH_SIZE,MIN_RDKBCRASH_SIZE
 
 
-# — Config —
-DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
-CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
-RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
-
-MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
-MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
-
-crash_update_queue = Queue()
 
 # Lock for thread-safe config I/O
 _cfg_lock = thread_lock()
@@ -109,10 +104,10 @@ def process_dir(root: Path,
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
 
-            start_thread(CH.crash_forecast(str(p), cfg[timestamp_k]))
+            start_thread(CH.crash_forecast(str(p), cfg[timestamp_k]),"Crash forecast Thread")
             print(cfg[count_k])
 
-            crash_update_queue.put({
+            GUI.data_queue.put({
                 'type': prefix,
                 'count': cfg[count_k]
             })

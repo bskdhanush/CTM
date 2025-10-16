@@ -181,22 +181,27 @@ def create_crash_forecat_page(container, pages, add_nav):
 
     def load_crash_table():
         """Read CSV and populate the table."""
+        try:
+            crash_meta_csv = os.path.join(r'C:\QSTAF\CTM_logs', 'CrashMetaInfo.csv')
+            df = pd.DataFrame()
+            if os.path.exists(crash_meta_csv):
+                df = pd.read_csv(crash_meta_csv)
 
-        df = pd.read_csv(os.path.join(r'C:\QSTAF\CTM_logs', 'CrashMetaInfo.csv'))
-        tree.delete(*tree.get_children())
-
-        for index, row in df.iterrows():
-            tree.insert(
-                "",
-                "end",
-                values=(
-                    row.get("ROOT_CAUSE", ""),
-                    row.get("ADB_ID", ""),
-                    row.get("CRASH_PATH", ""),
-                    row.get("TIMESTAMP", ""),
-                    row.get("FST_ID", "")
+            tree.delete(*tree.get_children())
+            for index, row in df.iterrows():
+                tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        row.get("ROOT_CAUSE", ""),
+                        row.get("ADB_ID", ""),
+                        row.get("CRASH_PATH", ""),
+                        row.get("TIMESTAMP", ""),
+                        row.get("FST_ID", "")
+                    )
                 )
-            )
+        except Exception as e:
+            print(f'Exception during load_crash_table: {e}')
 
     # initial fill
     load_crash_table()

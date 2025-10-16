@@ -502,11 +502,11 @@ def main() -> None:
     ADBController.save_to_json("--")
     
     # auto‑stops when the main program exits
-    start_thread(target_func=ADBController.run_adb_track_devices, daemon=True)
+    start_thread(ADBController.run_adb_track_devices, "ADBID_watcher", daemon=True)
 
-    start_thread(target_func=cc.run_watchdog, daemon=True)
+    start_thread(cc.run_watchdog,"Json_watch_dog" ,daemon=True)
     
-    start_thread(target_func=check_restart_timer, daemon=True)
+    start_thread(check_restart_timer,"Relaunch_scenario" ,daemon=True)
 
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()

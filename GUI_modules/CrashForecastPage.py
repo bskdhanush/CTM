@@ -212,7 +212,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     ttk.Button(
         crash_page_main,
         text="Zip & Upload Crash dump",
-        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump(), daemon=True)
+        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump(),"Zip and upload thread", daemon=True)
     ).pack(fill="x", **PADDING) # type: ignore
 
 

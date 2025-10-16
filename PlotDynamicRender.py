@@ -67,5 +67,5 @@ def periodic_refresh(parent_frame, interval_secs = 60):
             parent_frame.after(0, clear_plots)
             parent_frame.after(0, lambda: draw_all_plots(parent_frame))
 
-    start_thread(target_func=_worker, daemon=True)
+    start_thread(_worker,"data plots Thread" ,daemon=True)
     

@@ -47,4 +47,4 @@ def start_bat_and_watch_stdout(cmd_dir, bat_file,callback):
 
                 proc.terminate()
              
-    start_thread(target_func=reader, daemon=True)
+    start_thread(reader,"Speed test reults thread" ,daemon=True)

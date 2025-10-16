@@ -133,7 +133,7 @@ def _run_batch_wait_exit(
         except Exception:
             pass
 
-    start_thread(target_func=reader, daemon=True)
+    start_thread(reader,"", daemon=True)
 
     start = time.time()
     while True:

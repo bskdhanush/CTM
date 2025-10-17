@@ -45,10 +45,9 @@ def crash_forecast(crash_path, timestamp):
 
         root_cause = 'Root Not found'
         try:
-            print("Extracting root cause")
             for line in result_stdout.split('\n'):
                 m = re.search(r'"Root Cause":.*\"(.*)\"', line)
-                print(f"root_cause: {m}")
+
                 if m:
                     print(f'Root Cause: {m.group(1)}')
                     root_cause = m.group(1)
@@ -61,7 +60,7 @@ def crash_forecast(crash_path, timestamp):
         except Exception as e:
             print(f'Exception during get_adb_id in crash_forecast: {e}')
             adb_id = ''
-        
+        print("added data to fields")
         crash_info_dict = {
             'ADB_ID': [adb_id],
             'CRASH_PATH': [crash_path],
@@ -69,8 +68,9 @@ def crash_forecast(crash_path, timestamp):
             'ROOT_CAUSE': [root_cause],
             'FST_ID': [fst_id]
         }
+        print("Starting to edit CSV")
         create_crash_meta_info_csv(crash_info_dict)
-
+        print("DOne edit csv")
     else:
         print("[INFO] Not a valid crash path.")
 

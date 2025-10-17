@@ -8,6 +8,7 @@ from JsonHandler import load_prov_json, save_prov_json
 import pandas as pd
 import os
 from Threading import start_thread
+from Constants import CTM_LOGS_DIR
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
@@ -178,7 +179,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         buttons_frame, 
         text="Crash Forecast", 
-        command=lambda: CrashHandler.forecast_crashes(get_selected_crash_paths())
+        command=lambda: [CrashHandler.forecast_crashes(get_selected_crash_paths()),load_crash_table()]
     ).grid(row=0, column=0, sticky="w", **PADDING) # type: ignore
 
     # Center button
@@ -198,7 +199,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     def load_crash_table():
         """Read CSV and populate the table."""
         try:
-            crash_meta_csv = os.path.join(r'C:\QSTAF\CTM_logs', 'CrashMetaInfo.csv')
+            crash_meta_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
             df = pd.DataFrame()
             if os.path.exists(crash_meta_csv):
                 df = pd.read_csv(crash_meta_csv)

@@ -127,13 +127,13 @@ class DefaultCrashHandler(FileSystemEventHandler):
         final_path= get_latest_play()
         if e.is_directory and e.src_path.startswith(str(final_path)):
             #print(updated_path)
-            time.sleep(10)
+            time.sleep(120)
             n = process_dir(final_path, 'normalcrash', MIN_CRASH_SIZE)
             
 class CrashHandler(FileSystemEventHandler):
     def on_created(self, e):
         if e.is_directory and e.src_path.startswith(str(CRASHDUMP_ROOT_PCAT)):
-            time.sleep(10)
+            time.sleep(120)
             n = process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
 
            # log.info("Crash → Day:%d Night:%d", d, n)

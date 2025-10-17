@@ -26,7 +26,7 @@ def set_magic_sting(path_var,magic_string:str):
     #current_label.config(text=f"Current Magic String: \n\n{magic_string}")
     return 
 
-def create_crash_forecat_page(container, pages, add_nav):
+def create_crash_forecast_page(container, pages, add_nav):
     crash_frame = ttk.Frame(container)
     crash_frame.grid(row=0, column=0, sticky="nsew")
     pages["Crash"] = crash_frame
@@ -62,7 +62,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     # current_string_label.pack(fill="x", **PADDING)  # type: ignore
 
     ttk.Button(
-         crash_page_header, text="Crash Processing", command=lambda:CrashHandler.get_crash_path()
+         crash_page_header, text="Crash Forecast", command=lambda:CrashHandler.get_crash_path()
     ).pack(fill="x",**PADDING)# type: ignore
 
     crash_page_main = ttk.LabelFrame(crash_frame, text="Crash Renaming and Upload")
@@ -212,7 +212,7 @@ def create_crash_forecat_page(container, pages, add_nav):
     ttk.Button(
         crash_page_main,
         text="Zip & Upload Crash dump",
-        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump(),"Zip and upload thread", daemon=True)
+        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump, "Zip and upload thread", daemon=True)
     ).pack(fill="x", **PADDING) # type: ignore
 
 

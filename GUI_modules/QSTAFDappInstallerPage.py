@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 import datetime as dt
-import QSTAFInstaller,DappInstaller
+import QSTAFInstaller, DappInstaller
 from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
@@ -13,12 +13,12 @@ def _pick_zip() -> str:
         filePath = filedialog.askopenfilename(
             title="Select QSTAF archive",
             filetypes=[
-            ("Archives", "*.zip *.7z"),
-            ("ZIP archives", "*.zip"),
-            ("7z archives", "*.7z"),
-            ("All files", "*.*"),
-        ],
-    )
+                ("Archives", "*.zip *.7z"),
+                ("ZIP archives", "*.zip"),
+                ("7z archives", "*.7z"),
+                ("All files", "*.*"),
+            ],
+        )
         if not filePath:
             return ""
         if not filePath.lower().endswith((".zip", ".7z")):

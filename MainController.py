@@ -498,7 +498,9 @@ def get_all_speedtest_results():
     print("Speedtest results collected and saved to JSON.")
 
 def main() -> None:
+    subprocess.call("taskkill /F /IM adb.exe", shell=False)
     init_dirs()
+
     ADBController.save_to_json("--")
     
     # auto‑stops when the main program exits

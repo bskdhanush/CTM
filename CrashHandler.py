@@ -47,6 +47,7 @@ def crash_forecast(crash_path, timestamp):
         try:
             for line in result_stdout.split('\n'):
                 m = re.search(r'"Root Cause":.*\"(.*)\"', line)
+
                 if m:
                     print(f'Root Cause: {m.group(1)}')
                     root_cause = m.group(1)
@@ -59,7 +60,7 @@ def crash_forecast(crash_path, timestamp):
         except Exception as e:
             print(f'Exception during get_adb_id in crash_forecast: {e}')
             adb_id = ''
-
+        print("added data to fields")
         crash_info_dict = {
             'ADB_ID': [adb_id],
             'CRASH_PATH': [crash_path],
@@ -67,8 +68,9 @@ def crash_forecast(crash_path, timestamp):
             'ROOT_CAUSE': [root_cause],
             'FST_ID': [fst_id]
         }
+        print("Starting to edit CSV")
         create_crash_meta_info_csv(crash_info_dict)
-
+        print("DOne edit csv")
     else:
         print("[INFO] Not a valid crash path.")
 
@@ -115,16 +117,19 @@ def zip_and_upload_crash_dump():
             print(f'Exception during zip_and_upload_crash_dump: {e}')
 
 
-def get_crash_path():
-    cfg = load_json()
-    normal_crash_path = cfg.get("previous_crash_dir", "null")
+def forecast_crashes(crash_dir_list):
+    # cfg = load_json()
+    # normal_crash_path = cfg.get("previous_crash_dir", "null")
     # rdkb_crash_path = cfg.get("previous_rdkbcrash_dir", "null")
     # magic_number = CrashForecastPage.get_magic_string()
-
-    # Choose which to run, or run both if needed
-    if normal_crash_path:
-        time_stamp = datetime.datetime.fromtimestamp(normal_crash_path.stat().st_mtime).isoformat()
-        start_thread(crash_forecast,"Crash Dump forecast", daemon=True, crash_path=normal_crash_path, timestamp=time_stamp)
+    #Choose which to run, or run both if needed
+    # if normal_crash_path:
+    for directory in crash_dir_list:
+        print(directory)
+    # Path objects have .stat() as a method
+        time_stamp = datetime.datetime.fromtimestamp(os.stat(directory).st_mtime).strftime("%Y-%m-%dT%H:%M:%S")
+        print(time_stamp, directory)
+        start_thread(crash_forecast(directory, time_stamp), "Crash Dump forecast")
     # if rdkb_crash_path:
     #     crash_forecast(rdkb_crash_path)  # Uncomment if needed
 

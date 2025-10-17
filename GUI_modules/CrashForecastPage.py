@@ -8,6 +8,7 @@ from JsonHandler import load_prov_json, save_prov_json
 import pandas as pd
 import os
 from Threading import start_thread
+from Constants import CTM_LOGS_DIR
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
@@ -60,10 +61,6 @@ def create_crash_forecast_page(container, pages, add_nav):
 
     # current_string_label = ttk.Label(crash_page_header, text=f"Current Magic String: \n\n{magic_string}", wraplength=1000)
     # current_string_label.pack(fill="x", **PADDING)  # type: ignore
-
-    ttk.Button(
-         crash_page_header, text="Crash Forecast", command=lambda:CrashHandler.get_crash_path()
-    ).pack(fill="x",**PADDING)# type: ignore
 
     crash_page_main = ttk.LabelFrame(crash_frame, text="Crash Renaming and Upload")
     crash_page_main.pack(fill="x", **PADDING) # type: ignore
@@ -171,18 +168,38 @@ def create_crash_forecast_page(container, pages, add_nav):
     tree.grid(row=0, column=0, sticky="nsew")
     vscroll.grid(row=0, column=1, sticky="ns", rowspan=2)
     hsb.grid(row=1, column=0, sticky="ew")
+    
+    buttons_frame = ttk.Frame(Crash_table)
+    buttons_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=(6, 0))
+    buttons_frame.columnconfigure(0, weight=1)  # Left section
+    buttons_frame.columnconfigure(1, weight=0)  # Center section
+    buttons_frame.columnconfigure(2, weight=1)  # Right section
 
-    # Refresh button BELOW the hscrollbar (row 2)
+    # Left button
     ttk.Button(
-        Crash_table,
+        buttons_frame, 
+        text="Crash Forecast", 
+        command=lambda: [CrashHandler.forecast_crashes(get_selected_crash_paths()),load_crash_table()]
+    ).grid(row=0, column=0, sticky="w", **PADDING) # type: ignore
+
+    # Center button
+    ttk.Button(
+        buttons_frame,
         text="Refresh Data",
-        command=lambda: (load_crash_table()),
-    ).grid(row=2, column=0, sticky="ew", padx=10, pady=(6, 0))
+        command=lambda: load_crash_table(),
+    ).grid(row=0, column=1, pady=8)
+
+    # Right button
+    ttk.Button(
+        buttons_frame,
+        text="Zip & Upload Crash dump",
+        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump(), "Zip and upload thread", daemon=True)
+    ).grid(row=0, column=2, sticky="e",**PADDING) # type: ignore
 
     def load_crash_table():
         """Read CSV and populate the table."""
         try:
-            crash_meta_csv = os.path.join(r'C:\QSTAF\CTM_logs', 'CrashMetaInfo.csv')
+            crash_meta_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
             df = pd.DataFrame()
             if os.path.exists(crash_meta_csv):
                 df = pd.read_csv(crash_meta_csv)
@@ -206,16 +223,23 @@ def create_crash_forecast_page(container, pages, add_nav):
     # initial fill
     load_crash_table()
 
-    separator = ttk.Separator(crash_page_main, orient='horizontal')
-    separator.pack(fill='x', padx=20, pady=(12, 0))
+    def get_selected_crash_paths(): 
 
-    ttk.Button(
-        crash_page_main,
-        text="Zip & Upload Crash dump",
-        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump, "Zip and upload thread", daemon=True)
-    ).pack(fill="x", **PADDING) # type: ignore
-
-
+        selected_items = tree.selection()  # Returns tuple of selected item IDs
+        
+        if not selected_items:
+            print("No rows selected")
+            return []
+        
+        crash_paths = []
+        for item_id in selected_items:
+            item_data = tree.item(item_id)  # Returns dict with 'values' key
+            values = item_data['values']  # List of column values
+            crash_path = values[2]  # CRASH_PATH is index 2 (ROOT_CAUSE=0, ADB_ID=1, CRASH_PATH=2)
+            crash_paths.append(crash_path)
+        
+        print(f"Selected crash paths: {crash_paths}")
+        return crash_paths
 
     return crash_frame
 

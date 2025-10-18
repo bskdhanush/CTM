@@ -13,11 +13,7 @@ def _get_download_path() -> str:
 
 def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     print(f"Meta/Mpss selected: {device_name}")
-    try:
-        items = FzHandler.list_files(device_name, Pagename)
-    except Exception as e:
-        print(f'Exception during list_files: {e}')
-        items = []
+ 
 
     # MMdownload= ttk.Frame(container)
     # MMdownload.grid(row=0, column=0, sticky="nsew")
@@ -25,6 +21,17 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     # add_nav("Meta/Mpss ⇩ ", "MMdownload")
 
     MMdownload = ttk.Frame(container)
+
+    def get_current_files():
+        try:
+            items = FzHandler.list_files(device_name, Pagename)
+            for item in items:
+                file_listbox.insert(tk.END, item["name"])
+        except Exception as e:
+            print(f'Exception during list_files: {e}')
+        return items
+        
+
 
     def browse_path():
         # Open directory selection dialog
@@ -92,31 +99,32 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     file_listbox.config(yscrollcommand=scrollbar.set)
 
-   
-    if items is None:
-        print("No items found on the server.")
-        items = []
-
-    for item in items:
-        print(f"Found item: {item}")
-        file_listbox.insert(tk.END, item["name"])
-    
-
-    # Centered download button below the list
+    # Separator above buttons
     separator = ttk.Separator(Selection_frame, orient='horizontal')
     separator.pack(fill='x', padx=100, pady=(12, 0))
 
-    select_btn = ttk.Button(Selection_frame, text="Download", command=download_selected_Meta_Mpss)
-    select_btn.pack(pady=(15, 10))
-    select_btn.pack_configure(anchor="center")
+    # Bottom section with buttons and checkbox
+    bottom_section = tk.Frame(Selection_frame)
+    bottom_section.pack(fill="x", padx=16, pady=(15, 10))
+
+    # Left side: Refresh button and checkbox in a vertical frame
+    left_controls = tk.Frame(bottom_section)
+    left_controls.pack(side="left", anchor="w")
+
+    Refresh_btn = ttk.Button(left_controls, text="Refresh Table", command=get_current_files)
+    Refresh_btn.pack(anchor="w")
 
     auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
 
     ttk.Checkbutton(
-    Selection_frame,
-    text="Enable auto download",
-    variable=auto_download_checkBox,
-    command=toggle_auto_downloader
-    ).pack(side="left", padx=16)
+        left_controls,
+        text="Enable auto download",
+        variable=auto_download_checkBox,
+        command=toggle_auto_downloader
+    ).pack(anchor="w", pady=(8, 0))
+
+    # Right side: Download button
+    select_btn = ttk.Button(bottom_section, text="Download", command=download_selected_Meta_Mpss)
+    select_btn.pack(side="right", anchor="e")
 
     return MMdownload

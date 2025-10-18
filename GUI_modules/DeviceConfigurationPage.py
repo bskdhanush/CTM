@@ -45,7 +45,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
         Header_frame,
         text="Select Script Path",
         command=lambda: set_prov_path(path_var))
-    button.pack(side="right", padx=(0, 10), pady=6)
+    button.pack(side="right", padx=(0, 10),pady=(0,6))
     
     # Main labelframe (title area) - using pack
     Main_frame = ttk.LabelFrame(configPage, text="Device Configuration")

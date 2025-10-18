@@ -108,16 +108,35 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     bottom_section.pack(fill="x", padx=16, pady=(15, 10))
 
     # Left side: Refresh button and checkbox in a vertical frame
-    left_controls = tk.Frame(bottom_section)
-    left_controls.pack(side="left", anchor="w")
+    refresh_table_row = tk.Frame(bottom_section)
+    refresh_table_row.pack(fill="x")
 
-    Refresh_btn = ttk.Button(left_controls, text="Refresh Table", command=get_current_files)
-    Refresh_btn.pack(anchor="w")
+    Refresh_btn = ttk.Button(refresh_table_row, text="Refresh Table", command=get_current_files)
+    Refresh_btn.pack(side="left")
+   
+    sub_string = tk.StringVar(value="Enter a sub string to search")
+   
+   
+    ttk.Button(
+        refresh_table_row,
+        text="Get Data",
+        command=lambda:sub_string.get(),
+    ).pack(side="right", padx=(8,8)) # type: ignore
+    
+    ttk.Entry(
+        refresh_table_row,
+        textvariable=sub_string,
+        width=30
+    ).pack(side="right")
 
+
+
+
+    
+    
     auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
-
     ttk.Checkbutton(
-        left_controls,
+        bottom_section,
         text="Enable auto download",
         variable=auto_download_checkBox,
         command=toggle_auto_downloader
@@ -125,6 +144,6 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     # Right side: Download button
     select_btn = ttk.Button(bottom_section, text="Download", command=download_selected_Meta_Mpss)
-    select_btn.pack(side="right", anchor="e")
+    select_btn.pack( anchor="e")
 
     return MMdownload

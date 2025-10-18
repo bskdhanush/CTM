@@ -1,19 +1,21 @@
 import subprocess
 import json
 import os
+from GUI import data_queue
 
-# Path to the JSON file
-json_path = r"C:\QSTAF\CTM_logs\adb_ID.json"
+
+from Constants import ADB_ID_JSON_DIR
+
 
 # Ensure directory exists
-os.makedirs(os.path.dirname(json_path), exist_ok=True)
+os.makedirs(os.path.dirname(ADB_ID_JSON_DIR), exist_ok=True)
 
 # Store last known "ADB ID" value
 last_adb_id = None
 
 def save_to_json(adb_id):
     data = {"ADB ID": adb_id}
-    with open(json_path, "w") as f:
+    with open(ADB_ID_JSON_DIR, "w") as f:
         json.dump(data, f, indent=4)
     #print(f"[INFO] Updated ADB ID → {adb_id}")
 
@@ -52,6 +54,12 @@ def run_adb_track_devices():
         if adb_id != last_adb_id:
             last_adb_id = adb_id
             save_to_json(adb_id)
+            data_queue.put({
+                'type': 'adb_id',
+                'ID': adb_id
+            })
+            
+            
 
 if __name__ == "__main__":
     try:

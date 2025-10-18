@@ -13,7 +13,7 @@ from queue import Queue,Empty
 
 import sv_ttk
 
-import ADBController
+
 from GUI_modules import DataMonitorPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage,CrashForecastPage
 import MainController
 import WifiController
@@ -21,7 +21,7 @@ import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc 
 import JsonHandler as JH
-from Constants import APP_CONFIG_JSON
+from Constants import APP_CONFIG_JSON,ADB_ID_JSON_DIR
 
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -124,36 +124,36 @@ observers = []  # Global list to track all observers
 meta = ""
 data_queue=Queue()
 
-class JsonFileWatcher(FileSystemEventHandler):
-    def __init__(self, callback, file_path_to_watch, tk_root: tk.Tk):
-        self.callback = callback
-        self.file_path_to_watch = str(file_path_to_watch)
-        self.tk_root = tk_root
+# class JsonFileWatcher(FileSystemEventHandler):
+#     def __init__(self, callback, file_path_to_watch, tk_root: tk.Tk):
+#         self.callback = callback
+#         self.file_path_to_watch = str(file_path_to_watch)
+#         self.tk_root = tk_root
 
-    def on_modified(self, event):
-        if event.src_path == self.file_path_to_watch:
-            def safe_update():
-                try:
-                    if self.tk_root.winfo_exists():
-                        self.callback()
-                except tk.TclError:
-                    pass
-            try:
-                self.tk_root.after(0, safe_update)
-                logging.info(f"JSON Watcher: File modified - {event.src_path}")
-            except tk.TclError:
-                pass
-def start_json_file_watcher(callback, file_path_to_watch, tk_root: tk.Tk):
-    obs = Observer()
-    handler = JsonFileWatcher(callback, file_path_to_watch, tk_root)
+#     def on_modified(self, event):
+#         if event.src_path == self.file_path_to_watch:
+#             def safe_update():
+#                 try:
+#                     if self.tk_root.winfo_exists():
+#                         self.callback()
+#                 except tk.TclError:
+#                     pass
+#             try:
+#                 self.tk_root.after(0, safe_update)
+#                 logging.info(f"JSON Watcher: File modified - {event.src_path}")
+#             except tk.TclError:
+#                 pass
+# def start_json_file_watcher(callback, file_path_to_watch, tk_root: tk.Tk):
+#     obs = Observer()
+#     handler = JsonFileWatcher(callback, file_path_to_watch, tk_root)
 
-    watch_dir = os.path.dirname(file_path_to_watch)
-    if not os.path.exists(watch_dir):
-        os.makedirs(watch_dir)
+#     watch_dir = os.path.dirname(file_path_to_watch)
+#     if not os.path.exists(watch_dir):
+#         os.makedirs(watch_dir)
 
-    obs.schedule(handler, watch_dir, recursive=False)
-    obs.start()
-    observers.append(obs)
+#     obs.schedule(handler, watch_dir, recursive=False)
+#     obs.start()
+#     observers.append(obs)
 
 def launch_gui() -> None:
     """Construct and run the UI."""
@@ -235,35 +235,6 @@ def launch_gui() -> None:
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
 
 
-    def check_crash_queue():
-        try:
-            while True:
-                update = data_queue.get_nowait()
-                
-                # Update based on crash type
-                if update['type'] in ['crash', 'normalcrash']:
-                    crash_var.set(str(update['count']))
-                    if update['count'] > 0:
-                        crash_lbl.config(foreground=red_accent)
-                        crash_text_lbl.configure(foreground=red_accent)
-                elif update['type'] == 'rdkbcrash':
-                    RDKB_var.set(str(update['count']))
-                    if update['count'] > 0:
-                        RDKB_lbl.configure(foreground=red_accent)
-                        RDKB_text_lbl.configure(foreground=red_accent)
-                        
-        except Empty:
-            pass
-        finally:
-            # Check queue again after 100ms
-            if root is not None:
-                try:
-                    if root.winfo_exists():
-                        root.after(100, check_crash_queue)
-                except tk.TclError:
-                    pass
-    check_crash_queue()
-
     # ── Grid weights ─────────────────────────────────────────────────────
     root.columnconfigure(1, weight=1)  # column 1 = main content
     root.rowconfigure(1, weight=1)     # row 1   = sidebar  pages
@@ -328,17 +299,17 @@ def launch_gui() -> None:
     internet_label.grid(   row=0, column=2, sticky="ew", padx=5)
     version_label.grid(  row=0, column=3, sticky="e",  padx=5)
 
-    def update_label():
-        try:
-            with open(ADBController.json_path, "r") as f:
-                data = json.load(f)
-            adb_id = data.get("ADB ID", "--")
-            adb_var.set(f"ADB ID: {adb_id}")
-        except (FileNotFoundError, json.JSONDecodeError):
-            adb_id = "--"
+#     def update_label():
+#         try:
+#             with open( ADB_ID_JSON_DIR,"r") as f:
+#                 data = json.load(f)
+#             adb_id = data.get("ADB ID", "--")
+#             adb_var.set(f"ADB ID: {adb_id}")
+#         except (FileNotFoundError, json.JSONDecodeError):
+#             adb_id = "--"
 
-    update_label()
-    start_json_file_watcher(update_label,Path(ADBController.json_path), root)
+#     update_label()
+#    start_json_file_watcher(update_label,Path(ADBController.json_path), root)
 
     def update_internet_status():
         status = dmc.get_internet_status()
@@ -374,6 +345,38 @@ def launch_gui() -> None:
             except tk.TclError:
                 pass
     _update_quts()
+
+    def check_and_Update_from_queue():
+        try:
+            while True:
+                update = data_queue.get_nowait()
+                
+                # Update based on crash type
+                if update['type'] in ['crash', 'normalcrash']:
+                    crash_var.set(str(update['count']))
+                    if update['count'] > 0:
+                        crash_lbl.config(foreground=red_accent)
+                        crash_text_lbl.configure(foreground=red_accent)
+                elif update['type'] == 'rdkbcrash':
+                    RDKB_var.set(str(update['count']))
+                    if update['count'] > 0:
+                        RDKB_lbl.configure(foreground=red_accent)
+                        RDKB_text_lbl.configure(foreground=red_accent)
+
+                elif update['type']== 'adb_id':
+                    adb_var.set(str(f"ADB ID: {update['ID']}"))
+                
+        except Empty:
+            pass
+        finally:
+            # Check queue again after 100ms
+            if root is not None:
+                try:
+                    if root.winfo_exists():
+                        root.after(100, check_and_Update_from_queue)
+                except tk.TclError:
+                    pass
+    check_and_Update_from_queue()
 
     # ── MAIN PAGE ────────────────────────────────────────────────────────────
     HomePage.create_Home_Page(container, pages, add_nav, root)

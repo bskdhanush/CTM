@@ -1,3 +1,17 @@
 ﻿dist/
 build/
 .env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+myenv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/

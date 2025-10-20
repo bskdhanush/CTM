@@ -6,6 +6,7 @@ import customtkinter as ctk
 
 from JsonHandler import load_cfg,load_prov_json, save_json
 import FzHandler
+from Threading import start_thread
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
@@ -144,7 +145,10 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     ).pack(side='left', pady=(8, 0))
 
     # Right side: Download button
-    select_btn = ttk.Button(download_btn_row, text="Download", command=download_selected_Meta_Mpss)
+    select_btn = ttk.Button(download_btn_row, 
+                            text="Download", 
+                            command=lambda:start_thread(download_selected_Meta_Mpss,"Download Thread for FZ",
+                                     daemon=True))
     select_btn.pack( side='right')
 
     return MMdownload

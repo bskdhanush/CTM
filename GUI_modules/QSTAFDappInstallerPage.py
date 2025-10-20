@@ -15,14 +15,16 @@ def _pick_zip(pagename) -> str:
             cfg=load_prov_json()
             dir=cfg[f"{pagename}_path"]
         filePath = filedialog.askopenfilename(
-            title="Select QSTAF archive",
-            initialdir=dir,
-            filetypes=[
-                ("Archives", "*.zip *.7z"),
-                ("ZIP archives", "*.zip"),
-                ("7z archives", "*.7z"),
-            ],
-        )
+        title="Select QSTAF archive",
+        initialdir=dir,
+        filetypes=[
+            ("Archives", "*.zip *.7z *.rar"),
+            ("ZIP archives", "*.zip"),
+            ("7z archives", "*.7z"),
+            ("RAR archives", "*.rar"),
+            ("All files", "*.*"),
+        ],
+    )
         if not filePath:
             return ""
         if not filePath.lower().endswith((".zip", ".7z")):

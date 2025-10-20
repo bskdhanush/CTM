@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from GUI_modules import FzDownloadPage, QSTAFDappInstallerPage
+from GUI_modules import MetaMpssDownloadSubFrame, QSTAFDappInstallerPage
 import EndToEndDevProvsioningController
 from JsonHandler import load_prov_json
 from Threading import *
@@ -37,7 +37,7 @@ def getFolderPath(pagename):
     
 def Meta_page(parent,Pagename,device_name):
 
-    Meta_frame = FzDownloadPage.create_Meta_Mpss_download(parent, Pagename, device_name)
+    Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
 
     Selection_frame = ttk.LabelFrame(Meta_frame, text=f"Select Meta to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
@@ -71,7 +71,7 @@ def Meta_page(parent,Pagename,device_name):
 
 
 def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
-    Mpss_frame= FzDownloadPage.create_Meta_Mpss_download(parent, Pagename, device_name)
+    Mpss_frame= MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
     Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 

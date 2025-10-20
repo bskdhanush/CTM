@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
-from GUI_modules import DeviceConfigNavigator
+from GUI_modules import ProvisioningNavigator
 from JsonHandler import load_prov_json, save_prov_json
 
 
@@ -14,7 +14,7 @@ def get_prov_path():
     return cfg.get("provisioning_path")
 
 def set_prov_path(path_var):
-     folderpath = DeviceConfigNavigator.getFolderPath("")
+     folderpath = ProvisioningNavigator.getFolderPath("")
      path_var.set(folderpath)
      cfg = load_prov_json()
      cfg.update({"provisioning_path": folderpath})
@@ -68,25 +68,25 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
         fr.place(relx=0, rely=0, relwidth=1, relheight=1)
         
         if Pagename == "Meta":
-            section_ui = DeviceConfigNavigator.Meta_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.Meta_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "Mpss":
-            section_ui = DeviceConfigNavigator.Mpss_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.Mpss_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "QCN":
-            section_ui = DeviceConfigNavigator.QCN_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.QCN_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "MBN":
-            section_ui = DeviceConfigNavigator.MBN_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.MBN_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "NV":
-            section_ui = DeviceConfigNavigator.NV_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.NV_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "Full_Provisioning":
-            section_ui = DeviceConfigNavigator.Full_Provisioning_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.Full_Provisioning_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "FOTA":
-            section_ui = DeviceConfigNavigator.FOTA_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.FOTA_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         
         return fr

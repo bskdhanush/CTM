@@ -16,6 +16,7 @@ CTM_DAPP_DIR = os.path.join(CTM_BASE_DIR, 'DAPP')
 
 APP_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'app_config.json')
 PROV_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'prov_config.json')
+META_JSON_FILE= os.path.join(CTM_CONFIG_DIR,'Metas_downloaded.json')
 
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB

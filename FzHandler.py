@@ -9,6 +9,7 @@ import os
 import socket
 import time
 from datetime import datetime
+import datetime
 from dotenv import load_dotenv
 from ssh2.session import Session
 from ssh2.sftp import (
@@ -81,7 +82,8 @@ def list_files(device_filter="", pageName="",sub_sting=""):
                 
                 filesize = getattr(attrs, "filesize", None) if attrs is not None else None
                 mtime = getattr(attrs, "mtime", None) if attrs is not None else None
-                files.append({"name": name, "size": filesize, "mtime": mtime})
+                dt = datetime.datetime.fromtimestamp(mtime) # type: ignore
+                files.append({"name": name, "size": filesize, "mtime": dt.strftime("%Y-%m-%d %H:%M:%S")})
         return files
     finally:
         try:
@@ -167,6 +169,7 @@ def download_file(remote_filename, local_dir, chunk_size=1024 * 1024, progress_i
             sock.close()
         except Exception:
             pass
+        
 
 def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_interval=0.5):
     """
@@ -272,13 +275,6 @@ if __name__ == "__main__":
     files = list_files(device)
     if not files:
         print("No matching files found.")
-    else:
-        print("Found files:")
-        for f in files:
-            mtime = datetime.fromtimestamp(f["mtime"]).strftime("%Y-%m-%d %H:%M:%S") if f["mtime"] else "Unknown"
-            print(f" - {f['name']} size={f['size']} mtime={mtime}")
-        
-        # Download the first file
         target = files[0]["name"]
         print(f"Downloading first file: {target}")
         #download_file(target, "./downloads")

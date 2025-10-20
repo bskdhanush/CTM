@@ -5,6 +5,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 
 from JsonHandler import load_cfg,load_prov_json, save_json
+from AutoDownloader import checK_for_new_meta
 import FzHandler
 from Threading import start_thread
 
@@ -54,7 +55,10 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         cfg["Auto_download"] = bool(auto_download_checkBox.get())
         save_json(cfg)
 
-        
+        ## auto download logic
+        checK_for_new_meta(device_name)
+
+
 
 
     def download_selected_Meta_Mpss():
@@ -72,7 +76,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value=f'Downlaod Path:- C:\CTM\{Pagename}')
+    local_path = tk.StringVar(value=f'Downlaod Path:- C:\CTM\{Pagename}') # type: ignore
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", anchor="w", padx=(10, 0))
 
@@ -138,13 +142,15 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     download_btn_row = tk.Frame(bottom_section)
     download_btn_row.pack(fill="x", pady=(10,0))
 
-    auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
-    ttk.Checkbutton(
-        download_btn_row,
-        text="Enable auto download",
-        variable=auto_download_checkBox,
-        command=toggle_auto_downloader
-    ).pack(side='left', pady=(8, 0))
+    if Pagename=="Meta":
+
+        auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
+        ttk.Checkbutton(
+            download_btn_row,
+            text="Enable auto download",
+            variable=auto_download_checkBox,
+            command=toggle_auto_downloader
+        ).pack(side='left', pady=(8, 0))
 
     # Right side: Download button
     select_btn = ttk.Button(download_btn_row, 

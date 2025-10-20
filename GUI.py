@@ -14,7 +14,7 @@ from queue import Queue,Empty
 import sv_ttk
 
 
-from GUI_modules import DataMonitorPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, DeviceConfigurationPage,CrashForecastPage
+from GUI_modules import DataMonitorPage, DeviceProvisioningPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, CrashForecastPage
 import MainController
 import WifiController
 import QutsController
@@ -396,7 +396,7 @@ def launch_gui() -> None:
 
     
      # ── CPE config monitor page ────────────────────────────────────────────────
-    DeviceConfigurationPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
+    DeviceProvisioningPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
     
      # ── CPE config monitor page ────────────────────────────────────────────────
     CrashForecastPage.create_crash_forecast_page(container,pages ,add_nav)

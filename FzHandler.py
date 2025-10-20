@@ -38,19 +38,23 @@ def connect_sftp(connect_timeout=10):
     sftp = sess.sftp_init()
     return sess, sftp, sock
 
-def list_files(device_filter="", pageName=""):
+def list_files(device_filter="", pageName="",sub_sting=""):
     """
     Return a list of dicts: [{'name': , 'size': , 'mtime': }...]
     Uses sftp.opendir() and handle.readdir()
     """
     keywords = []
-    if pageName == "Meta":
-        filter = device_filter.strip('"')
-        filter = filter.split('.')[0]
-        keywords= [filter]
-    elif pageName == "Mpss":
+    if sub_sting=="":
+        if pageName == "Meta":
+            filter = device_filter.strip('"')
+            filter = filter.split('.')[0]
+            keywords= [filter]
+        elif pageName == "Mpss":
+            keywords= ["BF","MPSS"]
+    elif sub_sting:
+        sub_sting=sub_sting.upper()
         keywords= ["BF","MPSS"]
-    
+        
     sess, sftp, sock = connect_sftp()
     try:
         files = []
@@ -65,8 +69,15 @@ def list_files(device_filter="", pageName=""):
                     attrs = entry[-1] if len(entry) > 1 else None
                 
                 name = name_buf.decode() if isinstance(name_buf, (bytes, bytearray)) else str(name_buf)
-                if keywords and not any(k in name for k in keywords):
-                    continue
+                print(pageName)
+                if pageName=="Meta":
+                    if keywords and not any(k in name for k in keywords):
+                        continue
+                else:
+                    if keywords and not (sub_sting in name and any(k in name for k in keywords)):
+                        continue  # Skip if BOTH conditions are not met
+
+                    
                 
                 filesize = getattr(attrs, "filesize", None) if attrs is not None else None
                 mtime = getattr(attrs, "mtime", None) if attrs is not None else None

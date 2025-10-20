@@ -14,6 +14,8 @@ def _pick_zip(pagename) -> str:
         if pagename!="": 
             cfg=load_prov_json()
             dir=cfg[f"{pagename}_path"]
+        else: 
+          dir="~"
         filePath = filedialog.askopenfilename(
         title="Select QSTAF archive",
         initialdir=dir,

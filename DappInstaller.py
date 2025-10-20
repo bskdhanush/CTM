@@ -3,19 +3,24 @@ import QSTAFInstaller
 from pathlib import Path
 import re
 import WifiController,StartTestCase
+from Constants import CTM_DAPP_DIR
+
 
 def InstallDapp(archive_path: str) -> None:
-    apath = Path(archive_path)
-    if not apath.exists() or apath.suffix.lower() not in (".zip", ".7z"):
+    archivepath = Path(archive_path)
+    print(archive_path)
+    if not archivepath.exists() or archivepath.suffix.lower() not in (".zip", ".7z"):
         print(f"Invalid archive (expected .zip or .7z): {archive_path}")
+    folder_path = Path(r"C:\CTM\DAPP")
 
-    folder_path = Path(os.path.dirname(archive_path))
 
-    QSTAFInstaller._extract_archive(apath,folder_path ,None,"Dapp")
+
+    QSTAFInstaller._extract_archive(archivepath,folder_path ,None,"Dapp")
+    folder_name = Path(archive_path).stem
 
     try:
-        extracted_folder = apath.with_suffix('') 
-        TC_ondevice_path = extracted_folder / "kobuk" / "testcase" / "TC_ondevice.txt"
+        extracted_folder = folder_path.with_suffix('') 
+        TC_ondevice_path = extracted_folder / folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
         replace_ADB_TC_ondevice(TC_ondevice_path,extracted_folder)
         #print("Extracted to:", TC_ondevice_path)
     except Exception as e:

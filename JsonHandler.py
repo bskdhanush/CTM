@@ -38,9 +38,9 @@ def _default_prov():
         "fst_id": "Enter FST ID",
         "operator": "Enter operator (TMO / ATT / VZW)",
         "tdc_serial": "Enter TDC Serial",
-        "Meta_path": "C:\CTM\Meta",
-        "Mpss_path":"C:\CTM\MPSS",
-        "Dapp_path": "C:\CTM\DAPP"
+        "Meta_path": r"C:\CTM\Meta",
+        "Mpss_path": r"C:\CTM\MPSS",
+        "Dapp_path": r"C:\CTM\DAPP"
 
     }
 

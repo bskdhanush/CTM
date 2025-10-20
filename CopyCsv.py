@@ -16,6 +16,26 @@ timeout = 2 * 60 * 60  # 2 hours
 del_timeout = (2* 60 * 60) + 30
 SubDirCount=100
 
+def safe_delete_folder(folder_path):
+    """Try to delete folder, skip if in use or being deleted"""
+    if not os.path.exists(folder_path):
+        print(f"Folder {folder_path} doesn't exist, skipping")
+        return False
+    
+    try:
+        shutil.rmtree(folder_path)
+        print(f"Successfully deleted {folder_path}")
+        return True
+    except PermissionError:
+        print(f"Folder {folder_path} is in use, skipping")
+        return False
+    except OSError as e:
+        print(f"Cannot delete {folder_path}, skipping. Error: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error with {folder_path}, skipping. Error: {e}")
+        return False
+
 
 def get_sorted_dirs(base):
     sorted_dirs = []
@@ -68,6 +88,7 @@ def get_copy_csv_list(base_dir, csv_patterns):
             subdir_count = sum(1 for entry in os.scandir(control_base_dir) if entry.is_dir())
             if subdir_count > SubDirCount:
                 LogHandler.sendLog(f'Skipping {control_base_dir} - too many subdirectories ({subdir_count})')
+                safe_delete_folder(control_base_dir)
                 continue
         except (OSError, PermissionError) as e:
             LogHandler.sendLog(f'Error accessing {control_base_dir}: {e}')

@@ -48,6 +48,8 @@ def update_meta_in_config(meta_path, meta_mpss_txt):
 
 def load_meta_from_path(filepath):
     # Update filepath for Meta in META_MPSS.txt and trigger load
+    if filepath=="":
+        return
     PROV_BASE = get_provisioning_base()
     if PROV_BASE:
         META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
@@ -57,6 +59,8 @@ def load_meta_from_path(filepath):
         trigger_prov_meta(PROV_BASE)
 
 def load_meta_from_zip(filepath):
+    if filepath=="":
+        return
     # Extract META zip, update META_MPSS.txt and trigger load
     print(f"Meta zip: {filepath}")
     PROV_BASE = get_provisioning_base()
@@ -78,6 +82,8 @@ def load_meta_from_zip(filepath):
         trigger_prov_meta(PROV_BASE)
 
 def load_mpss_from_path(filepath):
+    if filepath=="":
+        return
     # Update filepath for MPSS in META_MPSS.txt and trigger load
     PROV_BASE = get_provisioning_base()
     if PROV_BASE:
@@ -88,6 +94,8 @@ def load_mpss_from_path(filepath):
         trigger_prov_mpss(PROV_BASE)
 
 def load_mpss_from_zip(filepath):
+    if filepath=="":
+        return
     # Extract MPSS zip, update META_MPSS.txt and trigger load
     print(f"Mpss zip: {filepath}")
     PROV_BASE = get_provisioning_base()

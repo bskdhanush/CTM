@@ -37,7 +37,11 @@ def _default_prov():
         "name": "Enter name (eg. Kiran or Aniket)",
         "fst_id": "Enter FST ID",
         "operator": "Enter operator (TMO / ATT / VZW)",
-        "tdc_serial": "Enter TDC Serial"
+        "tdc_serial": "Enter TDC Serial",
+        "Meta_path": r"C:\CTM\Meta",
+        "Mpss_path": r"C:\CTM\MPSS",
+        "Dapp_path": r"C:\CTM\DAPP"
+
     }
 
 def load_cfg():

@@ -2,19 +2,20 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
+import customtkinter as ctk
 
-import JsonHandler
+from JsonHandler import load_cfg,load_prov_json, save_json
+from AutoDownloader import checK_for_new_meta
 import FzHandler
+from Threading import start_thread
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 def _get_download_path() -> str:
-    return str(JsonHandler.load_cfg().get("Local_downloadPath", ""))
+    return str(load_cfg().get("Local_downloadPath", ""))
 
 def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
-    print(f"Meta/Mpss selected: {device_name}")
- 
-
+    
     # MMdownload= ttk.Frame(container)
     # MMdownload.grid(row=0, column=0, sticky="nsew")
     # pages["MMdownload"] = MMdownload
@@ -22,9 +23,10 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     MMdownload = ttk.Frame(container)
 
-    def get_current_files():
+    def get_current_files(sub_string):
         try:
-            items = FzHandler.list_files(device_name, Pagename)
+            items = FzHandler.list_files(device_name, Pagename, sub_string)
+            file_listbox.delete(0, tk.END)
             for item in items:
                 file_listbox.insert(tk.END, item["name"])
         except Exception as e:
@@ -46,12 +48,17 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     def _is_auto_download_enabled() -> bool:
         #print("entered auto download check")
-        return bool(JsonHandler.load_cfg().get("Auto_download", False))
+        return bool(load_cfg().get("Auto_download", False))
 
     def toggle_auto_downloader() -> None:
-        cfg = JsonHandler.load_cfg()
+        cfg = load_cfg()
         cfg["Auto_download"] = bool(auto_download_checkBox.get())
-        JsonHandler.save_json(cfg)
+        save_json(cfg)
+
+        ## auto download logic
+        checK_for_new_meta(device_name)
+
+
 
 
     def download_selected_Meta_Mpss():
@@ -59,7 +66,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
-            FzHandler.download_file( selected_item,local_path.get())
+            FzHandler.download_file( selected_item,load_prov_json().get(f"{Pagename}_path"))
 
     # Manual download section
     Selection_frame = ttk.LabelFrame(MMdownload, text=f"Select and download {Pagename} files")
@@ -69,16 +76,16 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value='Path not selected')
+    local_path = tk.StringVar(value=f'Downlaod Path:- C:\CTM\{Pagename}') # type: ignore
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", anchor="w", padx=(10, 0))
 
-    button = ttk.Button(
-        top_row,
-        text="Choose download path…",
-        command=lambda: browse_path(),
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    # button = ttk.Button(
+    #     top_row,
+    #     text="Choose download path…",
+    #     command=lambda: browse_path(),
+    # )
+    # button.pack(side="right", anchor="e", padx=(0, 10))
 
     # Separator below the row
     separator = ttk.Separator(Selection_frame, orient='horizontal')
@@ -108,42 +115,48 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     bottom_section.pack(fill="x", padx=16, pady=(15, 10))
 
     # Left side: Refresh button and checkbox in a vertical frame
-    refresh_table_row = tk.Frame(bottom_section)
-    refresh_table_row.pack(fill="x")
+    refresh_btn_row = tk.Frame(bottom_section)
+    refresh_btn_row.pack(fill="x")
 
-    Refresh_btn = ttk.Button(refresh_table_row, text="Refresh Table", command=get_current_files)
+    Refresh_btn = ttk.Button(refresh_btn_row, text="Refresh Table", command=lambda:get_current_files(""))
     Refresh_btn.pack(side="left")
-   
-    sub_string = tk.StringVar(value="Enter a sub string to search")
+
    
    
     ttk.Button(
-        refresh_table_row,
+        refresh_btn_row,
         text="Get Data",
-        command=lambda:sub_string.get(),
+        command=lambda:get_current_files(entry.get()),
     ).pack(side="right", padx=(8,8)) # type: ignore
     
-    ttk.Entry(
-        refresh_table_row,
-        textvariable=sub_string,
-        width=30
-    ).pack(side="right")
-
-
-
-
+    entry = ctk.CTkEntry(
+    refresh_btn_row,
+    placeholder_text="Type substring here...",
+    width=200,
+    height=30,
+    corner_radius=6
+)
+    entry.pack(side="right", padx=5)
     
-    
-    auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
-    ttk.Checkbutton(
-        bottom_section,
-        text="Enable auto download",
-        variable=auto_download_checkBox,
-        command=toggle_auto_downloader
-    ).pack(anchor="w", pady=(8, 0))
+
+    download_btn_row = tk.Frame(bottom_section)
+    download_btn_row.pack(fill="x", pady=(10,0))
+
+    if Pagename=="Meta":
+
+        auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
+        ttk.Checkbutton(
+            download_btn_row,
+            text="Enable auto download",
+            variable=auto_download_checkBox,
+            command=toggle_auto_downloader
+        ).pack(side='left', pady=(8, 0))
 
     # Right side: Download button
-    select_btn = ttk.Button(bottom_section, text="Download", command=download_selected_Meta_Mpss)
-    select_btn.pack( anchor="e")
+    select_btn = ttk.Button(download_btn_row, 
+                            text="Download", 
+                            command=lambda:start_thread(download_selected_Meta_Mpss,"Download Thread for FZ",
+                                     daemon=True))
+    select_btn.pack( side='right')
 
     return MMdownload

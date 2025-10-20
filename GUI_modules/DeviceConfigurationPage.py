@@ -14,7 +14,8 @@ def get_prov_path():
     return cfg.get("provisioning_path")
 
 def set_prov_path(path_var):
-     folderpath = DeviceConfigNavigator.getFolderPath(path_var, "provisioning_path")
+     folderpath = DeviceConfigNavigator.getFolderPath("")
+     path_var.set(folderpath)
      cfg = load_prov_json()
      cfg.update({"provisioning_path": folderpath})
      save_prov_json(cfg)

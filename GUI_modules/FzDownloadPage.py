@@ -4,13 +4,13 @@ from tkinter import filedialog
 from tkinter import messagebox
 import customtkinter as ctk
 
-import JsonHandler
+from JsonHandler import load_cfg,load_prov_json, save_json
 import FzHandler
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 def _get_download_path() -> str:
-    return str(JsonHandler.load_cfg().get("Local_downloadPath", ""))
+    return str(load_cfg().get("Local_downloadPath", ""))
 
 def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     
@@ -46,12 +46,12 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     def _is_auto_download_enabled() -> bool:
         #print("entered auto download check")
-        return bool(JsonHandler.load_cfg().get("Auto_download", False))
+        return bool(load_cfg().get("Auto_download", False))
 
     def toggle_auto_downloader() -> None:
-        cfg = JsonHandler.load_cfg()
+        cfg = load_cfg()
         cfg["Auto_download"] = bool(auto_download_checkBox.get())
-        JsonHandler.save_json(cfg)
+        save_json(cfg)
 
 
     def download_selected_Meta_Mpss():
@@ -59,7 +59,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
-            FzHandler.download_file( selected_item,local_path.get())
+            FzHandler.download_file( selected_item,load_prov_json().get(f"{Pagename}_path"))
 
     # Manual download section
     Selection_frame = ttk.LabelFrame(MMdownload, text=f"Select and download {Pagename} files")
@@ -69,16 +69,16 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value='Path not selected')
+    local_path = tk.StringVar(value=f'Downlaod Path:- C:\CTM\{Pagename}')
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", anchor="w", padx=(10, 0))
 
-    button = ttk.Button(
-        top_row,
-        text="Choose download path…",
-        command=lambda: browse_path(),
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    # button = ttk.Button(
+    #     top_row,
+    #     text="Choose download path…",
+    #     command=lambda: browse_path(),
+    # )
+    # button.pack(side="right", anchor="e", padx=(0, 10))
 
     # Separator below the row
     separator = ttk.Separator(Selection_frame, orient='horizontal')

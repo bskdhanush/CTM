@@ -6,17 +6,21 @@ from tkinter.scrolledtext import ScrolledText
 import datetime as dt
 import QSTAFInstaller, DappInstaller
 from Threading import *
+from JsonHandler import load_prov_json
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
-def _pick_zip() -> str:
+def _pick_zip(pagename) -> str:
+        if pagename!="": 
+            cfg=load_prov_json()
+            dir=cfg[f"{pagename}_path"]
         filePath = filedialog.askopenfilename(
             title="Select QSTAF archive",
+            initialdir=dir,
             filetypes=[
                 ("Archives", "*.zip *.7z"),
                 ("ZIP archives", "*.zip"),
                 ("7z archives", "*.7z"),
-                ("All files", "*.*"),
             ],
         )
         if not filePath:
@@ -132,7 +136,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
         start_thread(worker,"Qstaf installer Thread",daemon=True)
 
     def getSetQstafZipPath():
-        filePath = _pick_zip()
+        filePath = _pick_zip("")
         selected_zip.set(filePath)
         zip_label.configure(style="TLabel")  # switch from hint to normal
         _run_install(filePath)
@@ -178,7 +182,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
     
 
     def getSetDappZipPath():
-        filePath = _pick_zip()
+        filePath = _pick_zip("")
         selected_Dapp_zip.set(filePath)
         zip_Dapp_label.configure(style="TLabel")  # switch from hint to normal
         DappInstaller.InstallDapp(filePath)

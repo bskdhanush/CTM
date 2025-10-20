@@ -4,14 +4,14 @@ from tkinter import ttk
 from tkinter import filedialog
 from GUI_modules import FzDownloadPage, QSTAFDappInstallerPage
 import EndToEndDevProvsioningController
+from JsonHandler import load_prov_json
 from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 
-def getzippath(label_var):
-        filepath = QSTAFDappInstallerPage._pick_zip()
-        label_var.set(filepath)
+def getzippath(pagenme):
+        filepath = QSTAFDappInstallerPage._pick_zip(pagenme)
         return filepath
 
 def getFilePath(label_var, identifier):
@@ -23,12 +23,16 @@ def getFilePath(label_var, identifier):
             label_var.set(filepath)
         return filepath
 
-def getFolderPath(label_var, identifier):
+def getFolderPath(pagename):
+    if pagename!="": 
+            cfg=load_prov_json()
+            dir=cfg[f"{pagename}_path"]
+    else :
+         dir="~"
     folderpath = filedialog.askdirectory(
-        title=f"Select {identifier} folder"
+        title=f"Select {pagename} folder",
+        initialdir=dir
     )
-    if folderpath:
-        label_var.set(folderpath)
     return folderpath
     
 def Meta_page(parent,Pagename,device_name):
@@ -50,7 +54,7 @@ def Meta_page(parent,Pagename,device_name):
         top_row,
         text="Select Meta path to load",
         command=lambda: start_thread(EndToEndDevProvsioningController.load_meta_from_path,"Meta install Thread",
-                                     daemon=True, filepath=getFolderPath(local_path, 'Meta'))
+                                     daemon=True, filepath=getFolderPath(Pagename))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -58,7 +62,7 @@ def Meta_page(parent,Pagename,device_name):
         top_row,
         text="select Meta zip to load",
         command=lambda:start_thread(EndToEndDevProvsioningController.load_meta_from_zip,"Meta install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(local_path))
+                                    daemon=True, filepath=getzippath(Pagename))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -83,7 +87,7 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
         top_row,
         text="Select MPSS path to load",
         command=lambda: start_thread(EndToEndDevProvsioningController.load_mpss_from_path,"MPSS install Thread",
-                                     daemon=True, filepath=getFolderPath(local_path, 'MPSS'))
+                                     daemon=True, filepath=getFolderPath(Pagename))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
@@ -91,7 +95,7 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
         top_row,
         text="Select MPSS zip to load",
         command=lambda:start_thread(EndToEndDevProvsioningController.load_mpss_from_zip,"MPSS install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(local_path))
+                                    daemon=True, filepath=getzippath(Pagename))
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 

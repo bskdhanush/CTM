@@ -193,7 +193,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         buttons_frame,
         text="Zip & Upload Crash dump",
-        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump(), "Zip and upload thread", daemon=True)
+        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump, "Zip and upload thread", daemon=True, crash_dir_list=get_selected_crash_paths())
     ).grid(row=0, column=2, sticky="e",**PADDING) # type: ignore
 
     def load_crash_table():

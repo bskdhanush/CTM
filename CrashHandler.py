@@ -1,6 +1,7 @@
 import os
 import socket
 import json
+import glob
 from pathlib import Path
 import re
 import subprocess
@@ -103,29 +104,42 @@ def zip_and_upload_crash_dump(crash_dir_list):
                                            
             crash_path = row.get("CRASH_PATH")
             if crash_path in crash_dir_list:
-                crash_name = get_crash_naming()
+
                 if crash_path and os.path.exists(crash_path):
                     # crash_folder = os.path.basename(crash_path)
                     crash_base = os.path.dirname(crash_path)
+                    orig_crash_name = os.path.basename(crash_path)
                     count = 1
-                    crash_name = get_crash_naming(count)
+                    crash_name = get_crash_naming(orig_crash_name, count)
+                    if not crash_name:
+                        print('Could not retrieve correct naming convention. Pls check')
+                        continue
                     new_crash_path = os.path.join(crash_base, crash_name)
                     while os.path.exists(new_crash_path):
                         count = count + 1
-                        crash_name = get_crash_naming(count)
+                        crash_name = get_crash_naming(orig_crash_name, count)
+                        if not crash_name:
+                            print('Could not retrieve correct naming convention. Pls check')
+                            new_crash_path = None
+                            break
                         new_crash_path = os.path.join(crash_base, crash_name)
 
+                    if not new_crash_path:
+                        continue
                     os.rename(crash_path, new_crash_path)
 
                     # Zip
                     if os.path.exists(new_crash_path):
                         print(f'Zipping and Uploading {new_crash_path}')
                         output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
-                        zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
+                                                                                       
 
+                        print(f'Zipping {output_zip}')
+                        zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                         subprocess.run(zip_command, capture_output=True, text=True)
 
-                        file_upload(output_zip, "crash_upload")
+                        print(f'Uploading {output_zip}')
+                        file_upload(output_zip, f"crash_upload/{crash_name}.7z")
         except Exception as e:
             print(f'Exception during zip_and_upload_crash_dump: {e}')
 
@@ -149,24 +163,29 @@ def forecast_crashes(crash_dir_list):
 
 def get_naming_convention():
     cfg = load_prov_json()
-    market = cfg.get("market", "null")
-    name = cfg.get("name", "null")
-    fst_id = cfg.get("fst_id", "null")
-    operator = cfg.get("operator", "null")
-    tdc_serial = cfg.get("tdc_serial", "null")
+    market = cfg.get("market", None)
+    name = cfg.get("name", None)
+    fst_id = cfg.get("fst_id", None)
+    operator = cfg.get("operator", None)
+    tdc_serial = cfg.get("tdc_serial", None)
     # market="LV-CPE "
     # name="kiran"
     # fst_id="sdx-asdjfjsdl-7887"
     return market, name, fst_id, operator, tdc_serial
 
 def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string=None):
-    print(f'market:{market}, name: {name}, fst_id: {fst_id}, operator: {operator}, tdc_serial: {tdc_serial}')
+    print(f'market: {market}, name: {name}, fst_id: {fst_id}, operator: {operator}, tdc_serial: {tdc_serial}')
     cfg = load_prov_json()
-    cfg["market"] = market
-    cfg["name"] = name
-    cfg["fst_id"] = fst_id
-    cfg["operator"] = operator
-    cfg["tdc_serial"] = tdc_serial
+    if market:
+        cfg["market"] = market
+    if name:
+        cfg["name"] = name
+    if fst_id:
+        cfg["fst_id"] = fst_id
+    if operator:
+        cfg["operator"] = operator
+    if tdc_serial:
+        cfg["tdc_serial"] = tdc_serial
     if magic_string:
         cfg["magic_string"] = magic_string
     save_prov_json(cfg)
@@ -174,6 +193,8 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_stri
 def set_naming_convention_from_crash_rename_csv():
     from Constants import CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
+
+    market, name, fst_id, operator, tdc_serial, magic_string = None
 
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
@@ -201,17 +222,43 @@ def set_naming_convention_from_crash_rename_csv():
 
 
 def get_operator():
-    # Needs to be implemented
-    return "TMO"
+    from Constants import CTM_LOGS_DIR
+    operator = None
+    control_meta_csv_files = glob.glob(CTM_LOGS_DIR + '\\*control_metadata.csv', recursive=True)
+    if control_meta_csv_files:
+        meta_csv = sorted(control_meta_csv_files, reverse=True)[0]
+        df_operator = pd.read_csv(meta_csv, index_col=False)
+        if isinstance(df_operator, pd.DataFrame):
+            operator = df_operator['OPERATOR'].iloc[0]
+    return operator
     
-def get_crash_naming(count=1):
-    today = date.today()
-    today = today.strftime("%m%d%Y")
+def get_crash_naming(orig_crash_name, count=1):
+    # today = date.today()
+    # today = today.strftime("%m%d%Y")
+    crash_name = None
+    date = ''
+    m = re.search(r'(\d\d\d\d)(\d\d\d\d)-(\d+)', orig_crash_name)
+    if m:
+        date = f'{m.group(2)}{m.group(1)}'
     # count = 1
     market, name, fst_id, operator, tdc_serial = get_naming_convention()
-    
-    crash_name = f"{market}_{name}_{fst_id}_{today}_{operator}_{count}_{tdc_serial}_LAN_DRI"
-    crash_name = re.sub(r'\s+', '', crash_name)
+
+    if not market:
+        print('market is not valid. Pls check')
+    if not name:
+        print('name is not valid. Pls check')
+    if not fst_id:
+        print('fst_id is not valid. Pls check')
+    if not date:
+        print('date is not valid. Pls check')
+    if not operator:
+        print('operator is not valid. Pls check')
+    if not tdc_serial:
+        print('tdc_serial is not valid. Pls check')
+
+    if market and name and fst_id and operator and tdc_serial:
+        crash_name = f"{market}_{name}_{fst_id}_{date}_{operator}_{count}_{tdc_serial}_LAN_DRI"
+        crash_name = re.sub(r'\s+', '', crash_name)
     return crash_name
     
 def remove_crash_entry(filepath):

@@ -130,7 +130,7 @@ def get_total_copy_csv_list():
     control_csv_patterns = ['\\**\\*RFBandInfo.csv', '\\**\\*QSH.csv', '\\**\\*QSH_DL_STATS.csv',
                             '\\**\\*QSH_FR_MODE.csv',
                             '\\**\\*QSH_ENL2.csv', '\\**\\*qstaf_monitor_connected_devices.csv',
-                            '\\**\\*qstaf_monitor.csv', '\\**\\*qstaf_gps_monitor.csv']
+                            '\\**\\*qstaf_monitor.csv', '\\**\\*qstaf_gps_monitor.csv', '\\**\\*control_metadata.csv']
     traffic_csv_patterns = ['\\**\\*Ping.csv', '\\**\\*Zoomcall.csv', '\\**\\*BrowseUrl.csv',
                             '\\**\\*SpeedTest.csv',
                             '\\**\\*HttpDownload.csv', '\\**\\*ftpUpload.csv', '\\**\\*ftpDownload.csv',

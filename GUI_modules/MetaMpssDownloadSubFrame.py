@@ -1,8 +1,11 @@
+import logging
+import time
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import customtkinter as ctk
+import schedule
 
 from JsonHandler import load_cfg,load_prov_json, save_json
 from AutoDownloader import checK_for_new_meta
@@ -10,6 +13,9 @@ import FzHandler
 from Threading import start_thread
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
+
+_job: schedule.Job | None = None
+_loop_started = False
 
 def _get_download_path() -> str:
     return str(load_cfg().get("Local_downloadPath", ""))
@@ -51,13 +57,54 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         #print("entered auto download check")
         return bool(load_cfg().get("Auto_download", False))
 
-    def toggle_auto_downloader() -> None:
-        cfg = load_cfg()
-        cfg["Auto_download"] = bool(auto_download_checkBox.get())
-        save_json(cfg)
 
         ## auto download logic
-        checK_for_new_meta(device_name)
+        #checK_for_new_meta(device_name)
+
+    
+
+    def method123():
+        # Your code here
+        print("method123 called")
+
+    def _reschedule(enable: bool) -> None:
+        """(Re)create or cancel the 30-min job."""
+        global _job
+        if _job:
+            schedule.cancel_job(_job)
+            _job = None
+        if enable:
+            print("Scheduling 30-min interval job")
+            _job = schedule.every(1).minutes.do(method123)
+
+    def _loop() -> None:
+        """Background thread that drives `schedule`."""
+        logging.info("Scheduler loop STARTED")
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+
+    def _start_loop_once() -> None:
+        global _loop_started
+        if not _loop_started:
+            start_thread(_loop,"META auto download Thresf", daemon=True)
+            _loop_started = True
+
+    def is_enabled() -> bool:
+        return bool(load_cfg().get("Auto_download", False))
+
+    def set_enabled(enable: bool) -> None:
+        cfg = load_cfg()
+        cfg["Auto_download"] = bool(enable)
+        save_json(cfg)
+        _reschedule(enable)
+
+# Tkinter checkbox callback
+    def on_checkbox():
+        set_enabled(auto_download_checkBox.get())
+
+    # Initialise scheduling
+   
 
 
 
@@ -150,7 +197,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
             download_btn_row,
             text="Enable auto download",
             variable=auto_download_checkBox,
-            command=toggle_auto_downloader
+            command=on_checkbox
         ).pack(side='left', pady=(8, 0))
 
     # Right side: Download button
@@ -159,5 +206,8 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
                             command=lambda:start_thread(download_selected_Meta_Mpss,"Download Thread for FZ",
                                      daemon=True))
     select_btn.pack( side='right')
+
+    _reschedule(is_enabled())
+    _start_loop_once()
 
     return MMdownload

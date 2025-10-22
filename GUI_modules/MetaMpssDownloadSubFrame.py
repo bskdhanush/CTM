@@ -79,7 +79,6 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     def _loop() -> None:
         """Background thread that drives `schedule`."""
-        logging.info("Scheduler loop STARTED")
         while True:
             schedule.run_pending()
             time.sleep(1)
@@ -208,6 +207,6 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     select_btn.pack( side='right')
 
     _reschedule(is_enabled())
-    _start_loop_once()
+   # _start_loop_once()
 
     return MMdownload

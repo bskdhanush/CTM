@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from Constants import CTM_META_DIR,META_JSON_FILE,CTM_BASE_DIR
 from FzHandler import list_files,download_file
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
+from CrashHandler import set_naming_convention_from_crash_rename_csv
 
 def get_downloaded_lsit(): 
     cfg =(load_meta_json())
@@ -62,6 +63,7 @@ def checK_for_new_CSV():
             download_file(files_list[0]["name"],CTM_BASE_DIR)
             cfg.update({"CSV":files_list[0]["mtime"]})
             save_meta_json(cfg)
+            set_naming_convention_from_crash_rename_csv()
         except Exception as e:
              print("CSV Download failed", e)
   

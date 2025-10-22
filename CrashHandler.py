@@ -1,4 +1,6 @@
 import os
+import socket
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -157,16 +159,51 @@ def get_naming_convention():
     # fst_id="sdx-asdjfjsdl-7887"
     return market, name, fst_id, operator, tdc_serial
 
-def set_naming_convention(market, name, fst_id, operator, tdc_serial):
-    # cfg = load_json(PROV_FILE)
+def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string=None):
+    print(f'market:{market}, name: {name}, fst_id: {fst_id}, operator: {operator}, tdc_serial: {tdc_serial}')
     cfg = load_prov_json()
     cfg["market"] = market
     cfg["name"] = name
     cfg["fst_id"] = fst_id
     cfg["operator"] = operator
     cfg["tdc_serial"] = tdc_serial
+    if magic_string:
+        cfg["magic_string"] = magic_string
     save_prov_json(cfg)
 
+def set_naming_convention_from_crash_rename_csv():
+    from Constants import CRASH_RENAME_META_CSV
+    from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
+
+    if os.path.exists(CRASH_RENAME_META_CSV):
+        df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
+        _adb_id = get_adb_id()
+        _mpss_build = get_mpss_build_info()
+        _meta_build = get_meta_build_info().strip('"')
+        df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
+
+        hostname = socket.gethostname()
+        host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
+        market = host_pool_mapping.get(hostname)
+
+        name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA']) or (hostname in ['LAPTOP-IDGK1E3S', 'DESKTOP-8FLRVQK', 'Mohan', 'mstft20-52'])) else 'Aniket'
+
+        adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
+        tdc_serial = adb_tdc_map.get(_adb_id)
+
+        fst_id = df_one['FST_ID'].iloc[0]
+
+        magic_string = df_one['MAGIC_STRING'].iloc[0]
+
+        operator = get_operator()
+
+        set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+
+
+def get_operator():
+    # Needs to be implemented
+    return "TMO"
+    
 def get_crash_naming(count=1):
     today = date.today()
     today = today.strftime("%m%d%Y")
@@ -188,5 +225,9 @@ def remove_crash_entry(filepath):
         os.remove(crash_meta_info_csv)
     df_csv.to_csv(crash_meta_info_csv, index=False)
 
+def remove_crash_entries(filepaths):
+    for filepath in filepaths:
+        remove_crash_entry(filepath)
+        
 if __name__ == "__main__":
     print(get_crash_naming())

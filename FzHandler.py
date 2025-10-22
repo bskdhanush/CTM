@@ -199,7 +199,7 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
         chunk_size: Size of chunks to read/write (default 1MB)
         progress_interval: How often to print progress updates in seconds
     """
-    from CrashHandler import remove_crash_entry
+    upload_result = False
     try:
         sess, sftp, sock = connect_sftp()
     except Exception as e:
@@ -209,15 +209,12 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
         try:
             # Ensure local file exists
             if not os.path.isfile(filepath):
-                raise FileNotFoundError(f"Local file not found: {filepath}")
+                print(f"Local file not found: {filepath}")
 
             # Get local file size
             file_size = os.path.getsize(filepath)
 
-            # Prepare remote path
-            remote_path = server_upload_path if "/" in server_upload_path else (REMOTE_PATH.rstrip("/") + "/" + server_upload_path)
-
-            print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {remote_path}")
+            print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
 
             # Use standard permissions: 0644 (rw-r--r--)
             mode = LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IWUSR | LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IRUSR
@@ -225,14 +222,13 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
             # Open remote file for writing
             try:
                 fh = sftp.open(
-                    remote_path,
+                    server_upload_path,
                     LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC,
                     mode
                 )
             except Exception as e:
                 print(f"Failed to open remote file. Error: {e}")
                 print(f"Ensure the remote directory exists and you have write permissions.")
-                raise
 
             try:
                 transferred = 0
@@ -276,7 +272,7 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
-                remove_crash_entry(filepath)
+                upload_result = True
 
             finally:
                 try:
@@ -294,6 +290,7 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
                 pass
     else:
         print(f'Failed to establish FTP connection to {HOST}')
+    return upload_result
 
 if __name__ == "__main__":
     # Basic example: list and download first matching file

@@ -73,7 +73,7 @@ def list_files(device_filter="", pageName="",sub_sting=""):
             # Use opendir to get a handle; iterate handle.readdir()
             with sftp.opendir(REMOTE_PATH) as dh:
                 for entry in dh.readdir():
-                    print(f"printing entry : {entry[1]}")
+                    #print(f"printing entry : {entry[1]}")
                     if len(entry) == 3:
                         _, name_buf, attrs = entry
                     else:
@@ -81,7 +81,7 @@ def list_files(device_filter="", pageName="",sub_sting=""):
                         attrs = entry[-1] if len(entry) > 1 else None
 
                     name = name_buf.decode() if isinstance(name_buf, (bytes, bytearray)) else str(name_buf)
-                    print(pageName)
+                    #print(pageName)
                     if pageName=="Meta":
                         if keywords and not any(k in name for k in keywords):
                             continue

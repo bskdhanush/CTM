@@ -51,18 +51,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         else:
             local_path.set(selected_path)
             print(f"Selected path: {selected_path}")
-
-
-    def _is_auto_download_enabled() -> bool:
-        #print("entered auto download check")
-        return bool(load_cfg().get("Auto_download", False))
-
-
-        ## auto download logic
-        #checK_for_new_meta(device_name)
-
     
-
     def method123():
         # Your code here
         print("method123 called")
@@ -71,6 +60,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         """(Re)create or cancel the 30-min job."""
         global _job
         if _job:
+            print("Removing the jobs")
             schedule.cancel_job(_job)
             _job = None
         if enable:
@@ -98,14 +88,8 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         save_json(cfg)
         _reschedule(enable)
 
-# Tkinter checkbox callback
     def on_checkbox():
         set_enabled(auto_download_checkBox.get())
-
-    # Initialise scheduling
-   
-
-
 
 
     def download_selected_Meta_Mpss():
@@ -191,7 +175,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     if Pagename=="Meta":
 
-        auto_download_checkBox = tk.BooleanVar(value=_is_auto_download_enabled())
+        auto_download_checkBox = tk.BooleanVar(value=is_enabled())
         ttk.Checkbutton(
             download_btn_row,
             text="Enable auto download",

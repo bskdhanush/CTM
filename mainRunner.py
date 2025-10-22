@@ -2,11 +2,26 @@
 import FzHandler
 
 
+from JsonHandler import load_prov_json,save_meta_json,load_meta_json
+from AutoDownloader import checK_for_new_meta 
 
-server_upload_path="CPE-Markets/LV/test_smi upload.7z"
-loaclfile_path="D:/work/test_smi upload.7z"
-if __name__ == "__main__":
-  files= FzHandler.list_files("Kobuk","Meta","")
-  print(files)
+
+
+
+def get_downloaded_lsit():
     
+    downloaded_meta = load_meta_json()
+    return downloaded_meta
+
+def add_data():
+  data = list(get_downloaded_lsit())
+  print(type(data))
+  data.append("5")
+  save_meta_json(data)
+
+
+if __name__ == "__main__":
+   checK_for_new_meta("Kobuk")
+   print(type(load_prov_json().get("Meta_path")))
+ 
   

@@ -101,7 +101,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         entry_row_frame,
         text="Update Fields",
         command=lambda: CrashHandler.set_naming_convention(
-            market_name.get(), naming.get(), fst_id_name.get(), operator.get(), tdc_serial.get()),
+            market_name.get(), naming.get(), fst_id_name.get(), operator.get(), tdc_serial.get())
     ).pack(fill="x", **PADDING) # type: ignore
     
 
@@ -182,19 +182,28 @@ def create_crash_forecast_page(container, pages, add_nav):
         command=lambda: [CrashHandler.forecast_crashes(get_selected_crash_paths()),load_crash_table()]
     ).grid(row=0, column=0, sticky="w", **PADDING) # type: ignore
 
-    # Center button
+    # 2nd button
+    ttk.Button(
+        buttons_frame,
+        text="Zip & Upload Crash dump",
+        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump, "Zip and upload thread", daemon=True,
+                                     crash_dir_list=get_selected_crash_paths())
+    ).grid(row=0, column=1, sticky="e", **PADDING)  # type: ignore
+
+    # 3rd button
     ttk.Button(
         buttons_frame,
         text="Refresh Data",
         command=lambda: load_crash_table(),
-    ).grid(row=0, column=1, pady=8)
+    ).grid(row=0, column=2, pady=8)
 
     # Right button
     ttk.Button(
         buttons_frame,
-        text="Zip & Upload Crash dump",
-        command=lambda: start_thread(CrashHandler.zip_and_upload_crash_dump, "Zip and upload thread", daemon=True, crash_dir_list=get_selected_crash_paths())
-    ).grid(row=0, column=2, sticky="e",**PADDING) # type: ignore
+        text="Delete",
+        command=lambda: start_thread(CrashHandler.remove_crash_entries, "Delete Crash entries thread", daemon=True, filepaths=get_selected_crash_paths())
+    ).grid(row=0, column=3, pady=8)
+
 
     def load_crash_table():
         """Read CSV and populate the table."""

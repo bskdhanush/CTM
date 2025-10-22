@@ -17,7 +17,7 @@ CTM_DAPP_DIR = os.path.join(CTM_BASE_DIR, 'DAPP')
 APP_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'app_config.json')
 PROV_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'prov_config.json')
 META_JSON_FILE= os.path.join(CTM_CONFIG_DIR,'Metas_downloaded.json')
-
+CRASH_RENAME_META_CSV = os.path.join(CTM_BASE_DIR, 'CrashRenamingMetaInfo.csv')
 
 MIN_CRASH_SIZE     = 1.5 * 1024**3   # 1.5 GiB
 MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB

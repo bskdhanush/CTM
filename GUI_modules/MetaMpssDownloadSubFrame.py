@@ -8,7 +8,7 @@ import customtkinter as ctk
 import schedule
 
 from JsonHandler import load_cfg,load_prov_json, save_json
-from AutoDownloader import checK_for_new_meta
+from AutoDownloader import checK_for_new_meta,checK_for_new_CSV
 import FzHandler
 from Threading import start_thread
 
@@ -52,9 +52,11 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
             local_path.set(selected_path)
             print(f"Selected path: {selected_path}")
     
-    def method123():
+    def check_for_updates():
         # Your code here
-        print("method123 called")
+        checK_for_new_meta(device_name)
+        checK_for_new_CSV()
+
 
     def _reschedule(enable: bool) -> None:
         """(Re)create or cancel the 30-min job."""
@@ -65,7 +67,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
             _job = None
         if enable:
             print("Scheduling 30-min interval job")
-            _job = schedule.every(1).minutes.do(method123)
+            _job = schedule.every(30).minutes.do(check_for_updates)
 
     def _loop() -> None:
         """Background thread that drives `schedule`."""

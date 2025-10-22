@@ -3,7 +3,7 @@ import FzHandler
 
 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
-from AutoDownloader import checK_for_new_meta 
+from AutoDownloader import checK_for_new_meta ,checK_for_new_CSV
 
 
 
@@ -21,7 +21,7 @@ def add_data():
 
 
 if __name__ == "__main__":
-   checK_for_new_meta("Kobuk")
+   checK_for_new_CSV()
    print(type(load_prov_json().get("Meta_path")))
  
   

@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 
 
-from Constants import CTM_META_DIR,META_JSON_FILE
+from Constants import CTM_META_DIR,META_JSON_FILE,CTM_BASE_DIR
 from FzHandler import list_files,download_file
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 
@@ -50,3 +50,18 @@ def checK_for_new_meta(device_name):
                 save_downloaded_meta(file_name)
             except Exception as e:
                 print("Download failed, not saving metadata:", e)
+  
+
+def checK_for_new_CSV():
+    files_list=list_files("CrashRenamingMetaInfo.csv", "Meta",sub_sting="") # here Meta we can search whole incomming
+    d,cfg= get_downloaded_lsit()
+
+    if files_list[0]["mtime"]> cfg["CSV"]:
+        print(files_list[0]["mtime"],cfg["CSV"])
+        try:
+            download_file(files_list[0]["name"],CTM_BASE_DIR)
+            cfg.update({"CSV":files_list[0]["mtime"]})
+            save_meta_json(cfg)
+        except Exception as e:
+             print("CSV Download failed", e)
+  

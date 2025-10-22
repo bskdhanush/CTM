@@ -1,4 +1,6 @@
 import os
+import socket
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -9,7 +11,6 @@ from GUI_modules import CrashForecastPage
 from JsonHandler import load_json, load_prov_json, save_prov_json
 from EndToEndDevProvsioningController import get_provisioning_base
 from WifiController import get_adb_id
-from FzHandler import file_upload
 from Threading import start_thread
 from Constants import CTM_LOGS_DIR
 
@@ -82,37 +83,49 @@ def create_crash_meta_info_csv(crash_info_dict):
     crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
-        df = pd.concat([df_csv, df], axis=0)
+        df = pd.concat([df_csv, df], axis=0, ignore_index=True)
+        df.drop_duplicates(subset='CRASH_PATH', keep='last', inplace=True)
+        df = df.sort_values(by=['TIMESTAMP'], ascending=False)
         os.remove(crash_meta_info_csv)
     df.to_csv(crash_meta_info_csv, index=False)
 
     # display_crash_table(crash_meta_info_csv)
 
 
-def zip_and_upload_crash_dump():
+def zip_and_upload_crash_dump(crash_dir_list):
     # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
     # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
+    from FzHandler import file_upload
     df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
 
     for index, row in df.iterrows():
         try:
-            crash_name = get_crash_naming()
+                                           
             crash_path = row.get("CRASH_PATH")
-            if crash_path:
-                # crash_folder = os.path.basename(crash_path)
-                crash_base = os.path.dirname(crash_path)
-                new_crash_path = os.path.join(crash_base, crash_name)
-                if os.path.exists(crash_path):
+            if crash_path in crash_dir_list:
+                crash_name = get_crash_naming()
+                if crash_path and os.path.exists(crash_path):
+                    # crash_folder = os.path.basename(crash_path)
+                    crash_base = os.path.dirname(crash_path)
+                    count = 1
+                    crash_name = get_crash_naming(count)
+                    new_crash_path = os.path.join(crash_base, crash_name)
+                    while os.path.exists(new_crash_path):
+                        count = count + 1
+                        crash_name = get_crash_naming(count)
+                        new_crash_path = os.path.join(crash_base, crash_name)
+
                     os.rename(crash_path, new_crash_path)
 
-                # Zip
-                if os.path.exists(new_crash_path):
-                    output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
-                    zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
+                    # Zip
+                    if os.path.exists(new_crash_path):
+                        print(f'Zipping and Uploading {new_crash_path}')
+                        output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
+                        zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
 
-                    subprocess.run(zip_command, capture_output=True, text=True)
+                        subprocess.run(zip_command, capture_output=True, text=True)
 
-                    file_upload(output_zip, "crash_upload")
+                        file_upload(output_zip, "crash_upload")
         except Exception as e:
             print(f'Exception during zip_and_upload_crash_dump: {e}')
 
@@ -129,7 +142,7 @@ def forecast_crashes(crash_dir_list):
     # Path objects have .stat() as a method
         time_stamp = datetime.datetime.fromtimestamp(os.stat(directory).st_mtime).strftime("%Y-%m-%dT%H:%M:%S")
         print(time_stamp, directory)
-        start_thread(crash_forecast(directory, time_stamp), "Crash Dump forecast")
+        start_thread(crash_forecast, "Crash Dump forecast", crash_path=directory, timestamp=time_stamp)
     # if rdkb_crash_path:
     #     crash_forecast(rdkb_crash_path)  # Uncomment if needed
 
@@ -146,26 +159,75 @@ def get_naming_convention():
     # fst_id="sdx-asdjfjsdl-7887"
     return market, name, fst_id, operator, tdc_serial
 
-def set_naming_convention(market, name, fst_id, operator, tdc_serial):
-    # cfg = load_json(PROV_FILE)
+def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string=None):
+    print(f'market:{market}, name: {name}, fst_id: {fst_id}, operator: {operator}, tdc_serial: {tdc_serial}')
     cfg = load_prov_json()
     cfg["market"] = market
     cfg["name"] = name
     cfg["fst_id"] = fst_id
     cfg["operator"] = operator
     cfg["tdc_serial"] = tdc_serial
+    if magic_string:
+        cfg["magic_string"] = magic_string
     save_prov_json(cfg)
 
-def get_crash_naming():
+def set_naming_convention_from_crash_rename_csv():
+    from Constants import CRASH_RENAME_META_CSV
+    from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
+
+    if os.path.exists(CRASH_RENAME_META_CSV):
+        df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
+        _adb_id = get_adb_id()
+        _mpss_build = get_mpss_build_info()
+        _meta_build = get_meta_build_info().strip('"')
+        df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
+
+        hostname = socket.gethostname()
+        host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
+        market = host_pool_mapping.get(hostname)
+
+        name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA']) or (hostname in ['LAPTOP-IDGK1E3S', 'DESKTOP-8FLRVQK', 'Mohan', 'mstft20-52'])) else 'Aniket'
+
+        adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
+        tdc_serial = adb_tdc_map.get(_adb_id)
+
+        fst_id = df_one['FST_ID'].iloc[0]
+
+        magic_string = df_one['MAGIC_STRING'].iloc[0]
+
+        operator = get_operator()
+
+        set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+
+
+def get_operator():
+    # Needs to be implemented
+    return "TMO"
+    
+def get_crash_naming(count=1):
     today = date.today()
     today = today.strftime("%m%d%Y")
-    count = 1
+    # count = 1
     market, name, fst_id, operator, tdc_serial = get_naming_convention()
     
     crash_name = f"{market}_{name}_{fst_id}_{today}_{operator}_{count}_{tdc_serial}_LAN_DRI"
     crash_name = re.sub(r'\s+', '', crash_name)
     return crash_name
     
+def remove_crash_entry(filepath):
+    print(f'{filepath} will be removed from CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    df_csv = pd.DataFrame()
+    if os.path.exists(crash_meta_info_csv):
+        df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
+        df_csv = df_csv[df_csv['CRASH_PATH'] != filepath]
+        df_csv = df_csv.sort_values(by=['TIMESTAMP'], ascending=False)
+        os.remove(crash_meta_info_csv)
+    df_csv.to_csv(crash_meta_info_csv, index=False)
 
+def remove_crash_entries(filepaths):
+    for filepath in filepaths:
+        remove_crash_entry(filepath)
+        
 if __name__ == "__main__":
     print(get_crash_naming())

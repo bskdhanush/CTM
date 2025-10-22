@@ -31,6 +31,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
                 file_listbox.insert(tk.END, item["name"])
         except Exception as e:
             print(f'Exception during list_files: {e}')
+            items = []
         return items
         
 
@@ -76,7 +77,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value=f'Downlaod Path:- C:\CTM\{Pagename}') # type: ignore
+    local_path = tk.StringVar(value=f'Download Path:- C:\CTM\{Pagename}') # type: ignore
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", anchor="w", padx=(10, 0))
 

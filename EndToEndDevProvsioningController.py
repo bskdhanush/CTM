@@ -268,10 +268,10 @@ def load_fota(filepath):
 
 
 def get_data_Meta_Mpss_txt():
+    config = {}
     PROV_BASE = get_provisioning_base()
     if PROV_BASE:
         META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
-        config = {}
         try: 
             with open(META_MPSS_TXT, 'r') as file:
                 for line in file:

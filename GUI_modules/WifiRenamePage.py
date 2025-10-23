@@ -69,7 +69,7 @@ def create_wifi_renaming_page(container, pages, add_nav):
     
     OWRT_CHOICES = ("3 SLO", "2G-5G MLO", "3 MLO")
     RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    Kobuk_CHOICES = ("3 MLO")
+    Kobuk_CHOICES = ("3_MLO")
 
     toggle_var = tk.StringVar(value="OWRT")
 
@@ -114,7 +114,7 @@ def create_wifi_renaming_page(container, pages, add_nav):
             choices = Kobuk_CHOICES
         else:
             choices = []
-        wifi_dd.configure(values=choices)
+        wifi_dd.configure(values=choices) # type: ignore
         # Set current value to first choice if not in choices
         cur = wifi_dd.get()
         wifi_dd.set(cur if cur in choices and cur else choices[0])

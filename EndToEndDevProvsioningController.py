@@ -272,12 +272,16 @@ def get_data_Meta_Mpss_txt():
     if PROV_BASE:
         META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
         config = {}
-        with open(META_MPSS_TXT, 'r') as file:
-            for line in file:
-                line = line.strip()  # Remove whitespace
-                if '=' in line:  # Check if line contains '='
-                    key, value = line.split('=', 1)  # Split at first '='
-                    config[key.strip()] = value.strip()
+        try: 
+            with open(META_MPSS_TXT, 'r') as file:
+                for line in file:
+                    line = line.strip()  # Remove whitespace
+                    if '=' in line:  # Check if line contains '='
+                        key, value = line.split('=', 1)  # Split at first '='
+                        config[key.strip()] = value.strip()
+        except Exception as e:
+            print(f'No path selected for POV : {e}')
+    
     return config
 
   

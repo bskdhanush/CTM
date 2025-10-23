@@ -61,9 +61,12 @@ def checK_for_new_CSV():
         print(files_list[0]["mtime"],cfg["CSV"])
         try:
             download_file(files_list[0]["name"],CTM_BASE_DIR)
-            cfg.update({"CSV":files_list[0]["mtime"]})
-            save_meta_json(cfg)
-            set_naming_convention_from_crash_rename_csv()
         except Exception as e:
-             print("CSV Download failed", e)
-  
+            print(f"Exception during download_file: {e}")
+        else:
+            try:
+                cfg.update({"CSV":files_list[0]["mtime"]})
+                save_meta_json(cfg)
+                set_naming_convention_from_crash_rename_csv()
+            except Exception as e:
+                print(f"Exception during set_naming_convention_from_crash_rename_csv: {e}")

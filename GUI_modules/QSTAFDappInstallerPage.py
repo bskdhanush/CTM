@@ -11,12 +11,14 @@ from JsonHandler import load_prov_json
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 def _pick_zip(pagename) -> str:
-        if pagename!="": 
-            cfg=load_prov_json()
-            dir=cfg[f"{pagename}_path"]
-        else: 
-          dir="~"
-        filePath = filedialog.askopenfilename(
+    from Constants import CTM_META_DIR, CTM_MPSS_DIR
+    if pagename == "Meta":
+        dir = CTM_META_DIR
+    elif pagename == "MPSS":
+        dir = CTM_MPSS_DIR
+    else:
+      dir = "~"
+    filePath = filedialog.askopenfilename(
         title="Select QSTAF archive",
         initialdir=dir,
         filetypes=[
@@ -27,12 +29,12 @@ def _pick_zip(pagename) -> str:
             ("All files", "*.*"),
         ],
     )
-        if not filePath:
-            return ""
-        if not filePath.lower().endswith((".zip", ".7z")):
-            messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
-            return ""
-        return filePath
+    if not filePath:
+        return ""
+    if not filePath.lower().endswith((".zip", ".7z")):
+        messagebox.showwarning("Unsupported file", "Please choose a .zip or .7z file.")
+        return ""
+    return filePath
 
 
 def create_Qstaf_dapp_install_page(container, pages, add_nav):

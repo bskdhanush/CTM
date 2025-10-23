@@ -24,11 +24,13 @@ def getFilePath(label_var, identifier):
         return filepath
 
 def getFolderPath(pagename):
-    if pagename!="": 
-            cfg=load_prov_json()
-            dir=cfg[f"{pagename}_path"]
+    from Constants import CTM_META_DIR, CTM_MPSS_DIR
+    if pagename == "Meta":
+        dir = CTM_META_DIR
+    elif pagename == "MPSS":
+        dir = CTM_MPSS_DIR
     else :
-         dir="~"
+         dir = "~"
     folderpath = filedialog.askdirectory(
         title=f"Select {pagename} folder",
         initialdir=dir

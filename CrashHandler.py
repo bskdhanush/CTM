@@ -241,14 +241,15 @@ def get_operator():
             operator = df_operator['OPERATOR'].iloc[0]
     return operator
     
-def get_crash_naming(orig_crash_name, count=1):
-    # today = date.today()
-    # today = today.strftime("%m%d%Y")
+def get_crash_naming(orig_crash_name='', count=1):
     crash_name = None
-    date = ''
+    date_folder = ''
     m = re.search(r'(\d\d\d\d)(\d\d\d\d)-(\d+)', orig_crash_name)
     if m:
-        date = f'{m.group(2)}{m.group(1)}'
+        date_folder = f'{m.group(2)}{m.group(1)}'
+    else:
+        date_folder = date.today()
+        date_folder = date_folder.strftime("%m%d%Y")
     # count = 1
     market, name, fst_id, operator, tdc_serial = get_naming_convention()
 
@@ -258,15 +259,15 @@ def get_crash_naming(orig_crash_name, count=1):
         print('name is not valid. Pls check')
     if not fst_id:
         print('fst_id is not valid. Pls check')
-    if not date:
-        print('date is not valid. Pls check')
+    # if not date_folder:
+    #     print('date_folder is not valid. Pls check')
     if not operator:
         print('operator is not valid. Pls check')
     if not tdc_serial:
         print('tdc_serial is not valid. Pls check')
 
     if market and name and fst_id and operator and tdc_serial:
-        crash_name = f"{market}_{name}_{fst_id}_{date}_{operator}_{count}_{tdc_serial}_LAN_DRI"
+        crash_name = f"{market}_{name}_{fst_id}_{date_folder}_{operator}_{count}_{tdc_serial}_LAN_DRI"
         crash_name = re.sub(r'\s+', '', crash_name)
     return crash_name
     

@@ -9,3 +9,4 @@ paramiko
 python-dotenv
 ssh2-python
 customtkinter
+py7zr

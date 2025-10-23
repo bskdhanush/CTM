@@ -4,6 +4,8 @@ import time
 import subprocess
 import shutil
 import QSTAFInstaller
+import py7zr
+from pathlib import Path
 from WifiController import get_adb_id, run_command
 from JsonHandler import load_prov_json
 from Constants import CTM_META_DIR, CTM_MPSS_DIR
@@ -46,7 +48,7 @@ def update_meta_in_config(meta_path, meta_mpss_txt):
             else:
                 f.write(line)
 
-def load_meta_from_path(filepath):
+def load_meta_from_path(filepath,Pgname):
     # Update filepath for Meta in META_MPSS.txt and trigger load
     if filepath=="":
         return
@@ -56,9 +58,10 @@ def load_meta_from_path(filepath):
         filepath = os.path.normpath(filepath)
         print(f'Meta Path: {filepath}')
         update_meta_in_config(filepath, META_MPSS_TXT)
-        trigger_prov_meta(PROV_BASE)
+        if Pgname:
+            trigger_prov_meta(PROV_BASE)
 
-def load_meta_from_zip(filepath):
+def load_meta_from_zip(filepath,Pgname):
     if filepath=="":
         return
     # Extract META zip, update META_MPSS.txt and trigger load
@@ -71,17 +74,26 @@ def load_meta_from_zip(filepath):
             META_ID = os.path.basename(filepath).strip(".7z")
         if filepath.endswith(".zip"):
             META_ID = os.path.basename(filepath).strip(".zip")
-
         META_PATH = os.path.join(CTM_META_DIR, META_ID)
+
+
 
         remove_dir(META_PATH)
         os.makedirs(META_PATH)
-
-        QSTAFInstaller._extract_zip(filepath, META_PATH) # type: ignore
+        
+        if filepath.endswith(".7z"):
+            print("Starting 7z extraction... This may take several minutes for large files")
+            QSTAFInstaller._extract_7z_with_cli(filepath, Path(META_PATH)) 
+            print("Extraction completed")
+        elif filepath.endswith(".zip"):
+            QSTAFInstaller._extract_zip(filepath, Path(META_PATH))
         update_meta_in_config(META_PATH, META_MPSS_TXT)
-        trigger_prov_meta(PROV_BASE)
+        # if its from meta triger else just update the meta_mpss_txt
+        print(Pgname)
+        if Pgname:
+            trigger_prov_meta(PROV_BASE)
 
-def load_mpss_from_path(filepath):
+def load_mpss_from_path(filepath,Pgname):
     if filepath=="":
         return
     # Update filepath for MPSS in META_MPSS.txt and trigger load
@@ -91,9 +103,10 @@ def load_mpss_from_path(filepath):
         filepath = os.path.normpath(filepath)
         print(f'MPSS Path: {filepath}')
         update_mpss_in_config(filepath, META_MPSS_TXT)
-        trigger_prov_mpss(PROV_BASE)
+        if Pgname:
+            trigger_prov_mpss(PROV_BASE)
 
-def load_mpss_from_zip(filepath):
+def load_mpss_from_zip(filepath,Pgname):
     if filepath=="":
         return
     # Extract MPSS zip, update META_MPSS.txt and trigger load
@@ -106,15 +119,20 @@ def load_mpss_from_zip(filepath):
             MPSS_ID = os.path.basename(filepath).strip(".7z")
         if filepath.endswith(".zip"):
             MPSS_ID = os.path.basename(filepath).strip(".zip")
-
         MPSS_PATH = os.path.join(CTM_MPSS_DIR, MPSS_ID)
         remove_dir(MPSS_PATH)
         os.makedirs(MPSS_PATH)
 
-        QSTAFInstaller._extract_zip(filepath, MPSS_PATH) # type: ignore
-        update_mpss_in_config(MPSS_PATH, META_MPSS_TXT)
-        trigger_prov_mpss(PROV_BASE)
-
+        if filepath.endswith(".7z"):
+            print("Starting 7z extraction... This may take several minutes for large files")
+            QSTAFInstaller._extract_7z_with_cli(filepath, Path(MPSS_PATH)) 
+            print("Extraction completed")
+        elif filepath.endswith(".zip"):
+            QSTAFInstaller._extract_zip(filepath, Path(MPSS_PATH))
+        update_meta_in_config(MPSS_PATH, META_MPSS_TXT)
+        # if its from Mpss triger else just update the meta_mpss_txt
+        if Pgname:
+            trigger_prov_meta(PROV_BASE)
 def trigger_prov_mpss(PROV_BASE):
     os.chdir(PROV_BASE)
     remove_dir(os.path.join(PROV_BASE, 'MPSS'))
@@ -173,7 +191,7 @@ def update_mbn_in_config(mbn, meta_mpss_txt):
             else:
                 f.write(line)
 
-def activate_mbn(operator):
+def activate_mbn(operator,Pgname):
     PROV_BASE = get_provisioning_base()
     if PROV_BASE:
         META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
@@ -185,15 +203,16 @@ def activate_mbn(operator):
         }
         if operator_dict.get(operator):
             update_mbn_in_config(operator_dict.get(operator), META_MPSS_TXT)
-            command = [
-                'python', 'End_to_End_device_configuration.py',
-                "--project", "2",
-                "--option", "5",
-                "--meta_option", "2",
-                "--device_serial", "m"
-            ]
-            subprocess.run(command, shell=True)
-            print("MBN Activation launched in a new cmd prompt")
+            if Pgname:
+                command = [
+                    'python', 'End_to_End_device_configuration.py',
+                    "--project", "2",
+                    "--option", "5",
+                    "--meta_option", "2",
+                    "--device_serial", "m"
+                ]
+                subprocess.run(command, shell=True)
+                print("MBN Activation launched in a new cmd prompt")
     
 def deactivate_mbn():
     pass
@@ -204,7 +223,7 @@ def write_nv():
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
-            "--project", "2",
+            "--Project", "2",
             "--option", "6",
             "--meta_option", "2",
             "--device_serial", "m"
@@ -246,3 +265,19 @@ def load_fota(filepath):
                 print(f'FOTA upgraded successfully')
             else:
                 print(f'FOTA upgrade failed')
+
+
+def get_data_Meta_Mpss_txt():
+    PROV_BASE = get_provisioning_base()
+    if PROV_BASE:
+        META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
+        config = {}
+        with open(META_MPSS_TXT, 'r') as file:
+            for line in file:
+                line = line.strip()  # Remove whitespace
+                if '=' in line:  # Check if line contains '='
+                    key, value = line.split('=', 1)  # Split at first '='
+                    config[key.strip()] = value.strip()
+    return config
+
+  

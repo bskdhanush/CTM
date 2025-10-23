@@ -70,7 +70,7 @@ def _extract_7z_with_cli(src: Path, dest: Path) -> None:
         raise RuntimeError("7-Zip not found. Install 7-Zip or `pip install py7zr`. ")
     dest.mkdir(parents=True, exist_ok=True)
     cmd = [str(exe), "x", str(src), f"-o{dest}", "-y"]
-    proc = subprocess.run(cmd, capture_output=True, text=True, check=False, creationflags=CREATE_NO_WINDOW)
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False )#creationflags=CREATE_NO_WINDOW
     if proc.returncode != 0:
         raise RuntimeError(f"7-Zip failed (code {proc.returncode}): {proc.stderr.strip()}")
 

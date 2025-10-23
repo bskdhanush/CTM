@@ -13,7 +13,7 @@ from JsonHandler import load_json, load_prov_json, save_prov_json
 from EndToEndDevProvsioningController import get_provisioning_base
 from WifiController import get_adb_id
 from Threading import start_thread
-from Constants import CTM_LOGS_DIR
+from Constants import CTM_LOGS_DIR, DEFAULT_CRASHDUMP, CRASHDUMP_ROOT_PCAT
 
 seven_zip_path = r'C:\Program Files\7-Zip\7z.exe'
 
@@ -115,7 +115,7 @@ def zip_and_upload_crash_dump(crash_dir_list):
                         print('Could not retrieve correct naming convention. Pls check')
                         continue
                     new_crash_path = os.path.join(crash_base, crash_name)
-                    while os.path.exists(new_crash_path):
+                    while find_folder(DEFAULT_CRASHDUMP, crash_name) or find_folder(CRASHDUMP_ROOT_PCAT, crash_name):
                         count = count + 1
                         crash_name = get_crash_naming(orig_crash_name, count)
                         if not crash_name:
@@ -139,10 +139,19 @@ def zip_and_upload_crash_dump(crash_dir_list):
                         subprocess.run(zip_command, capture_output=True, text=True)
 
                         print(f'Uploading {output_zip}')
-                        file_upload(output_zip, f"crash_upload/{crash_name}.7z")
+                        upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z")
+                        if upload_result:
+                            remove_crash_entry(crash_path)
         except Exception as e:
             print(f'Exception during zip_and_upload_crash_dump: {e}')
 
+
+def find_folder(base_path, folder_name):
+    for root, dirs, files in os.walk(base_path):
+        if folder_name in dirs:
+            return os.path.join(root, folder_name)
+    return None
+    
 
 def forecast_crashes(crash_dir_list):
     # cfg = load_json()

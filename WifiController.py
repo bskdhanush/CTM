@@ -2,6 +2,8 @@ import time
 import subprocess
 import re
 import os
+import json
+from Constants import CTM_CONFIG_DIR
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -120,13 +122,13 @@ def connectBackhaul():
     ]
     run_dmcli_commands(commands)
 
-def update_3_slo_config_owrt(Config):
+def update_3_slo_config_owrt(config):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
     if not adb_id:
         adb_id = ''
-    if Config == 'Test_SSID':
+    if config == 'Test_SSID':
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_3slo_{adb_id}{ssid_suffix}.json')
@@ -143,13 +145,13 @@ def update_3_slo_config_owrt(Config):
     run_command(f"adb push {file_to_check} /data/dapp/TC_ondevice.json")
     run_command("adb reboot")
 
-def update_2g5g_mlo_config_owrt(Config):
+def update_2g5g_mlo_config_owrt(config):
     ssid_suffix = ''
     json_content = ''
     adb_id = get_adb_id()
     if not adb_id:
         adb_id = ''
-    if Config == 'Test_SSID':
+    if config == 'Test_SSID':
         ssid_suffix = '_Test'
 
     file_to_check = os.path.join(output_config_path, f'OWRT_TC_ondevice_25mlo_{adb_id}{ssid_suffix}.json')
@@ -168,23 +170,80 @@ def update_2g5g_mlo_config_owrt(Config):
     run_command("adb reboot")
     print("done")
 
-def update_3_mlo_config_owrt(Confi):
+def update_3_mlo_config_owrt(config):
     print("OWRT 3 MLO selected with test SSID")
 
 
-def Update_3_mlo_config_Kubok(Config):  
-    #template_file = os.path.join(template_path, 'OWRT_TC_ondevice_25mlo_KOBUK.json') 
+def update_3_mlo_config_kobuk(config):
     print("Kobuk 3 MLO selected with test SSID")
+    config_json = os.path.join(CTM_CONFIG_DIR, 'config.json')
+    if config == "Test_SSID":
+        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'mlo_config_test.json')
+    else:
+        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'mlo_config.json')
 
-def Update_2_mlo_config_Kubok(Config):
+    if not os.path.exists(mlo_config_json):
+        prefix = ""
+        if config == "Test_SSID":
+            prefix = "_test"
+
+        _adb_id = get_adb_id()
+        ssid = f"QSTAF_MLO_{_adb_id}{prefix}"
+
+        mlo_json_data = {
+            "4": {
+                "command": "enableMLO",
+                "input": {
+                    "band_config": "2_5_6",
+                    "ssid": ssid,
+                    "encryption": "ccmp",
+                    "password": "12345678",
+                    "wpa3_flag": True,
+                    "Metadata": {
+                        "vpid": 0,
+                        "start_delay": "0:1"
+                    }
+                }
+            }
+        }
+
+        with open(mlo_config_json, "w") as json_file:
+            json.dump(mlo_json_data, json_file, indent=4)
+
+    if not os.path.exists(config_json):
+        config_json_data = {
+            "iteration_count": 1,
+            "TC_list": ["TC1.json"],
+            "Randomize": False,
+            "Report_Headers": ["StepNo", "Itr", "seqno","subiteration", "command", "start_time", "end_time","result", "input", "vpid","blocking", "start_delay", "Metadata","file_size","time_taken_sec","throughput_bps"],
+            "execute_once_api": ["enableMLO"],
+            "qstaflog_max_size_MB": 5000
+        }
+        with open(config_json, "w") as json_file:
+            json.dump(config_json_data, json_file, indent=4)
+
+    run_command("adb shell mkdir /data/dapp/wlan")
+    run_command("adb shell cp /data/dapp/qstaf.kb.* /data/dapp/wlan/")
+
+    run_command(f"adb push {config_json} /data/dapp/wlan/")
+    run_command(f"adb push {config_json} /")  # to be removed in next Dapp release
+    run_command(f"adb push {mlo_config_json} /data/dapp/wlan/")
+    if config == "Test_SSID":
+        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/mlo_config_test.json")
+    else:
+        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/mlo_config.json")
+    # run_command(f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/{mlo_config_json} /data/dapp/wlan/{config_json}")  # to be changed to in next Dapp release
+
+
+def update_2_mlo_config_kobuk(config):
    # template_file = os.path.join(template_path, 'OWRT_TC_ondevice_2_mlo_KOBUK.json') 
    print("Kobuk 2 MLO selected with test SSID")
 
 
-def update_3_slo_config_rdkb(Config):
+def update_3_slo_config_rdkb(config):
     ssid_suffix = ''
     adb_id = get_adb_id()
-    if Config == "Test":
+    if config == "Test":
         ssid_suffix = '_Test'
     slo_2g_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
     slo_5g_ssid = f'QSTAF_5G_SLO_{adb_id}{ssid_suffix}'
@@ -208,13 +267,13 @@ def update_3_slo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    if Config == 'Config_SSID':
+    if config == 'Config_SSID':
         setpassword_bandwidths_rdkb()
 
-def update_2g_slo_5g6g_mlo_config_rdkb(Config):
+def update_2g_slo_5g6g_mlo_config_rdkb(config):
     ssid_suffix =''
     adb_id = get_adb_id()
-    if Config == "Test_SSID":
+    if config == "Test_SSID":
         ssid_suffix = '_test'
     slo_ssid = f'QSTAF_2G_SLO_{adb_id}{ssid_suffix}'
     mlo_ssid = f'QSTAF_MLO_{adb_id}{ssid_suffix}'
@@ -229,7 +288,7 @@ def update_2g_slo_5g6g_mlo_config_rdkb(Config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    if Config == 'Config_SSID':
+    if config == 'Config_SSID':
         setpassword_bandwidths_rdkb()
 
 def setpassword_bandwidths_rdkb():
@@ -295,10 +354,9 @@ def update_cpe_wifi_config(toggle_var,wifi_config,config):
             elif wifi_config == 2:
                 update_3_mlo_config_owrt(config)
 
-    elif meta and 'LE.1.1' in meta:
-        if toggle_var == 'Kobuk':
-            if wifi_config == 0:
-                Update_3_mlo_config_Kubok(config)
-            elif wifi_config == 1:
-                Update_2_mlo_config_Kubok(config)
+    elif toggle_var == 'Kobuk':
+        if wifi_config == 0:
+            update_3_mlo_config_kobuk(config)
+        elif wifi_config == 1:
+            update_2_mlo_config_kobuk(config)
          

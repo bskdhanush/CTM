@@ -231,7 +231,7 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
 
     try:
         if df is not None:
-            df.columns = df.columns.str.upper()
+            df.columns = df.columns.map(str).str.upper()
             df_rf_indexed = get_rfband_df(df)
             if df_rf_indexed is not None:
                 df_rf_indexed = df_rf_indexed.sort_values(by=['TIMESTAMP'])
@@ -250,7 +250,7 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
         fig.tight_layout()
 
     except Exception as e:
-        print('Exception during rf_band_plot : {e}')
+        print(f'Exception during rf_band_plot : {e}')
 
     return fig
 

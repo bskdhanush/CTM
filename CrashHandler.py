@@ -203,7 +203,7 @@ def set_naming_convention_from_crash_rename_csv():
     from Constants import CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
 
-    market, name, fst_id, operator, tdc_serial, magic_string = None # type: ignore
+    market = name = fst_id = operator = tdc_serial = magic_string = None
 
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)

@@ -230,8 +230,8 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
     fig = None
 
     try:
-        if df is not None:
-            df.columns = df.columns.str.upper()
+        if isinstance(df, pd.DataFrame) and not df.empty:
+            df.columns = [str(column).upper() for column in df.columns]
             df_rf_indexed = get_rfband_df(df)
             if df_rf_indexed is not None:
                 df_rf_indexed = df_rf_indexed.sort_values(by=['TIMESTAMP'])
@@ -250,14 +250,14 @@ def rf_band_plot(figsize: tuple[Literal[7], Literal[4]]):
         fig.tight_layout()
 
     except Exception as e:
-        print('Exception during rf_band_plot : {e}')
+        print(f'Exception during rf_band_plot : {e}')
 
     return fig
 
 def get_rfband_df(df=None):
     """Creates RFBand dataframe """
 
-    if df is not None:
+    if isinstance(df, pd.DataFrame) and not df.empty:
         df["NR_CC_BAND"] = df["NR_CC_BAND"].apply(lambda x: 'N' + str(x).strip())
         df['LTE_BANDS'] = df['LTE_BANDS'].apply(
             lambda x: '+'.join('B' + y for y in str(x).replace('0', '').replace(' ', '').strip(',').split(',')).replace(

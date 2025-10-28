@@ -1,5 +1,5 @@
 To build the exe with out cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --windowed --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules"
-To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules"
+To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --add-data ".env;.env" --hidden-import=ssh2-python
 
 
 app_json format:    

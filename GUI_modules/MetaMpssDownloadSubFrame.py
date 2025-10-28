@@ -151,8 +151,17 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     refresh_btn_row = tk.Frame(bottom_section)
     refresh_btn_row.pack(fill="x")
 
-    Refresh_btn = ttk.Button(refresh_btn_row, text="Refresh Table", command=lambda:get_current_files(""))
-    Refresh_btn.pack(side="left")
+    # Refresh_btn = ttk.Button(refresh_btn_row, text="Refresh Table", command=lambda:get_current_files(""))
+    # Refresh_btn.pack(side="left")
+
+    entry = ctk.CTkEntry(
+    refresh_btn_row,
+    placeholder_text="Type substring here...",
+    width=200,
+    height=30,
+    corner_radius=6
+)
+    entry.pack(side="left", padx=5)
 
    
    
@@ -162,14 +171,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         command=lambda:get_current_files(entry.get()),
     ).pack(side="right", padx=(8,8)) # type: ignore
     
-    entry = ctk.CTkEntry(
-    refresh_btn_row,
-    placeholder_text="Type substring here...",
-    width=200,
-    height=30,
-    corner_radius=6
-)
-    entry.pack(side="right", padx=5)
+   
     
 
     download_btn_row = tk.Frame(bottom_section)

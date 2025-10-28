@@ -71,7 +71,7 @@ def create_wifi_renaming_page(container, pages, add_nav):
     RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
     Kobuk_CHOICES = ("3_MLO")
 
-    toggle_var = tk.StringVar(value="OWRT")
+    toggle_var = tk.StringVar(value="Kobuk")
 
     # Two radiobuttons share the same StringVar, so only one can be “on” at a time
 
@@ -123,16 +123,16 @@ def create_wifi_renaming_page(container, pages, add_nav):
     _update_choices() 
 
 
-    ttk.Button(
-    wifi_sel,
-    text="Set config",
-    command=lambda: run_wifi_command_with_loading(
-        wifi_pg,
-        lambda: WifiController.update_cpe_wifi_config(toggle_var.get(), wifi_dd.current(), "Config_SSID"),
-        "Applying WiFi Configuration...",
-        "WiFi configuration applied successfully!"
-    ),
-    ).pack(fill="x", **PADDING)# type: ignore
+    # ttk.Button(
+    # wifi_sel,
+    # text="Set config",
+    # command=lambda: run_wifi_command_with_loading(
+    #     wifi_pg,
+    #     lambda: WifiController.update_cpe_wifi_config(toggle_var.get(), wifi_dd.current(), "Config_SSID"),
+    #     "Applying WiFi Configuration...",
+    #     "WiFi configuration applied successfully!"
+    # ),
+    # ).pack(fill="x", **PADDING)# type: ignore
 
 
     test_sel = ttk.LabelFrame(wifi_pg, text="This is to rename SSIDs before Speedtest")

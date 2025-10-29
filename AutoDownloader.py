@@ -9,6 +9,7 @@ from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 from CrashHandler import set_naming_convention_from_crash_rename_csv
 
 
+
 def get_downloaded_lsit():
     """Load downloaded files from JSON"""
     cfg =(load_meta_json())
@@ -33,6 +34,14 @@ def save_downloaded_meta(file_name, file_mtime):
 
 
 def checK_for_new_meta(device_name):
+
+    if device_name==None or device_name=="":
+        cfg=load_meta_json()
+        device_name=cfg["CPE_META_MPSS"]["meta"]
+
+        if device_name=="UNKNOWN":
+            return
+
     
     files_list = list_files(device_name, "Meta", sub_sting="")  # Meta enables only auto download for Meta only 
     print(f"found LISt: {files_list}")

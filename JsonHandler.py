@@ -47,7 +47,7 @@ def _default_prov():
 
 def _default_META_JSon():
     return{
-            "Meta":[],
+            "Meta":"",
             "CSV":"",
             "CPE_META_MPSS":""
          }

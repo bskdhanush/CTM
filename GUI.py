@@ -1,13 +1,8 @@
 from __future__ import annotations
-import os
-import json
-from pathlib import Path
 import platform
 import tkinter as tk
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 import logging
 from queue import Queue,Empty
 
@@ -20,8 +15,7 @@ import WifiController
 import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc 
-import JsonHandler as JH
-from Constants import APP_CONFIG_JSON,ADB_ID_JSON_DIR
+from  JsonHandler import load_meta_json,save_meta_json
 
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -186,13 +180,21 @@ def launch_gui() -> None:
         .grid(row=0, column=0, sticky="w", padx=15)
     ttk.Label(header_frame, textvariable=mpss_var,  anchor="w") \
         .grid(row=1, column=0, sticky="w", padx=15)
+    
+    def saveCPEBuildinfo(meta,mpss):
+        cfg=load_meta_json()
+        cfg.update({"CPE_META_MPSS": {"meta":meta , "mpss": mpss}})
+        save_meta_json(cfg)
+
 
     def refresh_meta_mpss() -> None:
         meta, mpss = MainController.get_meta_mpss()
         meta_var.set(f"Meta : {meta or 'UNKNOWN'}")
         mpss_var.set(f"MPSS : {mpss or 'UNKNOWN'}")
+        saveCPEBuildinfo(meta,mpss)
     refresh_meta_mpss()
 
+   
     ttk.Button(
         header_frame, text="Get Build info",
         command=refresh_meta_mpss, width=12

@@ -5,17 +5,15 @@ from tkinter import filedialog
 from tkinter import messagebox
 from GUI_modules import ProvisioningNavigator
 from JsonHandler import load_prov_json, save_prov_json
-
+from EndToEndDevProvsioningController import get_provisioning_base
 
 PADDING: dict[str, int] = {"padx": 12, "pady": 2}
 
-def get_prov_path():
-    cfg = load_prov_json()
-    return cfg.get("provisioning_path")
 
-def set_prov_path(path_var):
+def set_prov_path(path_var,label):
      folderpath = ProvisioningNavigator.getFolderPath("")
      path_var.set(folderpath)
+     label.config(foreground="white")
      cfg = load_prov_json()
      cfg.update({"provisioning_path": folderpath})
      save_prov_json(cfg)
@@ -36,16 +34,23 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
     Header_frame = ttk.LabelFrame(configPage, text="Set Provisioning Script Path")
     Header_frame.pack(side="top", fill="x", padx=12, pady=(8, 8))
 
-    filepath = get_prov_path()
-    
-    path_var = tk.StringVar(value=filepath)
-    label = ttk.Label(Header_frame, textvariable=path_var)
-    label.pack(side="left", padx=(10, 0))
-    
+    filepath = get_provisioning_base()
+
+    if filepath==None:
+        path_var = tk.StringVar(value="provisioning_path is not configured. Please check")
+        label = ttk.Label(Header_frame, textvariable=path_var,foreground="red")
+        label.pack(side="left", padx=(10, 0))
+    else:
+        path_var = tk.StringVar(value=filepath)
+        label = ttk.Label(Header_frame, textvariable=path_var,foreground="white")
+        label.pack(side="left", padx=(10, 0))
+
+  
+
     button = ttk.Button(
         Header_frame,
         text="Select Script Path",
-        command=lambda: set_prov_path(path_var))
+        command=lambda: set_prov_path(path_var,label))
     button.pack(side="right", padx=(0, 10),pady=(0,6))
     
     # Main labelframe (title area) - using pack
@@ -121,3 +126,8 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
     
     # Initialize with first tab visible
     show(section_names[0])
+
+   
+
+
+

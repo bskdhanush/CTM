@@ -149,7 +149,7 @@ def zip_and_upload_crash_dump(crash_dir_list):
                             zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                             subprocess.run(zip_command, capture_output=True, text=True)
 
-                            update_crash_zip_status(os.path.join(new_crash_path)
+                            update_crash_zip_status(new_crash_path)
                         except Exception as e:
                             print(f'Exception during zipping crash dump: {e}')
 

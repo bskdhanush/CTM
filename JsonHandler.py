@@ -22,12 +22,14 @@ def _default_cfg() -> dict:
         "rdkbcrash_counter": 0,
         "rdkbcrash_last_timestamp": "null",
         "relaunch_control": "false",
-        "relaunch_timer": 6,
+        "control_reset_timer": 360,
+        "traffic_idle_timer": 0,
+        "traffic_test_timer": 360,
         "relaunch_traffic": "false",
         "traffic_start_timestamp": "null",
         "Local_downloadPath": "",
         "Auto_download": "false",
-        "SpeedTestData":[],
+        "SpeedTestData": []
     }
 
 def _default_prov():
@@ -46,11 +48,12 @@ def _default_prov():
     }
 
 def _default_META_JSon():
-    return{
-            "Meta":"",
-            "CSV":"",
-            "CPE_META_MPSS":""
-         }
+    return {
+        "Meta": "",
+        "CSV": "",
+        "CPE_META_MPSS": ""
+    }
+    
 def load_cfg():
     if not os.path.exists(APP_CONFIG_JSON):
         save_json(_default_cfg())

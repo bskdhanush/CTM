@@ -6,6 +6,7 @@ Install: pip install ssh2-python python-dotenv
 """
 
 import os
+import re
 import socket
 import time
 from datetime import datetime
@@ -45,23 +46,25 @@ def connect_sftp(connect_timeout=20):
         print(f"Socket error: {e}")
     return sess, sftp, sock
 
-def list_files(device_filter="", pageName="",sub_sting=""):
+def list_files(device_filter="", pageName="", pattern=""):
     """
     Return a list of dicts: [{'name': , 'size': , 'mtime': }...]
     Uses sftp.opendir() and handle.readdir()
     """
     files = []
     keywords = []
-    if sub_sting=="":
+    if pattern is None or pattern == "":
         if pageName == "Meta":
             filter = device_filter.strip('"')
             filter = filter.split('.')[0]
-            keywords= [filter]
+            if 'kobuk' in filter.lower():
+                keywords = ["^Kobuk"]
         elif pageName == "Mpss":
-            keywords= ["BF","MPSS"]
-    elif sub_sting:
-        sub_sting=sub_sting.upper()
-        keywords= ["BF","MPSS"]
+            if device_filter and 'kobuk' in device_filter.lower():
+                keywords = ["^BF.*kobuk", "^MPSS.*kobuk", "_mbns.zip"]
+    elif pattern:
+                                   
+        keywords = [pattern]
 
     try:
         sess, sftp, sock = connect_sftp()
@@ -81,13 +84,10 @@ def list_files(device_filter="", pageName="",sub_sting=""):
                         attrs = entry[-1] if len(entry) > 1 else None
 
                     name = name_buf.decode() if isinstance(name_buf, (bytes, bytearray)) else str(name_buf)
-                    #print(pageName)
-                    if pageName=="Meta":
-                        if keywords and not any(k in name for k in keywords):
-                            continue
-                    else:
-                        if keywords and not (sub_sting in name and any(k in name for k in keywords)):
-                            continue  # Skip if BOTH conditions are not met
+
+                    # if keywords and not any(k in name for k in keywords):
+                    if keywords and not any(re.findall(k, name, re.I) for k in keywords):
+                        continue
 
                     filesize = getattr(attrs, "filesize", None) if attrs is not None else None
                     mtime = getattr(attrs, "mtime", None) if attrs is not None else None

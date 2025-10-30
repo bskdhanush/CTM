@@ -80,6 +80,8 @@ def create_crash_meta_info_csv(crash_info_dict):
     # Creates CrashMetaInfo.csv with columns
     # crash_count, adb_id, crash_path, timestamp, root_cause, fst_id
 
+    from CopyCsv import CONTROL_BASE, copy_csv_to_latest_folder
+    
     df = pd.DataFrame(crash_info_dict)
     crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
@@ -89,6 +91,8 @@ def create_crash_meta_info_csv(crash_info_dict):
         df = df.sort_values(by=['TIMESTAMP'], ascending=False)
         os.remove(crash_meta_info_csv)
     df.to_csv(crash_meta_info_csv, index=False)
+
+    copy_csv_to_latest_folder(crash_meta_info_csv, CONTROL_BASE)
 
     # display_crash_table(crash_meta_info_csv)
 
@@ -244,7 +248,7 @@ def get_operator():
 def get_crash_naming(orig_crash_name='', count=1):
     crash_name = None
     date_folder = ''
-    m = re.search(r'(\d\d\d\d)(\d\d\d\d)-(\d+)', orig_crash_name)
+    m = re.search(r'(\d{4})(\d{4})-(\d+)', orig_crash_name)
     if m:
         date_folder = f'{m.group(2)}{m.group(1)}'
     else:

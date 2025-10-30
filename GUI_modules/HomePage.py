@@ -20,15 +20,17 @@ def create_Home_Page(container, pages, add_nav, root):
     ctrl.pack(fill="x", **PADDING)# type: ignore
     control_ts_var = tk.StringVar(value="Control: Not started")
     traffic_ts_var = tk.StringVar(value="Traffic: Not started")
-    relaunch_timer=tk.StringVar(value="The frameworks will restart in:")
-    rest_timer=tk.StringVar(value="none")
+    control_reset_timer_var = tk.StringVar(value="none")
+    traffic_idle_timer_var = tk.StringVar(value="none")
+    traffic_test_timer_var = tk.StringVar(value="none")
+
 
     def update_timestamps(mode):
         cfg = load_json()
-        if mode=="control":
+        if mode == "control":
             cts = cfg.get("control_start_timestamp")
             control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
-        elif mode=="traffic":
+        elif mode == "traffic":
             tts = cfg.get("traffic_start_timestamp")
             traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
         else:
@@ -36,8 +38,6 @@ def create_Home_Page(container, pages, add_nav, root):
             control_ts_var.set(f"Control started at: {cts}" if cts else "Control: Not started")
             tts = cfg.get("traffic_start_timestamp")
             traffic_ts_var.set(f"Traffic started at: {tts}" if tts else "Traffic: Not started")
-        rest_timer=cfg.get("relaunch_timer")
-        relaunch_timer.set(f"The frameworks will restart in {rest_timer} hours")
 
     update_timestamps("")
     #GUI.start_json_file_watcher(update_timestamps, APP_CONFIG_JSON, root)
@@ -93,38 +93,84 @@ def create_Home_Page(container, pages, add_nav, root):
         anchor="center"
     ).grid(row=0, column=1, sticky="ew", padx=5, pady=6)
 
-    ttk.Label(
-        row_relaunch,
-        textvariable=relaunch_timer,
-    ).pack(side="left", expand=True, fill="x", padx=(20, 6), ipady=6)
-    
-    reset_val_var = tk.StringVar(value=" ")
+    app_cfg = load_json()
+    control_reset_timer_value = app_cfg.get("control_reset_timer", " ")
+    control_reset_timer_var = tk.StringVar(value=control_reset_timer_value)
     ttk.Entry(
-    row_relaunch, 
-    textvariable=reset_val_var, 
-    width=4
+        row_relaunch,
+        textvariable=control_reset_timer_var,
+        width=4
     ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
         row_relaunch,
-        text="Update Restart Timer",
-        command=lambda: set_manual_count()
+        text="Update Control Relaunch Timer",
+        command=lambda: update_control_reset_timer_var()
     ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
-    
-    def set_manual_count() -> None:
+
+    def update_control_reset_timer_var() -> None:
         try:
-            new_count = int(reset_val_var.get())
+            new_count = int(control_reset_timer_var.get())
         except ValueError:
-        # could pop up a warning here instead
             return
-
         cfg = load_json()
-        cfg["relaunch_timer"] = new_count
-    # if you also want to set the RDKB counter too, uncomment:
-    # cfg["rdkbcrash_counter"] = new_count
-
+        cfg["control_reset_timer"] = new_count
         save_json(cfg)
-        update_timestamps("")    
+        update_timestamps("")
+
+
+    app_cfg = load_json()
+    traffic_idle_timer_value = app_cfg.get("traffic_idle_timer", " ")
+    traffic_idle_timer_var = tk.StringVar(value=traffic_idle_timer_value)
+    ttk.Entry(
+        row_relaunch,
+        textvariable=traffic_idle_timer_var,
+        width=4
+    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+
+    ttk.Button(
+        row_relaunch,
+        text="Update Idle Timer",
+        command=lambda: update_traffic_idle_timer_var()
+    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    
+    def update_traffic_idle_timer_var() -> None:
+        try:
+            new_count = int(traffic_idle_timer_var.get())
+        except ValueError:
+            return
+        cfg = load_json()
+        cfg["traffic_idle_timer"] = new_count
+        save_json(cfg)
+        traffic_idle_timer_var.set(f"{new_count}")
+        update_timestamps("")
+
+
+    app_cfg = load_json()
+    traffic_test_timer_value = app_cfg.get("traffic_test_timer", " ")
+    traffic_test_timer_var = tk.StringVar(value=traffic_test_timer_value)
+    ttk.Entry(
+        row_relaunch,
+        textvariable=traffic_test_timer_var,
+        width=4
+    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+
+    ttk.Button(
+        row_relaunch,
+        text="Update Test Timer",
+        command=lambda: update_traffic_test_timer_var()
+    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    
+    def update_traffic_test_timer_var() -> None:
+        try:
+            new_count = int(traffic_test_timer_var.get())
+        except ValueError:
+            return
+        cfg = load_json()
+        cfg["traffic_test_timer"] = new_count
+        save_json(cfg)
+        traffic_test_timer_var.set(f"{new_count}")
+        update_timestamps("")
 
 
 

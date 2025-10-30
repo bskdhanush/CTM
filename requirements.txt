@@ -7,9 +7,9 @@ watchdog
 pywin32
 paramiko
 python-dotenv
-ssh2-python
 customtkinter
 pyyaml
 pandas
 matplotlib
+nuitka
 

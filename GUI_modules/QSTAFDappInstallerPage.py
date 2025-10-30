@@ -6,7 +6,7 @@ from tkinter.scrolledtext import ScrolledText
 import datetime as dt
 import QSTAFInstaller, DappInstaller
 from Threading import *
-from JsonHandler import load_prov_json
+from Constants import CTM_DAPP_DIR
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
@@ -191,10 +191,28 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
         filePath = _pick_zip("")
         selected_Dapp_zip.set(filePath)
         zip_Dapp_label.configure(style="TLabel")  # switch from hint to normal
-        DappInstaller.InstallDapp(filePath)
+        DappInstaller.InstallDapp(filePath,"Zip")
 
-    ttk.Button(Dapp_install, text="Choose archive… /Install", command=getSetDappZipPath, width=20)\
-    .pack(fill="x", **PADDING)  # type: ignore  
+    def getDappPathAndInstall():
+        folderpath = filedialog.askdirectory(
+        title=f"Select Dapp folder",
+        initialdir=CTM_DAPP_DIR
+    )
+        selected_Dapp_zip.set(folderpath)
+        zip_Dapp_label.configure(style="TLabel")
+        DappInstaller.InstallDapp(folderpath,"")
+
+
+
+    
+
+    ttk.Button(Dapp_install,
+               text="Select Dapp path to load",
+               command=getDappPathAndInstall)\
+                .pack(side="right",**PADDING)  # type: ignore
+
+    ttk.Button(Dapp_install, text="Select Dapp Zip path to load", command=getSetDappZipPath)\
+    .pack(side="left", **PADDING)  # type: ignore  
 
 
 

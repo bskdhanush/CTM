@@ -68,7 +68,8 @@ def crash_forecast(crash_path, timestamp):
             'CRASH_PATH': [crash_path],
             'TIMESTAMP': [timestamp],
             'ROOT_CAUSE': [root_cause],
-            'FST_ID': [fst_id]
+            'FST_ID': [fst_id],
+            'ZIP_STATUS': False
         }
         print("Starting to edit CSV")
         create_crash_meta_info_csv(crash_info_dict)
@@ -104,13 +105,13 @@ def zip_and_upload_crash_dump(crash_dir_list):
     df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
 
     for index, row in df.iterrows():
-        try:
-                                           
-            crash_path = row.get("CRASH_PATH")
-            if crash_path in crash_dir_list:
+            
+        crash_path = row.get("CRASH_PATH")
+        if crash_path in crash_dir_list:
 
-                if crash_path and os.path.exists(crash_path):
-                    # crash_folder = os.path.basename(crash_path)
+            if crash_path and os.path.exists(crash_path):
+                new_crash_path = None
+                try:
                     crash_base = os.path.dirname(crash_path)
                     orig_crash_name = os.path.basename(crash_path)
                     count = 1
@@ -127,27 +128,38 @@ def zip_and_upload_crash_dump(crash_dir_list):
                             new_crash_path = None
                             break
                         new_crash_path = os.path.join(crash_base, crash_name)
+                except Exception as e:
+                    print(f'Exception while retrieving crash naming: {e}')
 
-                    if not new_crash_path:
-                        continue
+                if not new_crash_path:
+                    continue
+
+                try:
                     os.rename(crash_path, new_crash_path)
+                    update_crash_entry(crash_path, new_crash_path)
+                except Exception as e:
+                    print(f'Exception during renaming crash path and updating in csv: {e}')
 
+                if os.path.exists(new_crash_path):
                     # Zip
-                    if os.path.exists(new_crash_path):
-                        print(f'Zipping and Uploading {new_crash_path}')
-                        output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
-                                                                                       
+                    output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
+                    if not get_zip_status(new_crash_path):
+                        try:
+                            print(f'Zipping {output_zip}')
+                            zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
+                            subprocess.run(zip_command, capture_output=True, text=True)
 
-                        print(f'Zipping {output_zip}')
-                        zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
-                        subprocess.run(zip_command, capture_output=True, text=True)
+                            update_crash_zip_status(os.path.join(new_crash_path)
+                        except Exception as e:
+                            print(f'Exception during zipping crash dump: {e}')
 
-                        print(f'Uploading {output_zip}')
+                    print(f'Uploading {output_zip}')
+                    try:
                         upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z")
                         if upload_result:
                             remove_crash_entry(crash_path)
-        except Exception as e:
-            print(f'Exception during zip_and_upload_crash_dump: {e}')
+                    except Exception as e:
+                        print(f'Exception during uploading {output_zip}')
 
 
 def find_folder(base_path, folder_name):
@@ -248,7 +260,7 @@ def get_operator():
 def get_crash_naming(orig_crash_name='', count=1):
     crash_name = None
     date_folder = ''
-    m = re.search(r'(\d{4})(\d{4})-(\d+)', orig_crash_name)
+    m = re.search(r'^(\d{4})(\d{4})-(\d+)', orig_crash_name)
     if m:
         date_folder = f'{m.group(2)}{m.group(1)}'
     else:
@@ -274,7 +286,41 @@ def get_crash_naming(orig_crash_name='', count=1):
         crash_name = f"{market}_{name}_{fst_id}_{date_folder}_{operator}_{count}_{tdc_serial}_LAN_DRI"
         crash_name = re.sub(r'\s+', '', crash_name)
     return crash_name
-    
+
+def get_zip_status(crash_path):
+    result = None
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    if os.path.exists(crash_meta_info_csv):
+        df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
+        result = df_csv[(df_csv['CRASH_PATH'] == crash_path) & (df_csv['ZIP_STATUS'] == True)]
+    else:
+        print(f'{crash_meta_info_csv} does not exist')
+    return result
+
+def update_crash_zip_status(crash_path):
+    print(f'Updating zip-flag for {crash_path} in CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    if os.path.exists(crash_meta_info_csv):
+        df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
+        df_csv.loc[df_csv['CRASH_PATH'] == crash_path, 'ZIP_STATUS'] = True
+        df_csv = df_csv.sort_values(by=['TIMESTAMP'], ascending=False)
+        os.remove(crash_meta_info_csv)
+        df_csv.to_csv(crash_meta_info_csv, index=False)
+    else:
+        print(f'{crash_meta_info_csv} does not exist')
+
+def update_crash_entry(old_crash_path, new_crash_path):
+    print(f'{old_crash_path} will be replaced with {new_crash_path} from CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    if os.path.exists(crash_meta_info_csv):
+        df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
+        df_csv['CRASH_PATH'] = df_csv['CRASH_PATH'].replace(old_crash_path, new_crash_path)
+        df_csv = df_csv.sort_values(by=['TIMESTAMP'], ascending=False)
+        os.remove(crash_meta_info_csv)
+        df_csv.to_csv(crash_meta_info_csv, index=False)
+    else:
+        print(f'{crash_meta_info_csv} does not exist')
+
 def remove_crash_entry(filepath):
     print(f'{filepath} will be removed from CrashMetaInfo.csv')
     crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')

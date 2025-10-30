@@ -18,7 +18,7 @@ def set_prov_path(path_var,label):
      cfg.update({"provisioning_path": folderpath})
      save_prov_json(cfg)
 
-def create_device_Configuaration_page(container, pages, add_nav, device_name):
+def create_device_Configuaration_page(container, pages, add_nav, device_name, mpss_id):
     section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning", "FOTA"]
     
     # Page container
@@ -76,7 +76,7 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name):
             section_ui = ProvisioningNavigator.Meta_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "Mpss":
-            section_ui = ProvisioningNavigator.Mpss_page(fr, Pagename, device_name)
+            section_ui = ProvisioningNavigator.Mpss_page(fr, Pagename, mpss_id)
             section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "QCN":
             section_ui = ProvisioningNavigator.QCN_page(fr, Pagename, device_name)

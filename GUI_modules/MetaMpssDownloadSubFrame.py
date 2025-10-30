@@ -29,9 +29,9 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
     MMdownload = ttk.Frame(container)
 
-    def get_current_files(sub_string):
+    def get_current_files(pattern):
         try:
-            items = FzHandler.list_files(device_name, Pagename, sub_string)
+            items = FzHandler.list_files(device_name, Pagename, pattern)
             file_listbox.delete(0, tk.END)
             for item in items:
                 file_listbox.insert(tk.END, item["name"])
@@ -95,11 +95,21 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
 
     def download_selected_Meta_Mpss():
+        from Constants import CTM_META_DIR, CTM_MPSS_DIR
         selected_indices = file_listbox.curselection()
+        local_dir = None
+        if Pagename == 'Meta':
+            local_dir = CTM_META_DIR
+        if Pagename == 'Mpss':
+            local_dir = CTM_MPSS_DIR
+
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
-            FzHandler.download_file( selected_item,load_prov_json().get(f"{Pagename}_path"))
+            if local_dir:
+                FzHandler.download_file(selected_item, local_dir)
+            else:
+                print('No valid destination path to download')
 
     # Manual download section
     Selection_frame = ttk.LabelFrame(MMdownload, text=f"Select and download {Pagename} files")
@@ -155,12 +165,12 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     # Refresh_btn.pack(side="left")
 
     entry = ctk.CTkEntry(
-    refresh_btn_row,
-    placeholder_text="Type substring here...",
-    width=200,
-    height=30,
-    corner_radius=6
-)
+        refresh_btn_row,
+        placeholder_text="Pattern to search...",
+        width=200,
+        height=30,
+        corner_radius=6
+    )
     entry.pack(side="left", padx=5)
 
    

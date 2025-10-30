@@ -83,10 +83,10 @@ def load_meta_from_zip(filepath,Pgname):
         
         if filepath.endswith(".7z"):
             print("Starting 7z extraction... This may take several minutes for large files")
-            QSTAFInstaller._extract_7z_with_cli(filepath, Path(META_PATH)) 
+            QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_META_DIR))
             print("Extraction completed")
         elif filepath.endswith(".zip"):
-            QSTAFInstaller._extract_zip(filepath, Path(META_PATH))
+            QSTAFInstaller._extract_zip(filepath, Path(CTM_META_DIR))
         update_meta_in_config(META_PATH, META_MPSS_TXT)
         # if its from meta triger else just update the meta_mpss_txt
         print(Pgname)
@@ -125,14 +125,15 @@ def load_mpss_from_zip(filepath,Pgname):
 
         if filepath.endswith(".7z"):
             print("Starting 7z extraction... This may take several minutes for large files")
-            QSTAFInstaller._extract_7z_with_cli(filepath, Path(MPSS_PATH)) 
+            QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_MPSS_DIR))
             print("Extraction completed")
         elif filepath.endswith(".zip"):
-            QSTAFInstaller._extract_zip(filepath, Path(MPSS_PATH))
-        update_meta_in_config(MPSS_PATH, META_MPSS_TXT)
+            QSTAFInstaller._extract_zip(filepath, Path(CTM_MPSS_DIR))
+        update_mpss_in_config(MPSS_PATH, META_MPSS_TXT)
         # if its from Mpss triger else just update the meta_mpss_txt
         if Pgname:
-            trigger_prov_meta(PROV_BASE)
+            trigger_prov_mpss(PROV_BASE)
+            
 def trigger_prov_mpss(PROV_BASE):
     os.chdir(PROV_BASE)
     remove_dir(os.path.join(PROV_BASE, 'MPSS'))

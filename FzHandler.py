@@ -22,6 +22,7 @@ from ssh2.sftp import (
     LIBSSH2_SFTP_S_IRUSR,
     LIBSSH2_SFTP_S_IWUSR
 )
+from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 
 load_dotenv()
 HOST = os.getenv("SFTP_HOST")
@@ -51,6 +52,20 @@ def list_files(device_filter="", pageName="", pattern=""):
     Return a list of dicts: [{'name': , 'size': , 'mtime': }...]
     Uses sftp.opendir() and handle.readdir()
     """
+
+    if device_filter =="UNKNOWN" or device_filter==None:
+        print("No device connected pulling from json")
+        cfg=load_meta_json()
+        device_filter=cfg["CPE_META_MPSS"]["meta"]
+
+        if device_filter=="UNKNOWN"or device_filter==None:
+            print("no previous meta found from Json")
+            device_filter=""
+
+        
+
+    
+    print(device_filter)
     files = []
     keywords = []
     if pattern is None or pattern == "":

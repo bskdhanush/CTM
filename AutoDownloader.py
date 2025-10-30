@@ -43,7 +43,7 @@ def checK_for_new_meta(device_name):
             return
 
     
-    files_list = list_files(device_name, "Meta", sub_sting="")  # Meta enables only auto download for Meta only 
+    files_list = list_files(device_name, "Meta", "")  # Meta enables only auto download for Meta only 
     print(f"found LISt: {files_list}")
 
     # Time threshold for 24 hours
@@ -85,7 +85,7 @@ def checK_for_new_meta(device_name):
   
 
 def checK_for_new_CSV():
-    files_list=list_files("CrashRenamingMetaInfo.csv", "Meta",sub_sting="") # here Meta we can search whole incomming
+    files_list=list_files("CrashRenamingMetaInfo.csv", "Meta","") # here Meta we can search whole incomming
     d,cfg= get_downloaded_lsit()
 
     if files_list[0]["mtime"]> cfg["CSV"]:

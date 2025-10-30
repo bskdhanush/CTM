@@ -6,17 +6,22 @@ import WifiController,StartTestCase
 from Constants import CTM_DAPP_DIR
 
 
-def InstallDapp(archive_path: str) -> None:
-    archivepath = Path(archive_path)
-    print(archive_path)
-    if not archivepath.exists() or archivepath.suffix.lower() not in (".zip", ".7z"):
-        print(f"Invalid archive (expected .zip or .7z): {archive_path}")
-    folder_path = Path(r"C:\CTM\DAPP")
+def InstallDapp(archive_path: str, DappInstallerType:str) -> None:
+    if DappInstallerType=="Zip":
+        archivepath = Path(archive_path)
+        print(archive_path)
+        if not archivepath.exists() or archivepath.suffix.lower() not in (".zip", ".7z"):
+            print(f"Invalid archive (expected .zip or .7z): {archive_path}")
+        folder_path = Path(r"C:\CTM\DAPP")
 
 
 
-    QSTAFInstaller._extract_archive(archivepath,folder_path ,None,"Dapp")
-    folder_name = Path(archive_path).stem
+        QSTAFInstaller._extract_archive(archivepath,folder_path ,None,"Dapp")
+        folder_name = Path(archive_path).stem
+    else:
+        folder_path = Path(r"C:\CTM\DAPP")
+        folder_name = Path(archive_path)
+
 
     try:
         extracted_folder = folder_path.with_suffix('') 
@@ -41,5 +46,5 @@ def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder) -> None:
     
 
 if __name__ == "__main__":
-    InstallDapp(r"D:\work\GUI\Kobuk_CPE_1.0_v1.0.5.7z")
+    InstallDapp(r"D:\work\GUI\Kobuk_CPE_1.0_v1.0.5.7z","Zip")
     

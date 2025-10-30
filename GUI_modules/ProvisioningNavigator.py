@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from GUI_modules import MetaMpssDownloadSubFrame, QSTAFDappInstallerPage
+from Constants import CTM_META_DIR, CTM_MPSS_DIR,CTM_DAPP_DIR
 from EndToEndDevProvsioningController import *
 from JsonHandler import load_prov_json
 from Threading import *
@@ -24,7 +25,7 @@ def getFilePath(label_var, identifier):
         return filepath
 
 def getFolderPath(pagename):
-    from Constants import CTM_META_DIR, CTM_MPSS_DIR
+   
     if pagename == "Meta":
         dir = CTM_META_DIR
     elif pagename == "MPSS":

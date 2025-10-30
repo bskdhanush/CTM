@@ -398,7 +398,7 @@ def launch_gui() -> None:
 
     
      # ── CPE config monitor page ────────────────────────────────────────────────
-    DeviceProvisioningPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1])
+    DeviceProvisioningPage.create_device_Configuaration_page(container, pages, add_nav, meta_var.get().split(': ')[1], mpss_var.get().split(': ')[1])
     
      # ── CPE config monitor page ────────────────────────────────────────────────
     CrashForecastPage.create_crash_forecast_page(container,pages ,add_nav)

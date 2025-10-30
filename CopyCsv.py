@@ -192,5 +192,20 @@ def copy_csv_main():
         print(f'Exception during delete_old_csv: {e}')
 
 
+def copy_csv_to_latest_folder(csv, base_dir):
+    csv_files = sorted(glob.glob(base_dir + '\\**\\*.csv', recursive=True), reverse=True)
+    prefix = None
+    if len(csv_files):
+        for csv_file in csv_files:
+            m = re.search(r'(\[\d+\].*seqno\d+).*', csv_file)
+            if m:
+                prefix = m.group(1)
+                break
+        if prefix:
+            csv = f'{prefix}_{csv}'
+            dest_folder = os.path.dirname(csv_files[0])
+            print(f'Copying {csv} to {dest_folder}')
+            shutil.copy(csv, dest_folder)
+            
 if __name__ == '__main__':
     copy_csv_main()

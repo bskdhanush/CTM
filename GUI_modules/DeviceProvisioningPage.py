@@ -1,4 +1,6 @@
+from importlib.resources import files
 import json
+import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -9,11 +11,21 @@ from EndToEndDevProvsioningController import get_provisioning_base
 
 PADDING: dict[str, int] = {"padx": 12, "pady": 2}
 
+checkFiles=["META_MPSS.txt"]
+
 
 def set_prov_path(path_var,label):
      folderpath = ProvisioningNavigator.getFolderPath("")
      path_var.set(folderpath)
      label.config(foreground="white")
+     files = os.listdir(folderpath)
+     print(files)
+     for file in checkFiles:
+        if file not in files:
+                messagebox.showwarning("Invalid Path", f"The selected folder does not contain required file: {file}")
+                label.config(foreground="red")
+                return
+
      cfg = load_prov_json()
      cfg.update({"provisioning_path": folderpath})
      save_prov_json(cfg)

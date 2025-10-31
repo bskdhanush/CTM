@@ -14,25 +14,21 @@ def InstallDapp(archive_path: str, DappInstallerType:str) -> None:
             print(f"Invalid archive (expected .zip or .7z): {archive_path}")
         folder_path = Path(r"C:\CTM\DAPP")
 
-
-
         QSTAFInstaller._extract_archive(archivepath,folder_path ,None,"Dapp")
         folder_name = Path(archive_path).stem
         extracted_folder = folder_path.with_suffix('') 
         TC_ondevice_path = extracted_folder / folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
+        extracted_folder = os.path.join(extracted_folder, folder_name)
+        
     else:
-        #folder_path = Path(r"C:\CTM\DAPP")
-        folder_name = Path(archive_path)
-        extracted_folder = folder_name.with_suffix('') 
-        print(archive_path)
-        TC_ondevice_path =  folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
-
+        extracted_folder = Path(archive_path)
+        print(extracted_folder)
+        TC_ondevice_path = extracted_folder / "kobuk" / "testcase" / "TC_ondevice.txt"
 
     try:
         print(" folder:", extracted_folder)
         print("TC_ondevice_path:", TC_ondevice_path)
-        replace_ADB_TC_ondevice(TC_ondevice_path,extracted_folder)
-        #print("Extracted to:", TC_ondevice_path)
+        replace_ADB_TC_ondevice(TC_ondevice_path, extracted_folder)
     except Exception as e:
         print("Error:", str(e))
 

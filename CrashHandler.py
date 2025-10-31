@@ -115,19 +115,27 @@ def zip_and_upload_crash_dump(crash_dir_list):
                     crash_base = os.path.dirname(crash_path)
                     orig_crash_name = os.path.basename(crash_path)
                     count = 1
-                    crash_name = get_crash_naming(orig_crash_name, count)
-                    if not crash_name:
-                        print('Could not retrieve correct naming convention. Pls check')
-                        continue
-                    new_crash_path = os.path.join(crash_base, crash_name)
-                    while find_folder(DEFAULT_CRASHDUMP, crash_name) or find_folder(CRASHDUMP_ROOT_PCAT, crash_name):
-                        count = count + 1
+                    m = re.search(r'LAN_DRI$', orig_crash_name)
+                    if m:
+                        print('Crash dump already renamed')
+                                
+                        crash_name = orig_crash_name
+                        new_crash_path = find_folder(DEFAULT_CRASHDUMP, crash_name) or find_folder(CRASHDUMP_ROOT_PCAT, crash_name)
+                    else:
                         crash_name = get_crash_naming(orig_crash_name, count)
                         if not crash_name:
                             print('Could not retrieve correct naming convention. Pls check')
-                            new_crash_path = None
-                            break
+                            continue
+                                 
                         new_crash_path = os.path.join(crash_base, crash_name)
+                        while find_folder(DEFAULT_CRASHDUMP, crash_name) or find_folder(CRASHDUMP_ROOT_PCAT, crash_name):
+                            count = count + 1
+                            crash_name = get_crash_naming(orig_crash_name, count)
+                            if not crash_name:
+                                print('Could not retrieve correct naming convention. Pls check')
+                                new_crash_path = None
+                                break
+                            new_crash_path = os.path.join(crash_base, crash_name)
                 except Exception as e:
                     print(f'Exception while retrieving crash naming: {e}')
 
@@ -159,7 +167,7 @@ def zip_and_upload_crash_dump(crash_dir_list):
                         if upload_result:
                             remove_crash_entry(crash_path)
                     except Exception as e:
-                        print(f'Exception during uploading {output_zip}')
+                        print(f'Exception during uploading {output_zip}: {e}')
 
 
 def find_folder(base_path, folder_name):
@@ -255,6 +263,13 @@ def get_operator():
         df_operator = pd.read_csv(meta_csv, index_col=False)
         if isinstance(df_operator, pd.DataFrame):
             operator = df_operator['OPERATOR'].iloc[0]
+    if operator:
+        if 'TMO' in operator:
+            operator = 'TMO'
+        elif 'ATT' in operator:
+            operator = 'ATT'
+        elif 'VZW' in operator:
+            operator = 'VZW'
     return operator
     
 def get_crash_naming(orig_crash_name='', count=1):
@@ -292,7 +307,7 @@ def get_zip_status(crash_path):
     crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
-        result = df_csv[(df_csv['CRASH_PATH'] == crash_path) & (df_csv['ZIP_STATUS'] == True)]
+        result = len(df_csv[(df_csv['CRASH_PATH'] == crash_path) & (df_csv['ZIP_STATUS'] == True)])
     else:
         print(f'{crash_meta_info_csv} does not exist')
     return result

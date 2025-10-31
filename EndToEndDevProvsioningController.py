@@ -62,7 +62,7 @@ def load_meta_from_path(filepath,Pgname):
             trigger_prov_meta(PROV_BASE)
 
 def load_meta_from_zip(filepath,Pgname):
-    if filepath=="":
+    if filepath == "":
         return
     # Extract META zip, update META_MPSS.txt and trigger load
     print(f"Meta zip: {filepath}")
@@ -75,8 +75,6 @@ def load_meta_from_zip(filepath,Pgname):
         if filepath.endswith(".zip"):
             META_ID = os.path.basename(filepath).strip(".zip")
         META_PATH = os.path.join(CTM_META_DIR, META_ID)
-
-
 
         remove_dir(META_PATH)
         os.makedirs(META_PATH)

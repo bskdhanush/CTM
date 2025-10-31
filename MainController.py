@@ -44,7 +44,7 @@ TC_SPEEDTEST = r"C:\QSTAF\QSTAFpy\test_cases\Traffic\SpeedTest.txt"
 RUN_SPEEDTEST_BAT = r"C:\QSTAF\QSTAFpy\bin\Traffic_laptop\Windows\Run_SpeedTest.bat"
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
 MODES = ("control", "traffic")
-DEFAULT_TIMER_HOURS = 6
+DEFAULT_TIMER_MINS = 360
 
 # CrashCountController.run_watch()
 
@@ -152,12 +152,24 @@ def check_restart_timer():
         reset_start_timestamp()
         cfg = JH.load_json()
         # compute relaunch period in seconds
-        relaunch_timer = cfg.get("relaunch_timer", DEFAULT_TIMER_HOURS)
+        control_reset_timer = cfg.get("control_reset_timer", DEFAULT_TIMER_MINS)
+        traffic_idle_timer = cfg.get("traffic_idle_timer", 0)
+        traffic_test_timer = cfg.get("traffic_test_timer", DEFAULT_TIMER_MINS)
         try:
-            hrs = int(relaunch_timer)
+            mins = int(control_reset_timer)
         except (TypeError, ValueError):
-            hrs = DEFAULT_TIMER_HOURS
-        relaunch_timer = hrs * 3600
+            mins = DEFAULT_TIMER_MINS
+        control_reset_timer = mins * 60
+        try:
+            mins = int(traffic_idle_timer)
+        except (TypeError, ValueError):
+            mins = 0
+        traffic_idle_timer = mins * 60
+        try:
+            mins = int(traffic_test_timer)
+        except (TypeError, ValueError):
+            mins = DEFAULT_TIMER_MINS
+        traffic_test_timer = mins * 60
 
         now = datetime.now()
         now_str = now.strftime(TIMESTAMP_FMT)
@@ -173,10 +185,17 @@ def check_restart_timer():
             # parse & check elapsed
             start_time = datetime.strptime(ts_str, TIMESTAMP_FMT)
             elapsed = (now - start_time).total_seconds()
-            if elapsed >= relaunch_timer:
-                stop_framework(mode)
-                time.sleep(10)
-                start_framework(mode)
+            if mode == 'control':
+                if elapsed >= control_reset_timer:
+                    stop_framework(mode)
+                    time.sleep(10)
+                    start_framework(mode)
+            elif mode == 'traffic':
+                if elapsed >= traffic_test_timer:
+                    stop_framework(mode)
+                    time.sleep(traffic_idle_timer)
+                    time.sleep(10)
+                    start_framework(mode)
                 
         time.sleep(120)
 

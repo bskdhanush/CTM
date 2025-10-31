@@ -16,6 +16,7 @@ PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
 _job: schedule.Job | None = None
 _loop_started = False
+mtimeList=[]
 
 # def _get_download_path() -> str:
 #     return str(load_cfg().get("Local_downloadPath", ""))
@@ -30,11 +31,14 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     MMdownload = ttk.Frame(container)
 
     def get_current_files(pattern):
+        mtimeList.clear()
         try:
             items = FzHandler.list_files(device_name, Pagename, pattern)
             file_listbox.delete(0, tk.END)
             for item in items:
-                file_listbox.insert(tk.END, item["name"])
+                mtimeList.append(item['mtime'])
+                file_listbox.insert(tk.END, item['name'])
+            #print(f'timestamps: {mtimeList}')
         except Exception as e:
             print(f'Exception during list_files: {e}')
             items = []
@@ -54,6 +58,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     
     def check_for_updates():
         # Your code here
+        print("Checking for updates...")
         checK_for_new_meta(device_name)
         checK_for_new_CSV()
 
@@ -107,7 +112,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
             if local_dir:
-                FzHandler.download_file(selected_item, local_dir)
+                FzHandler.download_file(selected_item, local_dir, Pagename, mtimeList[0])
             else:
                 print('No valid destination path to download')
 

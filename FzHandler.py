@@ -22,6 +22,7 @@ from ssh2.sftp import (
     LIBSSH2_SFTP_S_IRUSR,
     LIBSSH2_SFTP_S_IWUSR
 )
+import AutoDownloader 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 
 load_dotenv()
@@ -121,7 +122,7 @@ def list_files(device_filter="", pageName="", pattern=""):
         print(f'Failed to establish FTP connection to {HOST}')
     return files
 
-def download_file(remote_filename, local_dir, chunk_size=1024 * 1024, progress_interval=0.5):
+def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size=1024 * 1024, progress_interval=0.5):
     """
     Download a remote file via libssh2 with large chunk reads.
     """
@@ -186,6 +187,10 @@ def download_file(remote_filename, local_dir, chunk_size=1024 * 1024, progress_i
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
+
+                if PageName=="Meta":
+                    AutoDownloader.save_downloaded_meta(remote_filename, timestamp)
+
             finally:
                 try:
                     fh.close()

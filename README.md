@@ -2,6 +2,11 @@ To build the exe with out cmd : pyinstaller --onefile MainController.py --name C
 To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --add-data ".env;.env" --hidden-import=ssh2-python
 
 
+new exe cration command:  install req befor tying this
+python -m nuitka --onefile --windows-console-mode=force MainController.py --output-filename=CTM.exe --windows-icon-from-ico=logs/logo.ico --include-data-dir=config=config --include-data-dir=GUI_modules=GUI_modules --include-data-files=.env=.env --include-module=ssh2-python
+
+
+
 
 
 

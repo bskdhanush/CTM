@@ -48,12 +48,11 @@ def _default_prov():
     }
 
 def _default_META_JSon():
-    return {
-        "Meta": "",
-        "CSV": "",
-        "CPE_META_MPSS": ""
-    }
-    
+    return{
+            "Meta":"",
+            "CSV":"",
+            "CPE_META_MPSS":{"meta":"","mpss":""}
+         }
 def load_cfg():
     if not os.path.exists(APP_CONFIG_JSON):
         save_json(_default_cfg())

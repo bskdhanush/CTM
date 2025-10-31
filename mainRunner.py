@@ -3,8 +3,9 @@ import FzHandler
 
 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
-from AutoDownloader import checK_for_new_meta ,checK_for_new_CSV
+import AutoDownloader 
 from EndToEndDevProvsioningController import *
+from GUI_modules import MetaMpssDownloadSubFrame
 
 
 
@@ -22,8 +23,19 @@ def add_data():
   save_meta_json(data)
 
 
+def checK_for_new_meta(device_name):
+
+    if device_name==None or device_name=="":
+        cfg=load_meta_json()
+        device_name=cfg["CPE_META_MPSS"]["meta"]
+        print(f"dev_name:{device_name}")
+
+        if device_name=="UNKNOWN":
+            return
+
 if __name__ == "__main__":
-  cofig= get_data_Meta_Mpss_txt()
-  print(cofig)
+    AutoDownloader.checK_for_new_meta("")
+    AutoDownloader.checK_for_new_CSV()
+  
  
   

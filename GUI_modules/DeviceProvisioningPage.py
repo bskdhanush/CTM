@@ -22,7 +22,7 @@ def set_prov_path(path_var,label):
      print(files)
      for file in checkFiles:
         if file not in files:
-                messagebox.showwarning("Invalid Path", f"The selected folder does not contain required file: {file}")
+                messagebox.showwarning("Invalid Path", f"The selected folder is not a valid provisioning script path.")
                 label.config(foreground="red")
                 return
 

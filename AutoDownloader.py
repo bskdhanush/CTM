@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 
 from Constants import CTM_META_DIR,META_JSON_FILE,CTM_BASE_DIR
-from FzHandler import list_files,download_file
+import FzHandler 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 from CrashHandler import set_naming_convention_from_crash_rename_csv
 
@@ -43,7 +43,7 @@ def checK_for_new_meta(device_name):
             return
 
     
-    files_list = list_files(device_name, "Meta", "")  # Meta enables only auto download for Meta only 
+    files_list = FzHandler.list_files(device_name, "Meta", "")  # Meta enables only auto download for Meta only 
     print(f"found LISt: {files_list}")
 
     # Time threshold for 24 hours
@@ -77,21 +77,21 @@ def checK_for_new_meta(device_name):
         if file_size >= 1.5 * 1024**3 and file_mtime > time_24hrs_ago:
             try:
                 print(f"Downloading meta: {file_name}")
-                download_file(file_name, load_prov_json().get("Meta_path"))
+                FzHandler.download_file(file_name, load_prov_json().get("Meta_path"), "Meta", file_info["mtime"])
                 # Save with string format of mtime
-                save_downloaded_meta(file_name, file_info["mtime"])
+                #save_downloaded_meta(file_name, file_info["mtime"])
             except Exception as e:
                 print(f"Download failed for {file_name}, not saving metadata:", e)
   
 
 def checK_for_new_CSV():
-    files_list=list_files("CrashRenamingMetaInfo.csv", "Meta","") # here Meta we can search whole incomming
+    files_list=FzHandler.list_files("CrashRenamingMetaInfo.csv", "Meta","") # here Meta we can search whole incomming
     d,cfg= get_downloaded_lsit()
 
     if files_list[0]["mtime"]> cfg["CSV"]:
         print(files_list[0]["mtime"],cfg["CSV"])
         try:
-            download_file(files_list[0]["name"],CTM_BASE_DIR)
+            FzHandler.download_file(files_list[0]["name"],CTM_BASE_DIR, "", "")
         except Exception as e:
             print(f"Exception during download_file: {e}")
         else:

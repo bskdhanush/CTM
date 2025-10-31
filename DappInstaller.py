@@ -18,14 +18,19 @@ def InstallDapp(archive_path: str, DappInstallerType:str) -> None:
 
         QSTAFInstaller._extract_archive(archivepath,folder_path ,None,"Dapp")
         folder_name = Path(archive_path).stem
+        extracted_folder = folder_path.with_suffix('') 
+        TC_ondevice_path = extracted_folder / folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
     else:
-        folder_path = Path(r"C:\CTM\DAPP")
+        #folder_path = Path(r"C:\CTM\DAPP")
         folder_name = Path(archive_path)
+        extracted_folder = folder_name.with_suffix('') 
+        print(archive_path)
+        TC_ondevice_path =  folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
 
 
     try:
-        extracted_folder = folder_path.with_suffix('') 
-        TC_ondevice_path = extracted_folder / folder_name / "kobuk" / "testcase" / "TC_ondevice.txt"
+        print(" folder:", extracted_folder)
+        print("TC_ondevice_path:", TC_ondevice_path)
         replace_ADB_TC_ondevice(TC_ondevice_path,extracted_folder)
         #print("Extracted to:", TC_ondevice_path)
     except Exception as e:

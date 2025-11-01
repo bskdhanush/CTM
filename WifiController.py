@@ -91,7 +91,7 @@ def get_meta_build_info():
     if not output or stderr:
         raise Exception('Meta Build info NOT FOUND')
     else:
-        meta = output.split(': ')[1].strip(',')
+        meta = output.split(': ')[1].strip(',').strip('"')
     return meta
 
 def get_mpss_build_info():

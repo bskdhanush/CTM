@@ -100,7 +100,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
 
 
     def download_selected_Meta_Mpss():
-        from Constants import CTM_META_DIR, CTM_MPSS_DIR
+        from Constants import CTM_META_DIR, CTM_MPSS_DIR, CTM_BASE_DIR
         selected_indices = file_listbox.curselection()
         local_dir = None
         if Pagename == 'Meta':
@@ -111,6 +111,8 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
         if selected_indices:
             selected_item = file_listbox.get(selected_indices[0])
             print(local_path.get(),selected_item)
+            if selected_item and selected_item.lower() == 'crashrenamingmetainfo.csv':
+                local_dir = CTM_BASE_DIR
             if local_dir:
                 FzHandler.download_file(selected_item, local_dir, Pagename, mtimeList[0])
             else:

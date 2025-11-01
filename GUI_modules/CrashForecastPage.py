@@ -35,8 +35,27 @@ def create_crash_forecast_page(container, pages, add_nav):
 
     magic_string = get_magic_string()
     path_var = tk.StringVar(value=magic_string)
-    
+
+    ########################################################################
+
     # Single LabelFrame containing everything
+    update_crash_rename_from_csv_header = ttk.LabelFrame(crash_frame, text="Update Crash Rename Fields from CSV")
+    update_crash_rename_from_csv_header.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row frame for entry and button
+    update_row1_frame = ttk.Frame(update_crash_rename_from_csv_header)
+    update_row1_frame.pack(fill="x", padx=10, pady=(10, 5))
+
+    ttk.Button(
+        update_row1_frame,
+        text="Update Crash Rename Fields from CSV",
+        command=lambda: [CrashHandler.set_naming_convention_from_crash_rename_csv(), update_crash_rename_fields()]
+    ).pack(fill="x", **PADDING)
+
+    separator = ttk.Separator(update_crash_rename_from_csv_header, orient='horizontal')
+    separator.pack(fill='x', padx=20, pady=(12, 0))
+
+    ########################################################################
     crash_page_header = ttk.LabelFrame(crash_frame, text="Magic String")
     crash_page_header.pack(fill="x", **PADDING) # type: ignore
     
@@ -62,13 +81,11 @@ def create_crash_forecast_page(container, pages, add_nav):
     # current_string_label = ttk.Label(crash_page_header, text=f"Current Magic String: \n\n{magic_string}", wraplength=1000)
     # current_string_label.pack(fill="x", **PADDING)  # type: ignore
 
+    ########################################################################
+
     crash_page_main = ttk.LabelFrame(crash_frame, text="Crash Renaming and Upload")
     crash_page_main.pack(fill="x", **PADDING) # type: ignore
     
-
-    # Market = tk.StringVar()
-    # Name = tk.StringVar()
-    # FstID = tk.StringVar()
 
     # Get the string values from your method
     market_str, name_str, fstid_str, operator_str, tdc_serial_str = CrashHandler.get_naming_convention()
@@ -77,23 +94,28 @@ def create_crash_forecast_page(container, pages, add_nav):
     entry_row_frame = ttk.Frame(crash_page_main)
     entry_row_frame.pack(fill="x", **PADDING)  # type: ignore
 
-    market_name = ttk.Entry(entry_row_frame, width=20)
+    market_var = tk.StringVar(value="")
+    market_name = ttk.Entry(entry_row_frame, textvariable=market_var, width=20)
     market_name.insert(0, market_str)
     market_name.pack(side="left", fill="x", expand=True, **PADDING)  # type: ignore
 
-    naming = ttk.Entry(entry_row_frame, width=20)
+    naming_var = tk.StringVar(value="")
+    naming = ttk.Entry(entry_row_frame, textvariable=naming_var, width=20)
     naming.insert(0, name_str)
     naming.pack(side="left", fill="x", expand=True, **PADDING)  # type: ignore
 
-    fst_id_name = ttk.Entry(entry_row_frame, width=20)
+    fst_id_var = tk.StringVar(value="")
+    fst_id_name = ttk.Entry(entry_row_frame, textvariable=fst_id_var, width=20)
     fst_id_name.insert(0, fstid_str)
     fst_id_name.pack(side="left", fill="x", expand=True, **PADDING)  # type: ignore
 
-    operator = ttk.Entry(entry_row_frame, width=20)
+    operator_var = tk.StringVar(value="")
+    operator = ttk.Entry(entry_row_frame, textvariable=operator_var, width=20)
     operator.insert(0, operator_str)
     operator.pack(side="left", fill="x", expand=True, **PADDING)  # type: ignore
 
-    tdc_serial = ttk.Entry(entry_row_frame, width=20)
+    tdc_serial_var = tk.StringVar(value="")
+    tdc_serial = ttk.Entry(entry_row_frame, textvariable=tdc_serial_var, width=20)
     tdc_serial.insert(0, tdc_serial_str)
     tdc_serial.pack(side="left", fill="x", expand=True, **PADDING)  # type: ignore
 
@@ -104,15 +126,24 @@ def create_crash_forecast_page(container, pages, add_nav):
             market_name.get(), naming.get(), fst_id_name.get(), operator.get(), tdc_serial.get())
     ).pack(fill="x", **PADDING) # type: ignore
     
+    def update_crash_rename_fields():
+        market_str, name_str, fstid_str, operator_str, tdc_serial_str = CrashHandler.get_naming_convention()
+        market_var.set(market_str)
+        naming_var.set(name_str)
+        tdc_serial_var.set(tdc_serial_str)
+        operator_var.set(operator_str)
+        fst_id_var.set(fstid_str)
 
+    ########################################################################
 
     second_row_frame = ttk.Frame(crash_page_main)
     second_row_frame.pack(fill="x", **PADDING)  # type: ignore
+    
     # Now the separator will be on its own line
     separator = ttk.Separator(second_row_frame, orient='horizontal')
     separator.pack(fill='x', padx=20, pady=(12, 0))
 
-    
+
     crash_naming_label = ttk.Label(second_row_frame, text="Current Renaming: \n\n", wraplength=1000)
     crash_naming_label.pack(fill="x", **PADDING) # type: ignore
     ttk.Button(
@@ -125,7 +156,10 @@ def create_crash_forecast_page(container, pages, add_nav):
     separator = ttk.Separator(crash_page_main, orient='horizontal')
     separator.pack(fill='x', padx=20, pady=(12, 0))
 
+    ########################################################################
+
     # Table for Crash Info
+
 
     Crash_table = ttk.LabelFrame(crash_page_main, text="Crash Table")
     Crash_table.pack(fill="both", expand=True, **PADDING)  # type: ignore

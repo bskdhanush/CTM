@@ -222,7 +222,7 @@ def write_nv():
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
-            "--Project", "2",
+            "--project", "2",
             "--option", "6",
             "--meta_option", "2",
             "--device_serial", "m"

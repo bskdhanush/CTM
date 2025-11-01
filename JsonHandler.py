@@ -51,7 +51,7 @@ def _default_META_JSon():
     return{
             "Meta":{},
             "CSV":"",
-            "CPE_META_MPSS":{"meta":"","mpss":""}
+            "CPE_META_MPSS":{"meta":None,"mpss":None}
          }
 def load_cfg():
     if not os.path.exists(APP_CONFIG_JSON):

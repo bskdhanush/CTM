@@ -53,6 +53,12 @@ def create_Home_Page(container, pages, add_nav, root):
     row_relaunch = ttk.Frame(ctrl)
     row_relaunch.pack(fill="x", **PADDING)# type: ignore
 
+    left_frame = ttk.Frame(row_relaunch)
+    left_frame.pack(side="left", fill="x", expand=True)
+
+    right_frame = ttk.Frame(row_relaunch)
+    right_frame.pack(side="right", fill="x", expand=True)
+    
     ttk.Button(
         row,
         text="Launch Control Framework",
@@ -97,14 +103,14 @@ def create_Home_Page(container, pages, add_nav, root):
     control_reset_timer_value = app_cfg.get("control_reset_timer", " ")
     control_reset_timer_var = tk.StringVar(value=control_reset_timer_value)
     ttk.Entry(
-        row_relaunch,
+        left_frame,
         textvariable=control_reset_timer_var,
         width=4
     ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
-        row_relaunch,
-        text="Update Control Relaunch Timer",
+        left_frame,
+        text="Update Control Relaunch Timer (in mins)",
         command=lambda: update_control_reset_timer_var()
     ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
 
@@ -123,16 +129,16 @@ def create_Home_Page(container, pages, add_nav, root):
     traffic_idle_timer_value = app_cfg.get("traffic_idle_timer", " ")
     traffic_idle_timer_var = tk.StringVar(value=traffic_idle_timer_value)
     ttk.Entry(
-        row_relaunch,
+        right_frame,
         textvariable=traffic_idle_timer_var,
         width=4
-    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
-        row_relaunch,
+        right_frame,
         text="Update Idle Timer",
         command=lambda: update_traffic_idle_timer_var()
-    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
     
     def update_traffic_idle_timer_var() -> None:
         try:
@@ -150,16 +156,16 @@ def create_Home_Page(container, pages, add_nav, root):
     traffic_test_timer_value = app_cfg.get("traffic_test_timer", " ")
     traffic_test_timer_var = tk.StringVar(value=traffic_test_timer_value)
     ttk.Entry(
-        row_relaunch,
+        right_frame,
         textvariable=traffic_test_timer_var,
         width=4
-    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
 
     ttk.Button(
-        row_relaunch,
+        right_frame,
         text="Update Test Timer",
         command=lambda: update_traffic_test_timer_var()
-    ).pack(side="right", expand=False, fill="x", padx=(0, 6), ipady=6)
+    ).pack(side="left", expand=False, fill="x", padx=(0, 6), ipady=6)
     
     def update_traffic_test_timer_var() -> None:
         try:

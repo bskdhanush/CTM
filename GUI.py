@@ -184,8 +184,9 @@ def launch_gui() -> None:
     def saveCPEBuildinfo(meta,mpss):
         cfg=load_meta_json()
         if meta!="UNKNOWN":
+            meta = meta.strip('"')
             print(meta)
-            cfg.update({"CPE_META_MPSS": {"meta":meta , "mpss": mpss}})
+            cfg.update({"CPE_META_MPSS": {"meta":meta,"mpss": mpss}})
             save_meta_json(cfg)
 
 

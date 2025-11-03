@@ -320,7 +320,7 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
             fig.autofmt_xdate()
             fig.tight_layout()
         except Exception as e:
-            pass
+            print(f'Exception during ipa_thruput_plot: {e}')
     return fig
 
 def speedtest_plot(figsize:tuple[Literal[7], Literal[4]]):
@@ -328,6 +328,8 @@ def speedtest_plot(figsize:tuple[Literal[7], Literal[4]]):
     df = get_df('\\*vpid1111_seqno1_SpeedTest.csv')
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
+    if not isinstance(df, pd.DataFrame) or df.empty:
+        return fig
     try:
         df = df.sort_values(by=['end_time'])
 
@@ -350,7 +352,7 @@ def speedtest_plot(figsize:tuple[Literal[7], Literal[4]]):
         fig.autofmt_xdate()
 
     except Exception as e:
-        pass
+        print(f'Exception during speedtest_plot: {e}')
     return fig
 
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
@@ -377,12 +379,14 @@ def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
         ax[0].set_title('WifiClients')
         ax[0].set_xlabel('TIMESTAMP')
         ax[0].set_ylabel('NO_OF_CLIENTS')
-        ax[0].legend(title='SSID')
+        handles, labels = ax[0].get_legend_handles_labels()
+        if labels:
+            ax[0].legend(title='SSID')
         ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
         fig.autofmt_xdate()
 
     except Exception as e:
-        pass
+        print(f'Exception during wifi_clients_plot: {e}')
     return fig
 
 def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
@@ -447,7 +451,7 @@ def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
             fig.autofmt_xdate()
             fig.tight_layout()
         except Exception as e:
-            pass
+            print(f'Exception during channel_conditions_plot: {e}')
     return fig
 
 

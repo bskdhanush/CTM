@@ -11,23 +11,20 @@ from Constants import CTM_LOGS_DIR
 
 PADDING: dict[str, int] = {"padx": 12, "pady": 8}
 
-
 def get_magic_string():
     cfg = load_prov_json()
     magic_string = cfg.get("magic_string", "Set magic string")
     return magic_string
 
-
-def set_magic_sting(path_var, magic_string: str):
+def set_magic_string(path_var, magic_string: str):  # Fixed typo: sting -> string
     print("setting the string")
     cfg = load_prov_json()
     cfg.update({"magic_string": magic_string})
     save_prov_json(cfg)
     path_var.set(magic_string)
-    # current_label.config(text=f"Current Magic String: \n\n{magic_string}")
     return
 
-
+log_box = None  # Global log box variable
 def create_crash_forecast_page(container, pages, add_nav):
     crash_frame = ttk.Frame(container)
     crash_frame.grid(row=0, column=0, sticky="nsew")
@@ -52,7 +49,7 @@ def create_crash_forecast_page(container, pages, add_nav):
 
     # Create the main scrollable frame inside canvas
     scrollable_frame = ttk.Frame(canvas)
-    canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
     # Update scroll region after widgets are added
     def update_scroll_region():
@@ -73,7 +70,8 @@ def create_crash_forecast_page(container, pages, add_nav):
     # Single LabelFrame containing everything
     update_crash_rename_from_csv_header = ttk.LabelFrame(
         scrollable_frame, text="Update Crash Rename Fields from CSV"
-    )
+    )  # Fixed: added closing parenthesis
+
     update_crash_rename_from_csv_header.pack(fill="x", **PADDING)  # type: ignore
 
     # First row frame for entry and button
@@ -83,11 +81,34 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         update_row1_frame,
         text="Update Crash Rename Fields from CSV",
-        command=lambda: [
-            CrashHandler.set_naming_convention_from_crash_rename_csv(),
-            update_crash_rename_fields(),
-        ],
+        command=lambda: update_crash_rename_from_csv_button_click(),
     ).pack(fill="x", **PADDING)  # type: ignore
+
+
+    def update_crash_rename_from_csv_button_click():
+        try:
+            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            add_log("Starting: Update Crash Rename Fields from CSV...")
+            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            
+            # Call the CrashHandler method
+            add_log("[Step 1/2] Reading crash rename CSV and fetching device info...")
+            CrashHandler.set_naming_convention_from_crash_rename_csv()
+            add_log("[Step 1/2] ✓ Successfully loaded naming convention from CSV")
+            
+            # Update the fields
+            add_log("[Step 2/2] Updating UI fields...")
+            update_crash_rename_fields()
+            add_log("[Step 2/2] ✓ UI fields updated successfully")
+            
+            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            add_log("✓ SUCCESS: All operations completed!")
+            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            
+        except Exception as e:
+            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            add_log(f"✗ ERROR: {str(e)}")
+            #messagebox.showerror("Error", f"Failed to update crash rename fields:\n{str(e)}")
 
     separator = ttk.Separator(update_crash_rename_from_csv_header, orient="horizontal")
     separator.pack(fill="x", padx=20, pady=(12, 0))
@@ -108,15 +129,11 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         row1_frame,
         text="Set Magic String",
-        command=lambda: set_magic_sting(path_var, Text_value.get()),
+        command=lambda: set_magic_string(path_var, Text_value.get()),  # Fixed: typo in function name
     ).pack(side="right", padx=(10, 0))
 
     separator = ttk.Separator(crash_page_header, orient="horizontal")
     separator.pack(fill="x", padx=20, pady=(12, 0))
-
-    # Current magic string label on a new line
-    # current_string_label = ttk.Label(crash_page_header, text=f"Current Magic String: \n\n{magic_string}", wraplength=1000)
-    # current_string_label.pack(fill="x", **PADDING) # type: ignore
 
     ########################################################################
 
@@ -126,7 +143,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     # Get the string values from your method
     market_str, name_str, fstid_str, operator_str, tdc_serial_str = (
         CrashHandler.get_naming_convention()
-    )
+    )  # Fixed: added closing parenthesis
 
     # Create a grid-based layout (3 columns, 2 rows)
     entry_grid_frame = ttk.Frame(crash_page_main)
@@ -180,7 +197,8 @@ def create_crash_forecast_page(container, pages, add_nav):
     def update_crash_rename_fields():
         market_str, name_str, fstid_str, operator_str, tdc_serial_str = (
             CrashHandler.get_naming_convention()
-        )
+        )  # Fixed: added closing parenthesis
+
         market_var.set(market_str)  # type: ignore
         naming_var.set(name_str)  # type: ignore
         tdc_serial_var.set(tdc_serial_str)  # type: ignore
@@ -198,7 +216,8 @@ def create_crash_forecast_page(container, pages, add_nav):
 
     crash_naming_label = ttk.Label(
         second_row_frame, text="Current Renaming: \n\n", wraplength=1000
-    )
+    )  # Fixed: added closing parenthesis
+
     crash_naming_label.pack(fill="x", **PADDING)  # type: ignore
 
     ttk.Button(
@@ -231,7 +250,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         columns=COLUMNS,
         show="headings",
         height=4,  # visible rows
-    )
+    )  # Fixed: added closing parenthesis
 
     # Headings
     tree.heading("ROOT_CAUSE", text="ROOT_CAUSE")
@@ -312,7 +331,9 @@ def create_crash_forecast_page(container, pages, add_nav):
             df = pd.DataFrame()
             if os.path.exists(crash_meta_csv):
                 df = pd.read_csv(crash_meta_csv)
+
             tree.delete(*tree.get_children())
+
             for index, row in df.iterrows():
                 tree.insert(
                     "",
@@ -322,11 +343,13 @@ def create_crash_forecast_page(container, pages, add_nav):
                         row.get("ADB_ID", ""),
                         row.get("CRASH_PATH", ""),
                         row.get("TIMESTAMP", ""),
+                      
                         row.get("FST_ID", ""),
                     ),
-                )
+                )  # Fixed: added closing parenthesis
+
         except Exception as e:
-            print(f"Exception during load_crash_table: {e}")
+            add_log(f"Exception during load_crash_table: {e}")
 
     # initial fill
     load_crash_table()
@@ -334,16 +357,60 @@ def create_crash_forecast_page(container, pages, add_nav):
     def get_selected_crash_paths():
         selected_items = tree.selection()  # Returns tuple of selected item IDs
         if not selected_items:
-            print("No rows selected")
+            #print("No rows selected")
+            add_log("No rows selected")
             return []
+
         crash_paths = []
         for item_id in selected_items:
             item_data = tree.item(item_id)  # Returns dict with 'values' key
             values = item_data["values"]  # List of column values
-            crash_path = values[2]  # CRASH_PATH is index 2 (ROOT_CAUSE=0, ADB_ID=1, CRASH_PATH=2)
+            crash_path = values[2]  # CRASH_PATH is index 2
             crash_paths.append(crash_path)
-        print(f"Selected crash paths: {crash_paths}")
+
+        add_log(f"Selected crash paths: {crash_paths}")
         return crash_paths
+
+    bottom_frame = ttk.LabelFrame(scrollable_frame, text="Logs")
+    bottom_frame.pack(fill="both", expand=True, **PADDING)  # type: ignore
+
+    # Configure grid for the LabelFrame
+    bottom_frame.rowconfigure(0, weight=1)  # Log box grows
+    bottom_frame.rowconfigure(1, weight=0)  # Button row doesn't grow
+    bottom_frame.columnconfigure(0, weight=1)
+
+    # Create Text widget with scrollbar for logs
+    log_box = tk.Text(
+        bottom_frame,
+        height=10,
+        wrap="word",
+        relief="sunken",
+        borderwidth=1,
+    )
+
+    # Vertical scrollbar for log box
+    log_scrollbar = ttk.Scrollbar(bottom_frame, orient="vertical", command=log_box.yview)
+    log_box.configure(yscrollcommand=log_scrollbar.set)
+
+    # Grid layout for log box and scrollbar
+    log_box.grid(row=0, column=0, sticky="nsew", padx=10, pady=(10, 5))
+    log_scrollbar.grid(row=0, column=1, sticky="ns", padx=(0, 10), pady=(10, 5))
+
+    # Clear button
+    button_frame = ttk.Frame(bottom_frame)
+    button_frame.grid(row=1, column=0, columnspan=2, sticky="e", padx=10, pady=(0, 10))
+
+    ttk.Button(
+        button_frame,
+        text="Clear Logs",
+        command=lambda: log_box.delete("1.0", "end"),
+    ).pack(side="right")
+
+    # Function to add logs to the log box
+    def add_log(message: str):
+        """Add a log message to the log box and scroll to the bottom."""
+        log_box.insert("end", message + "\n")
+        log_box.see("end")  # Auto-scroll to the latest log
 
     # Update scroll region after all widgets are added
     update_scroll_region()

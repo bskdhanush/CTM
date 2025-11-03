@@ -43,38 +43,43 @@ def Meta_page(parent,Pagename,device_name):
     Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
 
     Selection_frame = ttk.LabelFrame(Meta_frame, text=f"Select Meta to install")
-    Selection_frame.pack(fill="x", **PADDING)  # type: ignore
+    Selection_frame.pack(fill="x", **PADDING) # type: ignore
 
     # First row: label (left), button (right) in a horizontal frame
     top_row = tk.Frame(Selection_frame)
-    top_row.pack(fill="x", padx=10, pady=(10, 0))
+    top_row.pack(fill="both", expand=True, padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value='Meta not selected')
-    label = ttk.Label(top_row, textvariable=local_path)
-    label.pack(side="left", anchor="w", padx=(10, 0))
+    local_path = tk.StringVar(value='Pls select Meta path')
+    print(f"StringVar value: {local_path.get()}")  # Debug print
 
-    button = ttk.Button(
-        top_row,
-        text="Select Meta path to load",
-        command=lambda: start_thread(load_meta_from_path,"Meta install Thread",
-                                     daemon=True, filepath=getFolderPath(Pagename),Pgname=Pagename)
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    label = ttk.Label(top_row, textvariable=local_path, wraplength=300)
+    label.pack(side="left", padx=(10, 0), fill="x", expand=True)
 
-    button = ttk.Button(
-        top_row,
+    # Buttons container frame (stays on right)
+    button_frame = tk.Frame(top_row)
+    button_frame.pack(side="right", padx=(0, 10))
+
+    button2 = ttk.Button(
+        button_frame,
         text="select Meta zip to load",
-        command=lambda:start_thread(load_meta_from_zip,"Meta install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(Pagename),Pgname=Pagename)
+        command=lambda: start_thread(load_meta_from_zip, "Meta install from ZIP Thread",
+                                    daemon=True, filepath=getzippath(Pagename), Pgname=Pagename)
     )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    button2.pack(side="right", padx=(5, 0))
 
+    button1 = ttk.Button(
+        button_frame,
+        text="Select Meta path to load",
+        command=lambda: start_thread(load_meta_from_path, "Meta install Thread",
+                                    daemon=True, filepath=getFolderPath(Pagename), Pgname=Pagename)
+    )
+    button1.pack(side="right", padx=(0, 5))
     return Meta_frame
 
 
 
-def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
-    Mpss_frame= MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
+def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
+    Mpss_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
     Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
@@ -82,23 +87,35 @@ def Mpss_page(parent,Pagename,device_name) -> ttk.Frame:
     top_row = tk.Frame(Selection_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-    local_path = tk.StringVar(value='MPSS not selected')
-    label = ttk.Label(top_row, textvariable=local_path)
-    label.pack(side="left", anchor="w", padx=(10, 0))
+    # Create StringVar at parent level so it persists
+    local_path = tk.StringVar(value='Pls selcect MPSS path')
+    ttk.Label(top_row, textvariable=local_path).pack(side="left",expand=True, padx=(10, 0))
 
     button = ttk.Button(
         top_row,
         text="Select MPSS path to load",
-        command=lambda: start_thread(load_mpss_from_path,"MPSS install Thread",
-                                     daemon=True, filepath=getFolderPath(Pagename),Pgname=Pagename)
+        command=lambda: start_thread(
+            load_mpss_from_path,
+            "MPSS install Thread",
+            daemon=True,
+            filepath=getFolderPath(Pagename),
+            Pgname=Pagename,
+          #  text_var=local_path   Pass the StringVar to the thread
+        )
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
     button = ttk.Button(
         top_row,
         text="Select MPSS zip to load",
-        command=lambda:start_thread(load_mpss_from_zip,"MPSS install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(Pagename),Pgname=Pagename)
+        command=lambda: start_thread(
+            load_mpss_from_zip,
+            "MPSS install from ZIP Thread",
+            daemon=True,
+            filepath=getzippath(Pagename),
+            Pgname=Pagename,
+           # text_var=local_path   Pass the StringVar to the thread
+        )
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 

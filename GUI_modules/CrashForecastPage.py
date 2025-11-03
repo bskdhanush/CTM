@@ -108,6 +108,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         except Exception as e:
             add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             add_log(f"✗ ERROR: {str(e)}")
+
             #messagebox.showerror("Error", f"Failed to update crash rename fields:\n{str(e)}")
 
     separator = ttk.Separator(update_crash_rename_from_csv_header, orient="horizontal")

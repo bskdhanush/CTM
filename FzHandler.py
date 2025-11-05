@@ -12,18 +12,22 @@ import time
 from datetime import datetime
 import datetime
 from dotenv import load_dotenv
-from ssh2.session import Session
-from ssh2.sftp import (
-    LIBSSH2_FXF_READ,
-    LIBSSH2_SFTP_S_IRUSR,
-    LIBSSH2_FXF_WRITE,
-    LIBSSH2_FXF_CREAT,
-    LIBSSH2_FXF_TRUNC,
-    LIBSSH2_SFTP_S_IRUSR,
-    LIBSSH2_SFTP_S_IWUSR
-)
+from SSH_Modules import session
+from SSH_Modules import sftp
+ 
+
+#from ssh2.session import Session
+# from ssh2.sftp import (
+#     LIBSSH2_FXF_READ,
+#     LIBSSH2_SFTP_S_IRUSR,
+#     LIBSSH2_FXF_WRITE,
+#     LIBSSH2_FXF_CREAT,
+#     LIBSSH2_FXF_TRUNC,
+#     LIBSSH2_SFTP_S_IRUSR,
+#     LIBSSH2_SFTP_S_IWUSR
+# )
 import AutoDownloader 
-from JsonHandler import load_prov_json,save_meta_json,load_meta_json
+from JsonHandler import load_meta_json
 
 load_dotenv()
 HOST = os.getenv("SFTP_HOST")
@@ -35,18 +39,18 @@ REMOTE_PATH = "Incoming/"
 def connect_sftp(connect_timeout=20):
     if not HOST or not USER or PASS is None:
         raise ValueError("SFTP connection details (SFTP_HOST, SFTP_USER, SFTP_PASS) required in .env")
-    sess = sftp = sock = None
+    sess = sftp_var = sock = None
     try:
         sock = socket.create_connection((HOST, PORT), timeout=connect_timeout)
-        sess = Session()
+        sess = session.Session()
         sess.handshake(sock)
         sess.userauth_password(USER, PASS)
-        sftp = sess.sftp_init()
+        sftp_var = sess.sftp_init()
     except socket.timeout:
         print("Connection timed out.")
     except socket.error as e:
         print(f"Socket error: {e}")
-    return sess, sftp, sock
+    return sess, sftp_var, sock
 
 def list_files(device_filter="", pageName="", pattern=""):
     """
@@ -83,14 +87,14 @@ def list_files(device_filter="", pageName="", pattern=""):
         keywords = [pattern]
 
     try:
-        sess, sftp, sock = connect_sftp()
+        sess, sftp_var, sock = connect_sftp()
     except Exception as e:
         print(f'Exception during connect_sftp : {e}')
-        sess = sftp = sock = None
-    if sess and sftp and sock:
+        sess = sftp_var = sock = None
+    if sess and sftp_var and sock:
         try:
             # Use opendir to get a handle; iterate handle.readdir()
-            with sftp.opendir(REMOTE_PATH) as dh:
+            with sftp_var.opendir(REMOTE_PATH) as dh:
                 for entry in dh.readdir():
                     #print(f"printing entry : {entry[1]}")
                     if len(entry) == 3:
@@ -127,18 +131,18 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
     Download a remote file via libssh2 with large chunk reads.
     """
     try:
-        sess, sftp, sock = connect_sftp()
+        sess, sftp_var, sock = connect_sftp()
     except Exception as e:
         print(f'Exception during connect_sftp : {e}')
-        sess = sftp = sock = None
-    if sess and sftp and sock:
+        sess = sftp_var = sock = None
+    if sess and sftp_var and sock:
         try:
             remote_path = REMOTE_PATH.rstrip("/") + "/" + remote_filename
             os.makedirs(local_dir, exist_ok=True)
             local_path = os.path.join(local_dir, remote_filename)
 
             # Open remote file for reading
-            fh = sftp.open(remote_path, LIBSSH2_FXF_READ, LIBSSH2_SFTP_S_IRUSR)
+            fh = sftp_var.open(remote_path, sftp.LIBSSH2_FXF_READ, sftp.LIBSSH2_SFTP_S_IRUSR)
             try:
                 fstat = fh.fstat()
                 file_size = getattr(fstat, "filesize", None)
@@ -221,11 +225,11 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
     """
     upload_result = False
     try:
-        sess, sftp, sock = connect_sftp()
+        sess, sftp_var, sock = connect_sftp()
     except Exception as e:
         print(f'Exception during connect_sftp : {e}')
-        sess = sftp = sock = None
-    if sess and sftp and sock:
+        sess = sftp_var = sock = None
+    if sess and sftp_var and sock:
         try:
             # Ensure local file exists
             if not os.path.isfile(filepath):
@@ -237,13 +241,13 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
 
             # Use standard permissions: 0644 (rw-r--r--)
-            mode = LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IWUSR | LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IRUSR
+            mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
 
             # Open remote file for writing
             try:
-                fh = sftp.open(
+                fh = sftp_var.open(
                     server_upload_path,
-                    LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC,
+                    sftp.LIBSSH2_FXF_WRITE | sftp.LIBSSH2_FXF_CREAT | sftp.LIBSSH2_FXF_TRUNC,
                     mode
                 )
             except Exception as e:

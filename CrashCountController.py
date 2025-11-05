@@ -14,7 +14,7 @@ from queue import Queue
 import CrashHandler as CH
 import GUI 
 from JsonHandler import load_json, save_json
-from Constants import DEFAULT_CRASHDUMP,CRASHDUMP_ROOT_PCAT,RDKBCRASH_ROOT,MIN_CRASH_SIZE,MIN_RDKBCRASH_SIZE
+from Constants import DEFAULT_CRASHDUMP,CRASHDUMP_ROOT_PCAT,MIN_CRASH_SIZE
 
 
 
@@ -138,14 +138,14 @@ class CrashHandler(FileSystemEventHandler):
 
            # log.info("Crash → Day:%d Night:%d", d, n)
 
-class RdkbHandler(FileSystemEventHandler):
-    def on_created(self, e):
-        if e.is_directory and e.src_path.startswith(str(RDKBCRASH_ROOT)):
-            time.sleep(40)
-            n = process_dir(
-                RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True
-            )
-            #log.info("RDKB  → Day:%d Night:%d", d, n)
+# class RdkbHandler(FileSystemEventHandler):
+#     def on_created(self, e):
+#         if e.is_directory and e.src_path.startswith(str(RDKBCRASH_ROOT)):
+#             time.sleep(40)
+#             n = process_dir(
+#                 RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True
+#             )
+#             #log.info("RDKB  → Day:%d Night:%d", d, n)
 
 
 def run_watchdog():
@@ -153,7 +153,7 @@ def run_watchdog():
     final_path= get_latest_play()
     process_dir(final_path,'normalcrash', MIN_CRASH_SIZE)
     process_dir(CRASHDUMP_ROOT_PCAT, 'crash', MIN_CRASH_SIZE)
-    process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
+    #process_dir(RDKBCRASH_ROOT, 'rdkbcrash', MIN_RDKBCRASH_SIZE, scan_root=True)
 
     # start crash observer in its own instance
     obs_dcrash = Observer()
@@ -164,9 +164,9 @@ def run_watchdog():
     obs_crash.schedule(CrashHandler(), str(CRASHDUMP_ROOT_PCAT), recursive=True)
     obs_crash.start()
 
-    obs_rdkb = Observer()
-    obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)
-    obs_rdkb.start()
+    # obs_rdkb = Observer()
+    # obs_rdkb.schedule(RdkbHandler(), str(RDKBCRASH_ROOT), recursive=True)
+    # obs_rdkb.start()
 
     try:
         while True:
@@ -174,10 +174,10 @@ def run_watchdog():
     except KeyboardInterrupt:
         obs_dcrash.stop()
         obs_crash.stop()
-        obs_rdkb.stop()
+        #obs_rdkb.stop()
         obs_dcrash.join()
         obs_crash.join()
-        obs_rdkb.join()
+        #obs_rdkb.join()
 
 
 if __name__ == "__main__":

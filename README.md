@@ -1,13 +1,15 @@
 To build the exe with out cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --windowed --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules"
 
-To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --add-data ".env;.env" --add-data "SSH_Modules;SSH_Modules"
+To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --add-data ".env;.env" --add-data "SSH_Modules;SSH_Modules" --hidden-import=ssh2
 
 
-new exe cration command:  install req befor tying this
-python -m nuitka --onefile --windows-console-mode=force MainController.py --output-filename=CTM.exe --windows-icon-from-ico=logs/logo.ico --include-data-dir=config=config --include-data-dir=GUI_modules=GUI_modules --include-data-dir=SSH_Modules=SSH_Modules --include-data-files=.env=.env  --include-module=ssh2-python
+***** USE the follwoing to create EXE ******
+pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --add-data ".env;.env" --hidden-import=ssh2 --hidden-import=ssh2.agent --hidden-import=ssh2.channel --hidden-import=ssh2.error_codes --hidden-import=ssh2.exceptions --hidden-import=ssh2.fileinfo --hidden-import=ssh2.knownhost --hidden-import=ssh2.listener --hidden-import=ssh2.pkey --hidden-import=ssh2.publickey --hidden-import=ssh2.session --hidden-import=ssh2.sftp --hidden-import=ssh2.sftp_handle --hidden-import=ssh2.statinfo --hidden-import=ssh2.utils 
 
 
 
+
+D:/work/GUI/Quts_tool/myenv_312/Scripts/Activate.ps1    
 
 
 

@@ -12,4 +12,5 @@ pyyaml
 pandas
 matplotlib
 nuitka
-
+ssh2-python
+py7zr

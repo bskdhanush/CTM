@@ -127,7 +127,7 @@ def list_files(device_filter="", pageName="", pattern=""):
         print(f'Failed to establish FTP connection to {HOST}')
     return files
 
-def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size=1024 * 1024, progress_interval=0.5):
+def download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp,chunk_size=1024 * 1024, progress_interval=0.5,):
     """
     Download a remote file via libssh2 with large chunk reads.
     """
@@ -186,6 +186,7 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
                             speed_bps = delta / dt
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size and file_size != float("inf") else 0
+                            download_status_label_update.set(f"Download Status: {transferred}/{file_size if file_size!=float('inf') else 'unknown'} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps")
                             print(f"\r{transferred}/{file_size if file_size!=float('inf') else 'unknown'} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
                             last_time = now
                             last_transferred = transferred
@@ -193,6 +194,7 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
+                download_status_label_update.set(f"Completed downloading: {remote_filename} ")
 
                 if PageName=="Meta":
                     AutoDownloader.save_downloaded_meta(remote_filename, timestamp)

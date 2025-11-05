@@ -378,7 +378,7 @@ def launch_gui() -> None:
             if root is not None:
                 try:
                     if root.winfo_exists():
-                        root.after(100, check_and_Update_from_queue)
+                        root.after(1000, check_and_Update_from_queue) # checks for every second
                 except tk.TclError:
                     pass
     check_and_Update_from_queue()

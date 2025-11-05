@@ -27,7 +27,7 @@ from ssh2.sftp import (
     LIBSSH2_SFTP_S_IWUSR
 )
 import AutoDownloader 
-from JsonHandler import load_meta_json
+from JsonHandler import load_meta_json,save_meta_json
 
 load_dotenv()
 HOST = os.getenv("SFTP_HOST")
@@ -127,7 +127,7 @@ def list_files(device_filter="", pageName="", pattern=""):
         print(f'Failed to establish FTP connection to {HOST}')
     return files
 
-def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size=1024 * 1024, progress_interval=0.5):
+def download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp,chunk_size=1024 * 1024, progress_interval=0.5,):
     """
     Download a remote file via libssh2 with large chunk reads.
     """
@@ -186,6 +186,7 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
                             speed_bps = delta / dt
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size and file_size != float("inf") else 0
+                            download_status_label_update.set(f"Download Status: {transferred}/{file_size if file_size!=float('inf') else 'unknown'} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps")
                             print(f"\r{transferred}/{file_size if file_size!=float('inf') else 'unknown'} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
                             last_time = now
                             last_transferred = transferred
@@ -193,9 +194,16 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
+                download_status_label_update.set(f"Completed downloading: {remote_filename} ")
 
                 if PageName=="Meta":
                     AutoDownloader.save_downloaded_meta(remote_filename, timestamp)
+                    print(remote_filename)
+                if remote_filename and remote_filename.lower() == 'crashrenamingmetainfo.csv':
+                    print("Updating the time stamp")
+                    cfg=load_meta_json()
+                    cfg["CSV"]=timestamp
+                    save_meta_json(cfg)
 
             finally:
                 try:
@@ -213,9 +221,10 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
                 pass
     else:
         print(f'Failed to establish FTP connection to {HOST}')
+        download_status_label_update.set(f'Failed to establish FTP connection')
         
 
-def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_interval=0.5):
+def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, progress_interval=0.5):
     """
     Upload a local file to the remote SFTP server via libssh2 with large chunk writes.
     
@@ -229,6 +238,7 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
     try:
         sess, sftp_var, sock = connect_sftp()
     except Exception as e:
+        log_box.insert("end",f'Exception during connect_sftp : {e} \n')
         print(f'Exception during connect_sftp : {e}')
         sess = sftp_var = sock = None
     if sess and sftp_var and sock:
@@ -239,8 +249,10 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
 
             # Get local file size
             file_size = os.path.getsize(filepath)
+            
 
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
+            log_box.insert("end",f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
 
             # Use standard permissions: 0644 (rw-r--r--)
             #mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
@@ -255,8 +267,9 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
                     mode
                 )
             except Exception as e:
-                print(f"Failed to open remote file. Error: {e}")
+                log_box.insert("end",f" Failed to open remote file. Error: {e}\n")
                 print(f"Ensure the remote directory exists and you have write permissions.")
+                
 
             try:
                 transferred = 0
@@ -294,12 +307,14 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size > 0 else 0
                             print(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
+                            log_box.insert("end",(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps"))
                             last_time = now
                             last_transferred = transferred
 
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
+                log_box.insert("end",f"\n\n ***** CRASH DUMP UPLOADED ***** \n\n")
                 upload_result = True
 
             finally:
@@ -318,6 +333,7 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
                 pass
     else:
         print(f'Failed to establish FTP connection to {HOST}')
+        log_box.insert("end",f"Failed to establish FTP connection")
     return upload_result
 
 if __name__ == "__main__":

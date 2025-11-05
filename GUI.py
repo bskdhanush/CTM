@@ -15,7 +15,7 @@ import WifiController
 import QutsController
 import DataMonitorController as dmc
 import CrashCountController as cc 
-from  JsonHandler import load_meta_json,save_meta_json
+from  JsonHandler import load_meta_json,save_meta_json,load_json
 
 
 def add_copy_support(root: tk.Tk) -> None:
@@ -238,10 +238,35 @@ def launch_gui() -> None:
         header_frame, text="Reset Counter", width=12,
         command=Reset_label_counter
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
+    
+    def get_crash_count_json():
+        cfg =load_json()
+        noramlCrashCount=cfg["crash_counter"]
+        RDKBCrashCount=cfg["rdkbcrash_counter"]
+        if noramlCrashCount >0:
+            crash_var.set(noramlCrashCount)
+            crash_lbl.config(foreground=red_accent)
+            crash_text_lbl.configure(foreground=red_accent)
+        else:
+            crash_var.set(noramlCrashCount)
+            
+        if RDKBCrashCount> 0:
+            RDKB_var.set(RDKBCrashCount)
+            RDKB_lbl.config(foreground=red_accent)
+            RDKB_text_lbl.configure(foreground=red_accent)
+        else:
+            RDKB_var.set(RDKBCrashCount)
+            
+            
+        
+    #initial launch
+    get_crash_count_json()
+        
 
 
     # ── Grid weights ─────────────────────────────────────────────────────
-    root.columnconfigure(1, weight=1)  # column 1 = main content
+    root.columnconfigure(1, weight=1)  # column 1 = main content:
+    
     root.rowconfigure(1, weight=1)     # row 1   = sidebar  pages
 
     # ── Sidebar & container ───────────────────────────────────────────────

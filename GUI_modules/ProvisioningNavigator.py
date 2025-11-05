@@ -39,8 +39,10 @@ def getFolderPath(pagename):
     return folderpath
     
 def Meta_page(parent,Pagename,device_name):
+    
+    status_text = tk.StringVar(value="")
 
-    Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
+    Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text)
 
     Selection_frame = ttk.LabelFrame(Meta_frame, text=f"Select Meta to install")
     Selection_frame.pack(fill="x", **PADDING) # type: ignore
@@ -74,12 +76,23 @@ def Meta_page(parent,Pagename,device_name):
                                     daemon=True, filepath=getFolderPath(Pagename), Pgname=Pagename)
     )
     button1.pack(side="right", padx=(0, 5))
+    
+    Bottom_frame = ttk.Frame(Meta_frame)
+    Bottom_frame.pack(fill="x", **PADDING)
+
+   
+    status_label = tk.Label(Bottom_frame, textvariable=status_text,
+                            foreground="white")  # Add background color
+    status_label.pack(fill="x",side="left", padx=10, pady=(30,0))
     return Meta_frame
 
 
 
 def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
-    Mpss_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name)
+    
+    status_text = tk.StringVar(value="")
+    
+    Mpss_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text)
     Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
@@ -94,12 +107,7 @@ def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
     button = ttk.Button(
         top_row,
         text="Select MPSS path to load",
-        command=lambda: start_thread(
-            load_mpss_from_path,
-            "MPSS install Thread",
-            daemon=True,
-            filepath=getFolderPath(Pagename),
-            Pgname=Pagename,
+        command=lambda: start_thread(load_mpss_from_path,"MPSS install Thread",daemon=True,filepath=getFolderPath(Pagename),Pgname=Pagename,
           #  text_var=local_path   Pass the StringVar to the thread
         )
     )
@@ -118,7 +126,15 @@ def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
         )
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
+    
+    
+    Bottom_frame = ttk.Frame(Mpss_frame)
+    Bottom_frame.pack(fill="x", **PADDING)
 
+
+    status_label = tk.Label(Bottom_frame, textvariable=status_text,
+                            foreground="white")  # Add background color
+    status_label.pack(fill="x",side="left", padx=10, pady=(30,0))
     return Mpss_frame
 
 

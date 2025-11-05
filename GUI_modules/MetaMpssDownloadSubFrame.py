@@ -21,7 +21,7 @@ mtimeList=[]
 # def _get_download_path() -> str:
 #     return str(load_cfg().get("Local_downloadPath", ""))
 
-def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
+def create_Meta_Mpss_download(container, Pagename, device_name, download_status_label_update) -> ttk.Frame:
     
     # MMdownload= ttk.Frame(container)
     # MMdownload.grid(row=0, column=0, sticky="nsew")
@@ -114,7 +114,10 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
             if selected_item and selected_item.lower() == 'crashrenamingmetainfo.csv':
                 local_dir = CTM_BASE_DIR
             if local_dir:
-                FzHandler.download_file(selected_item, local_dir, Pagename, mtimeList[0])
+                try:
+                    FzHandler.download_file(selected_item, local_dir, Pagename,download_status_label_update, mtimeList[0])
+                except Exception as e:
+                    print(f"printing from subpage file {e}")
             else:
                 print('No valid destination path to download')
 
@@ -209,7 +212,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     select_btn = ttk.Button(download_btn_row, 
                             text="Download", 
                             command=lambda:start_thread(download_selected_Meta_Mpss,"Download Thread for FZ",
-                                     daemon=True))
+                                     daemon=True,))
     select_btn.pack( side='right')
 
     _reschedule(is_enabled())

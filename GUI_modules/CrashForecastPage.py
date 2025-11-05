@@ -302,7 +302,8 @@ def create_crash_forecast_page(container, pages, add_nav):
             CrashHandler.zip_and_upload_crash_dump,
             "Zip and upload thread",
             daemon=True,
-            crash_dir_list=get_selected_crash_paths(),
+            crash_dir_list=get_selected_crash_paths(),  
+            log_box=log_box
         ),
     ).grid(row=0, column=1, sticky="e", **PADDING)  # type: ignore
 
@@ -328,7 +329,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     def load_crash_table():
         """Read CSV and populate the table."""
         try:
-            crash_meta_csv = os.path.join(CTM_LOGS_DIR, "CrashMetaInfo.csv")
+            crash_meta_csv = os.path.join(CTM_LOGS_DIR, "CrashRenamingMetaInfo.csv")
             df = pd.DataFrame()
             if os.path.exists(crash_meta_csv):
                 df = pd.read_csv(crash_meta_csv)
@@ -360,7 +361,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         if not selected_items:
             #print("No rows selected")
             add_log("No rows selected")
-            return []
+            #return []
 
         crash_paths = []
         for item_id in selected_items:

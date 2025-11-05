@@ -9,7 +9,7 @@ from datetime import date
 import datetime
 import pandas as pd
 from GUI_modules import CrashForecastPage
-from JsonHandler import load_json, load_prov_json, save_prov_json
+from JsonHandler import load_prov_json, save_prov_json
 from EndToEndDevProvsioningController import get_provisioning_base
 from WifiController import get_adb_id
 from Threading import start_thread
@@ -78,13 +78,13 @@ def crash_forecast(crash_path, timestamp):
         print("[INFO] Not a valid crash path.")
 
 def create_crash_meta_info_csv(crash_info_dict):
-    # Creates CrashMetaInfo.csv with columns
+    # Creates CrashRenamingMetaInfo.csv with columns
     # crash_count, adb_id, crash_path, timestamp, root_cause, fst_id
 
     from CopyCsv import CONTROL_BASE, copy_csv_to_latest_folder
     
     df = pd.DataFrame(crash_info_dict)
-    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
         df = pd.concat([df_csv, df], axis=0, ignore_index=True)
@@ -98,11 +98,11 @@ def create_crash_meta_info_csv(crash_info_dict):
     # display_crash_table(crash_meta_info_csv)
 
 
-def zip_and_upload_crash_dump(crash_dir_list):
-    # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
-    # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
+def zip_and_upload_crash_dump(crash_dir_list,log_box):
+    # Goes through CrashRenamingMetaInfo.csv and triggers zip & upload for each row
+    # Update CrashRenamingMetaInfo.csv by deleting corresponding row -> display_crash_table
     from FzHandler import file_upload
-    df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
+    df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv'))
 
     for index, row in df.iterrows():
             
@@ -117,6 +117,7 @@ def zip_and_upload_crash_dump(crash_dir_list):
                     count = 1
                     m = re.search(r'LAN_DRI$', orig_crash_name)
                     if m:
+                        log_box.insert("end", "Crash dump already renamed \n")
                         print('Crash dump already renamed')
                                 
                         crash_name = orig_crash_name
@@ -124,7 +125,7 @@ def zip_and_upload_crash_dump(crash_dir_list):
                     else:
                         crash_name = get_crash_naming(orig_crash_name, count)
                         if not crash_name:
-                            print('Could not retrieve correct naming convention. Pls check')
+                            log_box.insert("end","Could not retrieve correct naming convention. Pls check \n")
                             continue
                                  
                         new_crash_path = os.path.join(crash_base, crash_name)
@@ -132,12 +133,12 @@ def zip_and_upload_crash_dump(crash_dir_list):
                             count = count + 1
                             crash_name = get_crash_naming(orig_crash_name, count)
                             if not crash_name:
-                                print('Could not retrieve correct naming convention. Pls check')
+                                log_box.insert("end","Could not retrieve correct naming convention. Pls check \n")
                                 new_crash_path = None
                                 break
                             new_crash_path = os.path.join(crash_base, crash_name)
                 except Exception as e:
-                    print(f'Exception while retrieving crash naming: {e}')
+                    log_box.insert("end",f'Exception while retrieving crash naming: {e} \n')
 
                 if not new_crash_path:
                     continue
@@ -146,24 +147,25 @@ def zip_and_upload_crash_dump(crash_dir_list):
                     os.rename(crash_path, new_crash_path)
                     update_crash_entry(crash_path, new_crash_path)
                 except Exception as e:
-                    print(f'Exception during renaming crash path and updating in csv: {e}')
+                    log_box.insert("end",f'Exception during renaming crash path and updating in csv: {e} \n')
 
                 if os.path.exists(new_crash_path):
                     # Zip
                     output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
                     if not get_zip_status(new_crash_path):
                         try:
+                            log_box.insert("end",f'Zipping {output_zip}\n')
                             print(f'Zipping {output_zip}')
                             zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                             subprocess.run(zip_command, capture_output=True, text=True)
 
                             update_crash_zip_status(new_crash_path)
                         except Exception as e:
-                            print(f'Exception during zipping crash dump: {e}')
+                           log_box.insert("end",f'Exception during zipping crash dump: {e} \n')
 
-                    print(f'Uploading {output_zip}')
+                    log_box.insert("end",f'Uploading {output_zip} \n')
                     try:
-                        upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z")
+                        upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z",log_box)
                         if upload_result:
                             remove_crash_entry(crash_path)
                     except Exception as e:
@@ -304,7 +306,7 @@ def get_crash_naming(orig_crash_name='', count=1):
 
 def get_zip_status(crash_path):
     result = None
-    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
         result = len(df_csv[(df_csv['CRASH_PATH'] == crash_path) & (df_csv['ZIP_STATUS'] == True)])
@@ -313,8 +315,8 @@ def get_zip_status(crash_path):
     return result
 
 def update_crash_zip_status(crash_path):
-    print(f'Updating zip-flag for {crash_path} in CrashMetaInfo.csv')
-    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    print(f'Updating zip-flag for {crash_path} in CrashRenamingMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
         df_csv.loc[df_csv['CRASH_PATH'] == crash_path, 'ZIP_STATUS'] = True
@@ -325,8 +327,8 @@ def update_crash_zip_status(crash_path):
         print(f'{crash_meta_info_csv} does not exist')
 
 def update_crash_entry(old_crash_path, new_crash_path):
-    print(f'{old_crash_path} will be replaced with {new_crash_path} from CrashMetaInfo.csv')
-    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    print(f'{old_crash_path} will be replaced with {new_crash_path} from CrashRenamingMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv')
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)
         df_csv['CRASH_PATH'] = df_csv['CRASH_PATH'].replace(old_crash_path, new_crash_path)
@@ -337,8 +339,8 @@ def update_crash_entry(old_crash_path, new_crash_path):
         print(f'{crash_meta_info_csv} does not exist')
 
 def remove_crash_entry(filepath):
-    print(f'{filepath} will be removed from CrashMetaInfo.csv')
-    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv')
+    print(f'{filepath} will be removed from CrashRenamingMetaInfo.csv')
+    crash_meta_info_csv = os.path.join(CTM_LOGS_DIR, 'CrashRenamingMetaInfo.csv')
     df_csv = pd.DataFrame()
     if os.path.exists(crash_meta_info_csv):
         df_csv = pd.read_csv(crash_meta_info_csv, index_col=False)

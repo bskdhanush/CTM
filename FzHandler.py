@@ -12,20 +12,20 @@ import time
 from datetime import datetime
 import datetime
 from dotenv import load_dotenv
-from SSH_Modules import session
-from SSH_Modules import sftp
+# from SSH_Modules import session
+# from SSH_Modules import sftp
  
 
-#from ssh2.session import Session
-# from ssh2.sftp import (
-#     LIBSSH2_FXF_READ,
-#     LIBSSH2_SFTP_S_IRUSR,
-#     LIBSSH2_FXF_WRITE,
-#     LIBSSH2_FXF_CREAT,
-#     LIBSSH2_FXF_TRUNC,
-#     LIBSSH2_SFTP_S_IRUSR,
-#     LIBSSH2_SFTP_S_IWUSR
-# )
+from ssh2.session import Session
+from ssh2.sftp import (
+    LIBSSH2_FXF_READ,
+    LIBSSH2_SFTP_S_IRUSR,
+    LIBSSH2_FXF_WRITE,
+    LIBSSH2_FXF_CREAT,
+    LIBSSH2_FXF_TRUNC,
+    LIBSSH2_SFTP_S_IRUSR,
+    LIBSSH2_SFTP_S_IWUSR
+)
 import AutoDownloader 
 from JsonHandler import load_meta_json
 
@@ -42,7 +42,8 @@ def connect_sftp(connect_timeout=20):
     sess = sftp_var = sock = None
     try:
         sock = socket.create_connection((HOST, PORT), timeout=connect_timeout)
-        sess = session.Session()
+        #sess = session.Session()
+        sess = Session()
         sess.handshake(sock)
         sess.userauth_password(USER, PASS)
         sftp_var = sess.sftp_init()
@@ -142,7 +143,8 @@ def download_file(remote_filename, local_dir, PageName:str, timestamp,chunk_size
             local_path = os.path.join(local_dir, remote_filename)
 
             # Open remote file for reading
-            fh = sftp_var.open(remote_path, sftp.LIBSSH2_FXF_READ, sftp.LIBSSH2_SFTP_S_IRUSR)
+            #fh = sftp_var.open(remote_path, sftp.LIBSSH2_FXF_READ, sftp.LIBSSH2_SFTP_S_IRUSR)
+            fh = sftp_var.open(remote_path, LIBSSH2_FXF_READ, LIBSSH2_SFTP_S_IRUSR)
             try:
                 fstat = fh.fstat()
                 file_size = getattr(fstat, "filesize", None)
@@ -241,13 +243,15 @@ def file_upload(filepath, server_upload_path, chunk_size=1024 * 1024, progress_i
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
 
             # Use standard permissions: 0644 (rw-r--r--)
-            mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
+            #mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
+            mode = LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IWUSR | LIBSSH2_SFTP_S_IRUSR | LIBSSH2_SFTP_S_IRUSR
 
             # Open remote file for writing
             try:
                 fh = sftp_var.open(
                     server_upload_path,
-                    sftp.LIBSSH2_FXF_WRITE | sftp.LIBSSH2_FXF_CREAT | sftp.LIBSSH2_FXF_TRUNC,
+                    #sftp.LIBSSH2_FXF_WRITE | sftp.LIBSSH2_FXF_CREAT | sftp.LIBSSH2_FXF_TRUNC,
+                    LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC,
                     mode
                 )
             except Exception as e:

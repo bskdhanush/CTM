@@ -14,7 +14,7 @@ from queue import Queue
 import CrashHandler as CH
 import GUI 
 from JsonHandler import load_json, save_json
-from Constants import DEFAULT_CRASHDUMP,CRASHDUMP_ROOT_PCAT,RDKBCRASH_ROOT,MIN_CRASH_SIZE,MIN_RDKBCRASH_SIZE
+from Constants import DEFAULT_CRASHDUMP,CRASHDUMP_ROOT_PCAT,MIN_CRASH_SIZE
 
 
 

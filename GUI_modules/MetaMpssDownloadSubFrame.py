@@ -194,6 +194,7 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     download_btn_row = tk.Frame(bottom_section)
     download_btn_row.pack(fill="x", pady=(10,0))
 
+
     if Pagename=="Meta":
 
         auto_download_checkBox = tk.BooleanVar(value=is_enabled())
@@ -212,6 +213,8 @@ def create_Meta_Mpss_download(container, Pagename, device_name) -> ttk.Frame:
     select_btn.pack( side='right')
 
     _reschedule(is_enabled())
+
+    
    # _start_loop_once()
 
     return MMdownload

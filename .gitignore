@@ -9,11 +9,15 @@ __pycache__/
 
 # Virtual environment
 myenv/
+myenv_312/
 venv/
 env/
 
 # IDE
 .vscode/
 .idea/
+
+
+
 
 

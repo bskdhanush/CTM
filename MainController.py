@@ -8,12 +8,11 @@ from datetime import datetime
 import ctypes
 from tkinter import messagebox
 import json, time
-import Constants
-import logging
 import psutil
 import yaml
 import glob
 import pandas as pd
+
 
 import ADBController
 import KillProcess

@@ -4,7 +4,18 @@ To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM -
 
 
 new exe cration command:  install req befor tying this
+<<<<<<< Updated upstream
 python -m nuitka --onefile --windows-console-mode=force MainController.py --output-filename=CTM.exe --windows-icon-from-ico=logs/logo.ico --include-data-dir=config=config --include-data-dir=GUI_modules=GUI_modules --include-data-dir=SSH_Modules=SSH_Modules --include-data-files=.env=.env  --include-module=ssh2-python
+=======
+
+python -m nuitka --onefile --windows-console-mode=force MainController.py --output-filename=CTM.exe --windows-icon-from-ico=logs/logo.ico --include-data-dir=config=config --include-data-files=.env=.env --enable-plugin=tk-inter --include-data-files="D:\work\GUI\Quts_tool\myenv_312\Lib\site-packages\ssh2\*.pyd=ssh2/" --include-data-files="D:\work\GUI\Quts_tool\myenv_312\Lib\site-packages\ssh2\*.dll=ssh2/"
+
+
+
+python -m nuitka --onefile --windows-console-mode=force MainController.py --output-filename=CTM.exe --windows-icon-from-ico=logs/logo.ico --include-data-dir=config=config --include-data-files=.env=.env --enable-plugin=tk-inter --include-data-files="D:\work\GUI\Quts_tool\myenv_312\Lib\site-packages\ssh2\*.pyd=ssh2/"
+
+
+>>>>>>> Stashed changes
 
 
 

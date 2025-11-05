@@ -361,7 +361,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         if not selected_items:
             #print("No rows selected")
             add_log("No rows selected")
-            #return []
+            return []
 
         crash_paths = []
         for item_id in selected_items:

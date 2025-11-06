@@ -10,7 +10,7 @@ from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
-update_config_disply=None
+update_config_display=None
 
 
 def getzippath(pagenme):
@@ -319,11 +319,11 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
 
     def on_toggle_change(*args):
         activate_mbn(toggle_var.get() ,Pgname="")
-        update_config_disply()
+        update_config_display()
 
     toggle_var.trace_add("write", on_toggle_change)
 
-    #disply current selected meta and mpss
+    #display current selected meta and mpss
 
     separator_frame = tk.Frame(Full_Provisioning_frame)
     separator_frame.pack(fill="x", padx=10, pady=10)
@@ -341,51 +341,63 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     meta_var = tk.StringVar()
     mpss_var = tk.StringVar()
     mbn_var = tk.StringVar()
+    imei_var = tk.StringVar()
 
     # Create labels once (during UI setup)
 
     ttk.Label(Current_Config_display_row, textvariable=meta_var).grid(row=0, column=0, sticky="w", padx=10, pady=2)
     ttk.Label(Current_Config_display_row, textvariable=mpss_var).grid(row=1, column=0, sticky="w", padx=10, pady=2)
     ttk.Label(Current_Config_display_row, textvariable=mbn_var).grid(row=2, column=0, sticky="w", padx=10, pady=2)
+    ttk.Label(Current_Config_display_row, textvariable=imei_var).grid(row=3, column=0, sticky="w", padx=10, pady=2)
 
     # Update function just changes the StringVar values
-    def update_config_disply():
-        config = get_data_Meta_Mpss_txt()
+    def update_config_display():
+        meta_mpss_config = get_data_Meta_Mpss_txt()
+        config = get_device_config_txt()
+
         from WifiController import get_meta_build_info
         meta_build = get_meta_build_info()
 
         if isinstance(meta_build, str) and 'kobuk' in meta_build.lower():
-            meta_var.set(f"Meta selected :- {config.get('DE9.0_KOBUK_META', 'N/A')}")
-            mpss_var.set(f"MPSS selected :- {config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
-            mbn_var.set(f"MBN selected  :- {config.get('MBN_SW', 'N/A')}")
+            meta_var.set(f"Meta selected :- {meta_mpss_config.get('DE9.0_KOBUK_META', 'N/A')}")
+            mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
+            mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
+            imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
 
         elif isinstance(meta_build, str) and 'pinnacles' in meta_build.lower():
-            meta_var.set(f"Meta selected :- {config.get('DE7.0_PINNACLES_META', 'N/A')}")
-            mpss_var.set(f"MPSS selected :- {config.get('DE7.0_PINNACLES_MPSS', 'N/A')}")
-            mbn_var.set(f"MBN selected  :- {config.get('MBN_SW', 'N/A')}")
+            meta_var.set(f"Meta selected :- {meta_mpss_config.get('DE7.0_PINNACLES_META', 'N/A')}")
+            mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE7.0_PINNACLES_MPSS', 'N/A')}")
+            mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
+            imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
+
+        else:
+            meta_var.set(f"Meta selected :- UNKNOWN (Bad device state)")
+            mpss_var.set(f"MPSS selected :- UNKNOWN (Bad device state)")
+            mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
+            imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
 
 
     # Initial call
-    update_config_disply()
+    update_config_display()
 
 
     def update_txt_display_lables(value: int):
         if value == 0:
             start_thread(load_meta_from_path, "Meta update txt Thread", 
                         daemon=True, filepath=getFolderPath("Meta"), Pgname="",
-                        callback=update_config_disply)
+                        callback=update_config_display)
         elif value == 1:
             start_thread(load_meta_from_zip, "Meta update txt ZIP Thread",
                         daemon=True, filepath=getzippath("Meta"), Pgname="",status_lable=status_text_FullPov,
-                        callback=update_config_disply)
+                        callback=update_config_display)
         elif value == 2:
             start_thread(load_mpss_from_path, "Mpss update txt Thread",
                         daemon=True, filepath=getFolderPath("Mpss"), Pgname="",
-                        callback=update_config_disply)
+                        callback=update_config_display)
         elif value == 3:
             start_thread(load_mpss_from_zip, "Meta update txt ZIP Thread",
                         daemon=True, filepath=getzippath("Mpss"), Pgname="",status_lable=status_text_FullPov,
-                        callback=update_config_disply)
+                        callback=update_config_display)
 
         
 
@@ -398,7 +410,13 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         bottom_row,
         text="Full Provisioning",
-        command=lambda:start_thread(full_provisioning, "Full Provisioning Thread", daemon=True)
+        command=lambda:start_thread(
+            full_provisioning,
+            "Full Provisioning Thread",
+            daemon=True,
+            meta_selection=meta_checkbox_var.get(),
+            mpss_selection=mpss_checkbox_var.get()
+        )
     )
     button.pack(fill="x", padx=(0, 10))
      

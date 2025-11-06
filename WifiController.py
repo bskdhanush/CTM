@@ -89,7 +89,7 @@ def get_meta_build_info():
     run_command("adb root")
     output, stderr = run_command("adb shell cat /firmware/verinfo/Ver_Info.txt | findstr Meta_Build_ID")
     if not output or stderr:
-        raise Exception('Meta Build info NOT FOUND')
+        print('Meta Build info NOT FOUND')
     else:
         meta = output.split(': ')[1].strip(',').strip('"')
     return meta

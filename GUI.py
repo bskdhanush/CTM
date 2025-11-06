@@ -182,11 +182,11 @@ def launch_gui() -> None:
         .grid(row=1, column=0, sticky="w", padx=15)
     
     def saveCPEBuildinfo(meta,mpss):
-        cfg=load_meta_json()
-        if meta!="UNKNOWN":
+        cfg = load_meta_json()
+        if meta not in [None, "UNKNOWN"]:
             meta = meta.strip('"')
             print(meta)
-            cfg.update({"CPE_META_MPSS": {"meta":meta,"mpss": mpss}})
+            cfg.update({"CPE_META_MPSS": {"meta": meta, "mpss": mpss}})
             save_meta_json(cfg)
 
 

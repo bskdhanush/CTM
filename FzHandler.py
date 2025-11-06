@@ -252,13 +252,14 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
             # Ensure local file exists
             if not os.path.isfile(filepath):
                 print(f"Local file not found: {filepath}")
+                log_box.insert("end",f"Local file not found: {filepath}\n")
 
             # Get local file size
             file_size = os.path.getsize(filepath)
             
 
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
-            log_box.insert("end",f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
+            log_box.insert("end",f"************************UPLOADING************************\n {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
 
             # Use standard permissions: 0644 (rw-r--r--)
             #mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
@@ -313,7 +314,7 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size > 0 else 0
                             print(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
-                            log_box.insert("end",(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps"))
+                            #log_box.insert("end",(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps"))
                             last_time = now
                             last_transferred = transferred
 

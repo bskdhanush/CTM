@@ -59,8 +59,9 @@ def create_Meta_Mpss_download(container, Pagename, device_name, download_status_
     def check_for_updates():
         # Your code here
         print("Checking for updates...")
-        checK_for_new_meta(device_name)
-        checK_for_new_CSV()
+        checK_for_new_CSV(download_status_label_update)
+        checK_for_new_meta(device_name,download_status_label_update)
+        
 
 
     def _reschedule(enable: bool) -> None:

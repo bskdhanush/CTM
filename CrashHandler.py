@@ -94,7 +94,7 @@ def create_crash_meta_info_csv(crash_info_dict):
     df.to_csv(crash_meta_info_csv, index=False)
 
     copy_csv_to_latest_folder(crash_meta_info_csv, CONTROL_BASE)
-
+   
     # display_crash_table(crash_meta_info_csv)
 
 
@@ -154,7 +154,7 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                     output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
                     if not get_zip_status(new_crash_path):
                         try:
-                            log_box.insert("end",f'Zipping {output_zip}\n')
+                            log_box.insert("end",f'**************Zipping************** \n {output_zip}\n')
                             print(f'Zipping {output_zip}')
                             zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                             subprocess.run(zip_command, capture_output=True, text=True)
@@ -170,6 +170,7 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                             remove_crash_entry(crash_path)
                     except Exception as e:
                         print(f'Exception during uploading {output_zip}: {e}')
+                    return
 
 
 def find_folder(base_path, folder_name):
@@ -194,6 +195,7 @@ def forecast_crashes(crash_dir_list):
         start_thread(crash_forecast, "Crash Dump forecast", crash_path=directory, timestamp=time_stamp)
     # if rdkb_crash_path:
     #     crash_forecast(rdkb_crash_path)  # Uncomment if needed
+    return
 
 
 def get_naming_convention():
@@ -203,10 +205,11 @@ def get_naming_convention():
     fst_id = cfg.get("fst_id", None)
     operator = cfg.get("operator", None)
     tdc_serial = cfg.get("tdc_serial", None)
+    magic_sting =cfg.get("magic_string",None) 
     # market="LV-CPE "
     # name="kiran"
     # fst_id="sdx-asdjfjsdl-7887"
-    return market, name, fst_id, operator, tdc_serial
+    return market, name, fst_id, operator, tdc_serial,magic_sting
 
 def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string=None):
     print(f'market: {market}, name: {name}, fst_id: {fst_id}, operator: {operator}, tdc_serial: {tdc_serial}')
@@ -225,11 +228,16 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_stri
         cfg["magic_string"] = magic_string
     save_prov_json(cfg)
 
-def set_naming_convention_from_crash_rename_csv():
+def set_naming_convention_from_crash_rename_csv(log_box):
     from Constants import CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
 
     market = name = fst_id = operator = tdc_serial = magic_string = None
+    
+    try:
+        log_box.insert("end", "Updating the Fields using CSV data" + "\n")
+    except Exception as e:
+        print(f"Faild to added data to log box {e}")
 
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)

@@ -10,6 +10,8 @@ from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 
+update_config_disply=None
+
 
 def getzippath(pagenme):
         filepath = QSTAFDappInstallerPage._pick_zip(pagenme)
@@ -28,10 +30,11 @@ def getFolderPath(pagename):
    
     if pagename == "Meta":
         dir = CTM_META_DIR
-    elif pagename == "MPSS":
+    elif pagename == "Mpss":
         dir = CTM_MPSS_DIR
-    else :
-         dir = "~"
+    else:
+        dir=""
+
     folderpath = filedialog.askdirectory(
         title=f"Select {pagename} folder",
         initialdir=dir
@@ -40,9 +43,9 @@ def getFolderPath(pagename):
     
 def Meta_page(parent,Pagename,device_name):
     
-    status_text = tk.StringVar(value="")
+    status_text_Meta = tk.StringVar(value="")
 
-    Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text)
+    Meta_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text_Meta)
 
     Selection_frame = ttk.LabelFrame(Meta_frame, text=f"Select Meta to install")
     Selection_frame.pack(fill="x", **PADDING) # type: ignore
@@ -65,7 +68,7 @@ def Meta_page(parent,Pagename,device_name):
         button_frame,
         text="select Meta zip to load",
         command=lambda: start_thread(load_meta_from_zip, "Meta install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(Pagename), Pgname=Pagename)
+                                    daemon=True, filepath=getzippath(Pagename), Pgname=Pagename,status_lable=status_text_Meta)
     )
     button2.pack(side="right", padx=(5, 0))
 
@@ -81,18 +84,18 @@ def Meta_page(parent,Pagename,device_name):
     Bottom_frame.pack(fill="x", **PADDING)
 
    
-    status_label = tk.Label(Bottom_frame, textvariable=status_text,
+    status_label_Meta = tk.Label(Bottom_frame, textvariable=status_text_Meta,
                             foreground="white")  # Add background color
-    status_label.pack(fill="x",side="left", padx=10, pady=(30,0))
+    status_label_Meta.pack(fill="x",side="left", padx=10, pady=(30,0))
     return Meta_frame
 
 
 
 def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
     
-    status_text = tk.StringVar(value="")
+    status_text_mpss = tk.StringVar(value="")
     
-    Mpss_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text)
+    Mpss_frame = MetaMpssDownloadSubFrame.create_Meta_Mpss_download(parent, Pagename, device_name,status_text_mpss)
     Selection_frame = ttk.LabelFrame(Mpss_frame, text=f"Select MPSS to install")
     Selection_frame.pack(fill="x", **PADDING)  # type: ignore
 
@@ -122,6 +125,7 @@ def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
             daemon=True,
             filepath=getzippath(Pagename),
             Pgname=Pagename,
+            status_lable=status_text_mpss
            # text_var=local_path   Pass the StringVar to the thread
         )
     )
@@ -132,9 +136,9 @@ def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
     Bottom_frame.pack(fill="x", **PADDING)
 
 
-    status_label = tk.Label(Bottom_frame, textvariable=status_text,
+    status_label_mpss = tk.Label(Bottom_frame, textvariable=status_text_mpss,
                             foreground="white")  # Add background color
-    status_label.pack(fill="x",side="left", padx=10, pady=(30,0))
+    status_label_mpss.pack(fill="x",side="left", padx=10, pady=(30,0))
     return Mpss_frame
 
 
@@ -206,6 +210,8 @@ def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     return NV_frame
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
+    status_text_FullPov= tk.StringVar(value="")
+    
     Full_Provisioning_frame = ttk.LabelFrame(parent, text=f"Full Provisioning")
     Full_Provisioning_frame.pack(fill="x", **PADDING)  # type: ignore
          
@@ -349,7 +355,7 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
                         callback=update_config_disply)
         elif value == 1:
             start_thread(load_meta_from_zip, "Meta update txt ZIP Thread",
-                        daemon=True, filepath=getzippath("Meta"), Pgname="",
+                        daemon=True, filepath=getzippath("Meta"), Pgname="",status_lable=status_text_FullPov,
                         callback=update_config_disply)
         elif value == 2:
             start_thread(load_mpss_from_path, "Mpss update txt Thread",
@@ -357,7 +363,7 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
                         callback=update_config_disply)
         elif value == 3:
             start_thread(load_mpss_from_zip, "Meta update txt ZIP Thread",
-                        daemon=True, filepath=getzippath("Mpss"), Pgname="",
+                        daemon=True, filepath=getzippath("Mpss"), Pgname="",status_lable=status_text_FullPov,
                         callback=update_config_disply)
 
         
@@ -374,6 +380,16 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
         command=lambda:start_thread(full_provisioning, "Full Provisioning Thread", daemon=True)
     )
     button.pack(fill="x", padx=(0, 10))
+     
+    Bottom_frame = ttk.Frame(Full_Provisioning_frame)
+    Bottom_frame.pack(fill="x", **PADDING)
+
+
+    status_label_mpss = tk.Label(Bottom_frame, textvariable=status_text_FullPov,
+                            foreground="white")  # Add background color
+    status_label_mpss.pack(fill="x",side="left", padx=10, pady=(30,0))
+    
+    
     
     return Full_Provisioning_frame
 

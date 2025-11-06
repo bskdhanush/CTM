@@ -9,6 +9,7 @@ from GUI_modules import ProvisioningNavigator
 from JsonHandler import load_prov_json, save_prov_json
 from EndToEndDevProvsioningController import get_provisioning_base
 
+
 PADDING: dict[str, int] = {"padx": 12, "pady": 2}
 
 checkFiles=["META_MPSS.txt"]
@@ -16,19 +17,20 @@ checkFiles=["META_MPSS.txt"]
 
 def set_prov_path(path_var,label):
      folderpath = ProvisioningNavigator.getFolderPath("")
-     path_var.set(folderpath)
-     label.config(foreground="white")
-     files = os.listdir(folderpath)
-     print(files)
-     for file in checkFiles:
-        if file not in files:
-                messagebox.showwarning("Invalid Path", f"The selected folder is not a valid provisioning script path.")
-                label.config(foreground="red")
-                return
+     if folderpath:
+        path_var.set(folderpath)
+        label.config(foreground="white")
+        files = os.listdir(folderpath)
+        print(files)
+        for file in checkFiles:
+            if file not in files:
+                    messagebox.showwarning("Invalid Path", f"The selected folder is not a valid provisioning script path.")
+                    label.config(foreground="red")
+                    return
 
-     cfg = load_prov_json()
-     cfg.update({"provisioning_path": folderpath})
-     save_prov_json(cfg)
+        cfg = load_prov_json()
+        cfg.update({"provisioning_path": folderpath})
+        save_prov_json(cfg)
 
 def create_device_Configuaration_page(container, pages, add_nav, device_name, mpss_id):
     section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning", "FOTA"]

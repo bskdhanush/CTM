@@ -119,7 +119,7 @@ def traffic_timeline_plot(df_all):
 
     fig = None
     try:
-        if df is not None and not df.empty:
+        if isinstance(df, pd.DataFrame) and not df.empty:
             df.columns = df.columns.str.upper()
             num_commands = df['COMMAND'].nunique()
             commands = df['COMMAND'].unique()
@@ -153,6 +153,8 @@ def traffic_indexing(csv_name, df_csv):
     """Reads Traffic CSV and Creates indexing CSV files"""
 
     df = pd.DataFrame(0, index=range(1), columns=['TOTAL', 'PASS', 'FAIL'])
+    if not isinstance(df_csv, pd.DataFrame) or df_csv.empty:
+        return df
     try:
         df['TOTAL'] = df_csv.shape[0]
         df['PASS'] = df_csv[df_csv['result'] == 'Pass'].shape[0]
@@ -202,7 +204,7 @@ def hist_plot(figsize: tuple[Literal[7], Literal[4]], df_indexing_all=None):
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
 
-    if isinstance(df_indexing_all, pd.DataFrame) and df_indexing_all.shape[0] > 0:
+    if isinstance(df_indexing_all, pd.DataFrame) and not df_indexing_all.empty:
 
         x_indices = range(len(df_indexing_all['COMMAND']))
 
@@ -302,7 +304,7 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
 
     df = get_df('\\*QSH_ENL2.csv')
     fig = None
-    if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
+    if isinstance(df, pd.DataFrame) and not df.empty:
         try:
             df['DL_UL'] = df['DIRECTION'].apply(lambda x: 0 if x == 'DL' else 1)
             df['IPA_THROUGHPUT'] = df['IPA_THROUGHPUT'] / 1000
@@ -361,6 +363,8 @@ def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
     df = get_df('\\*qstaf_monitor_connected_devices.csv')
     fig = Figure(figsize, dpi=100)
     ax = [fig.add_subplot(111)]
+    if not isinstance(df, pd.DataFrame) or df.empty:
+        return fig
     try:
         df = df[df['SSID'].str.contains('SLO|MLO|Ethernet', na=False)] # type: ignore
         df = df.sort_values(by=['TIMESTAMP']) # type: ignore
@@ -393,7 +397,7 @@ def data_call_state_plot(figsize:tuple[Literal[7], Literal[4]]):
     global backhaul_internet_status
     df = get_df('\\*qstaf_monitor.csv')
     fig = None
-    if isinstance(df, pd.DataFrame) and df.shape[0] > 0:
+    if isinstance(df, pd.DataFrame) and not df.empty:
         try:
             df['IPV4_DATACALL_STATUS'] = df['IPV4_DATACALL_STATUS'].str.replace(r'ipv4_datacall_status:\s*', '', regex=True)
             df.rename(columns={'IPV4_DATACALL_STATUS': 'BACKHAUL_STATE'}, inplace=True)
@@ -421,7 +425,7 @@ def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
 
     df = get_df('\\*QSH_FR_MODE.csv')
     fig = None
-    if df is not None:
+    if isinstance(df, pd.DataFrame) and not df.empty:
         try:
             fig = Figure(figsize, dpi=100)
             ax = [fig.add_subplot(211),

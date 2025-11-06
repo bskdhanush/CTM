@@ -33,12 +33,15 @@ def save_downloaded_meta(file_name, file_mtime):
 
 
 def check_for_new_meta(device_name, download_status_label_update):
+    #print(device_name)
 
-    if device_name==None or device_name=="":
+    if device_name==None or device_name=="UNKNOWN":
+        #print("inside the loop")
         cfg=load_meta_json()
         device_name=cfg["CPE_META_MPSS"]["meta"]
 
-        if device_name=="UNKNOWN":
+        if device_name == None:
+            #print("Returning from loop")
             return
 
     

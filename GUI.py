@@ -399,12 +399,7 @@ def launch_gui() -> None:
                         adb_label.config(foreground=red_accent)
                     else:
                         adb_var.set(str(f"ADB ID: {update['ID']}"))
-                        adb_label.config(foreground=white_accent)
-                        
-
-
-                    
-                
+                        adb_label.config(foreground=white_accent)                
         except Empty:
             pass
         finally:

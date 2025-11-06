@@ -220,9 +220,19 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     Meta_row= tk.Frame(Full_Provisioning_frame)
     Meta_row.pack(fill="x", padx=10, pady=10)
 
-    ttk.Label(Meta_row,
-              text="Select META:"
-              ).pack(side="left",padx=(10,0))
+    # to store checkbox state
+    meta_checkbox_var = tk.IntVar()
+
+    # Checkbox
+    meta_checkbox = tk.Checkbutton(
+        Meta_row,
+        selectcolor="black",
+        variable=meta_checkbox_var
+    )
+    meta_checkbox.pack(side="left", padx=(10, 5))
+
+    # Label next to checkbox
+    ttk.Label(Meta_row, text="Select META:").pack(side="left", padx=(0, 10))
     
     button = ttk.Button(
         Meta_row,
@@ -243,9 +253,20 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     Mpss_row= tk.Frame(Full_Provisioning_frame)
     Mpss_row.pack(fill="x", padx=10, pady=10)
 
+    # to store checkbox state
+    mpss_checkbox_var = tk.IntVar()
+
+    # Checkbox
+    mpss_checkbox = tk.Checkbutton(
+        Mpss_row,
+        selectcolor="black",
+        variable=mpss_checkbox_var
+    )
+    mpss_checkbox.pack(side="left", padx=(10, 5))
+
     ttk.Label(Mpss_row,
               text="Select MPSS:"
-              ).pack(side="left",padx=(10,0))
+              ).pack(side="left", padx=(0, 10))
     
     button = ttk.Button(
         Mpss_row,

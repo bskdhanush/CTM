@@ -394,7 +394,16 @@ def launch_gui() -> None:
                         RDKB_text_lbl.configure(foreground=red_accent)
 
                 elif update['type']== 'adb_id':
-                    adb_var.set(str(f"ADB ID: {update['ID']}"))
+                    if update['ID'] == "--":
+                        adb_var.set(str(f"ADB ID: {update['ID']}"))
+                        adb_label.config(foreground=red_accent)
+                    else:
+                        adb_var.set(str(f"ADB ID: {update['ID']}"))
+                        adb_label.config(foreground=white_accent)
+                        
+
+
+                    
                 
         except Empty:
             pass

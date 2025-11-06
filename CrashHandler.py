@@ -26,7 +26,7 @@ def crash_forecast(crash_path, timestamp):
             fst_id = cfg.get('fst_id', '')
             exe_name = "crash_forecast.exe"
             magic_number = CrashForecastPage.get_magic_string()
-            _, _, _, operator, _ = get_naming_convention()
+            _, _, _, operator, _, _ = get_naming_convention()
             command = [
                 f"{os.path.join(crash_forecast_exe_path, exe_name)}", # type: ignore
                 '-p', crash_path,
@@ -292,7 +292,7 @@ def get_crash_naming(orig_crash_name='', count=1):
         date_folder = date.today()
         date_folder = date_folder.strftime("%m%d%Y")
     # count = 1
-    market, name, fst_id, operator, tdc_serial = get_naming_convention()
+    market, name, fst_id, operator, tdc_serial ,magicSting= get_naming_convention()
 
     if not market:
         print('market is not valid. Pls check')

@@ -30,10 +30,16 @@ import AutoDownloader
 from JsonHandler import load_meta_json,save_meta_json
 
 load_dotenv()
-HOST = os.getenv("SFTP_HOST")
-PORT = int(os.getenv("SFTP_PORT", 22))
-USER = os.getenv("SFTP_USER")
-PASS = os.getenv("SFTP_PASS")
+# HOST = os.getenv("SFTP_HOST")
+# PORT = int(os.getenv("SFTP_PORT", 22))
+# USER = os.getenv("SFTP_USER")
+# PASS = os.getenv("SFTP_PASS")
+
+HOST = "qcstoragebayone.blob.core.windows.net"
+PORT = 22
+USER = "qcstoragebayone.srikrishna"
+PASS ="HySc3oy/Hwh3uqoY0eIpSlxB0ChVpSCN"
+
 REMOTE_PATH = "Incoming/"
 
 def connect_sftp(connect_timeout=20):

@@ -64,34 +64,33 @@ def list_files(device_filter="", pageName="", pattern=""):
     Return a list of dicts: [{'name': , 'size': , 'mtime': }...]
     Uses sftp.opendir() and handle.readdir()
     """
-
-    if device_filter =="UNKNOWN" or device_filter==None:
-        print("No device connected pulling from json")
-        cfg=load_meta_json()
-        device_filter=cfg["CPE_META_MPSS"]["meta"]
-
-        if device_filter=="UNKNOWN"or device_filter==None:
-            print("no previous meta found from Json")
-            device_filter=""
-
-        
-
-    
-    print(device_filter)
     files = []
-    keywords = []
-    if pattern is None or pattern == "":
-        if pageName == "Meta":
-            filter = device_filter.strip('"')
-            filter = filter.split('.')[0]
-            if 'kobuk' in filter.lower():
-                keywords = ["^Kobuk"]
-        elif pageName == "Mpss":
-            if device_filter and 'kobuk' in device_filter.lower():
-                keywords = ["^BF.*kobuk", "^MPSS.*kobuk", "_mbns.zip"]
-    elif pattern:
-                                   
-        keywords = [pattern]
+    try:
+        if device_filter =="UNKNOWN" or device_filter==None:
+            print("No device connected pulling from json")
+            cfg=load_meta_json()
+            device_filter=cfg["CPE_META_MPSS"]["meta"]
+
+            if device_filter=="UNKNOWN"or device_filter==None:
+                print("no previous meta found from Json")
+                device_filter=""
+
+        print(device_filter)
+        keywords = []
+        if pattern is None or pattern == "":
+            if pageName == "Meta":
+                filter = device_filter.strip('"')
+                filter = filter.split('.')[0]
+                if 'kobuk' in filter.lower():
+                    keywords = ["^Kobuk"]
+            elif pageName == "Mpss":
+                if device_filter and 'kobuk' in device_filter.lower():
+                    keywords = ["^BF.*kobuk", "^MPSS.*kobuk", "_mbns.zip"]
+        elif pattern:
+
+            keywords = [pattern]
+    except Exception as e:
+        print(f'Exception during pattern matching in list_files: {e}')
 
     try:
         sess, sftp_var, sock = connect_sftp()

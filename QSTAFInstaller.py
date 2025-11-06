@@ -41,7 +41,10 @@ def _progress(cb: ProgressCB, pct: int) -> None:
 
 def _extract_zip(src: Path, dest: Path) -> None:
     with zipfile.ZipFile(src, "r") as zf:
-        zf.extractall(dest)
+        try:
+            zf.extractall(dest)
+        except Exception as e:
+            print(f"Faild to unzip{e}")
 
 def _find_7z_exe() -> Optional[Path]:
     p = shutil.which("7z.exe") or shutil.which("7za.exe")

@@ -81,33 +81,10 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         update_row1_frame,
         text="Update Crash Rename Fields from CSV",
-        command=lambda: update_crash_rename_from_csv_button_click(),
+        command=lambda: [CrashHandler.set_naming_convention_from_crash_rename_csv(log_box), update_crash_rename_fields() ]
     ).pack(fill="x", **PADDING)  # type: ignore
 
 
-    def update_crash_rename_from_csv_button_click():
-        try:
-            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            add_log("Starting: Update Crash Rename Fields from CSV...")
-            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            
-            # Call the CrashHandler method
-            add_log("[Step 1/2] Reading crash rename CSV and fetching device info...")
-            CrashHandler.set_naming_convention_from_crash_rename_csv()
-            add_log("[Step 1/2] ✓ Successfully loaded naming convention from CSV")
-            
-            # Update the fields
-            add_log("[Step 2/2] Updating UI fields...")
-            update_crash_rename_fields()
-            add_log("[Step 2/2] ✓ UI fields updated successfully")
-            
-            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            add_log("✓ SUCCESS: All operations completed!")
-            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            
-        except Exception as e:
-            add_log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            add_log(f"✗ ERROR: {str(e)}")
 
             #messagebox.showerror("Error", f"Failed to update crash rename fields:\n{str(e)}")
 
@@ -142,7 +119,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     crash_page_main.pack(fill="x", **PADDING)  # type: ignore
 
     # Get the string values from your method
-    market_str, name_str, fstid_str, operator_str, tdc_serial_str = (
+    market_str, name_str, fstid_str, operator_str, tdc_serial_str,magicString= (
         CrashHandler.get_naming_convention()
     )  # Fixed: added closing parenthesis
 
@@ -196,15 +173,17 @@ def create_crash_forecast_page(container, pages, add_nav):
     ).grid(row=1, column=2, sticky="ew", **PADDING)  # type: ignore
 
     def update_crash_rename_fields():
-        market_str, name_str, fstid_str, operator_str, tdc_serial_str = (
+        
+        market_str, name_str, fstid_str, operator_str, tdc_serial_str,magicString= (
             CrashHandler.get_naming_convention()
         )  # Fixed: added closing parenthesis
-
+        
         market_var.set(market_str)  # type: ignore
         naming_var.set(name_str)  # type: ignore
         tdc_serial_var.set(tdc_serial_str)  # type: ignore
         operator_var.set(operator_str)  # type: ignore
         fst_id_var.set(fstid_str)  # type: ignore
+        path_var.set(magicString)
 
     ########################################################################
 
@@ -288,11 +267,12 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         buttons_frame,
         text="Crash Forecast",
-        command=lambda: [
-            CrashHandler.forecast_crashes(get_selected_crash_paths()),
-            load_crash_table(),
-        ],
+        command=lambda:crash_forecast_updateTable()
     ).grid(row=0, column=0, sticky="w", **PADDING)  # type: ignore
+     
+    def crash_forecast_updateTable():
+           CrashHandler.forecast_crashes(get_selected_crash_paths()),
+           load_crash_table()
 
     # 2nd button
     ttk.Button(
@@ -303,9 +283,13 @@ def create_crash_forecast_page(container, pages, add_nav):
             "Zip and upload thread",
             daemon=True,
             crash_dir_list=get_selected_crash_paths(),  
-            log_box=log_box
+            log_box=log_box,
+            callback=load_crash_table(),
         ),
     ).grid(row=0, column=1, sticky="e", **PADDING)  # type: ignore
+    
+   
+        
 
     # 3rd button
     ttk.Button(
@@ -323,6 +307,7 @@ def create_crash_forecast_page(container, pages, add_nav):
             "Delete Crash entries thread",
             daemon=True,
             filepaths=get_selected_crash_paths(),
+            callback=load_crash_table(),
         ),
     ).grid(row=0, column=3, pady=8)
 

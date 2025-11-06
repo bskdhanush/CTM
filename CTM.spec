@@ -5,7 +5,7 @@ a = Analysis(
     ['MainController.py'],
     pathex=[],
     binaries=[],
-    datas=[('config', 'config'), ('GUI_modules', 'GUI_modules'), ('.env', '.env')],
+    datas=[('config', 'config'), ('GUI_modules', 'GUI_modules')],
     hiddenimports=['ssh2', 'ssh2.agent', 'ssh2.channel', 'ssh2.error_codes', 'ssh2.exceptions', 'ssh2.fileinfo', 'ssh2.knownhost', 'ssh2.listener', 'ssh2.pkey', 'ssh2.publickey', 'ssh2.session', 'ssh2.sftp', 'ssh2.sftp_handle', 'ssh2.statinfo', 'ssh2.utils'],
     hookspath=[],
     hooksconfig={},

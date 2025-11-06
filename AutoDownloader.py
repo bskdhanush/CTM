@@ -5,6 +5,7 @@ from Constants import CTM_BASE_DIR
 import FzHandler 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
 from CrashHandler import set_naming_convention_from_crash_rename_csv
+from GUI_modules import CrashForecastPage
 
 
 
@@ -31,7 +32,7 @@ def save_downloaded_meta(file_name, file_mtime):
 
 
 
-def checK_for_new_meta(device_name):
+def checK_for_new_meta(device_name,download_status_label_update):
 
     if device_name==None or device_name=="":
         cfg=load_meta_json()
@@ -42,7 +43,7 @@ def checK_for_new_meta(device_name):
 
     
     files_list = FzHandler.list_files(device_name, "Meta", "")  # Meta enables only auto download for Meta only 
-    print(f"found LISt: {files_list}")
+    #print(f"found LISt: {files_list}")
 
     # Time threshold for 24 hours
     now = datetime.now()
@@ -55,7 +56,7 @@ def checK_for_new_meta(device_name):
 
         downloaded_meta, cfg = get_downloaded_lsit()
 
-        print(f"Checking {file_name}")
+        print(f"Checking {file_name , file_mtime}")
         
         # Check if file is already in downloaded list
         if file_name in downloaded_meta:
@@ -75,27 +76,31 @@ def checK_for_new_meta(device_name):
         if file_size >= 1.5 * 1024**3 and file_mtime > time_24hrs_ago:
             try:
                 print(f"Downloading meta: {file_name}")
-                FzHandler.download_file(file_name, load_prov_json().get("Meta_path"), "Meta", file_info["mtime"])
+                #download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp)
+                FzHandler.download_file(file_name, load_prov_json().get("Meta_path"),"Meta",download_status_label_update, file_info["mtime"])
                 # Save with string format of mtime
                 #save_downloaded_meta(file_name, file_info["mtime"])
             except Exception as e:
                 print(f"Download failed for {file_name}, not saving metadata:", e)
   
 
-def checK_for_new_CSV():
-    files_list=FzHandler.list_files("CrashRenamingMetaInfo.csv", "Meta","") # here Meta we can search whole incomming
+def checK_for_new_CSV(download_status_label_update):
+    files_list=FzHandler.list_files("", "Meta","CrashRenamingMetaInfo.csv") # here Meta we can search whole incomming
     d,cfg= get_downloaded_lsit()
-
+    print(f"serverTime stamp :{files_list[0]["mtime"]} \n json time stamp:{cfg["CSV"]}")
+    
+    #print(files_list)
     if files_list[0]["mtime"]> cfg["CSV"]:
         print(files_list[0]["mtime"],cfg["CSV"])
         try:
-            FzHandler.download_file(files_list[0]["name"],CTM_BASE_DIR, "", "")
+            #download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp)
+            FzHandler.download_file(files_list[0]["name"],CTM_BASE_DIR, "",download_status_label_update,"")
         except Exception as e:
             print(f"Exception during download_file: {e}")
         else:
             try:
                 cfg.update({"CSV":files_list[0]["mtime"]})
                 save_meta_json(cfg)
-                set_naming_convention_from_crash_rename_csv()
+                set_naming_convention_from_crash_rename_csv(CrashForecastPage.log_box)
             except Exception as e:
                 print(f"Exception during set_naming_convention_from_crash_rename_csv: {e}")

@@ -14,7 +14,7 @@ def _pick_zip(pagename) -> str:
     from Constants import CTM_META_DIR, CTM_MPSS_DIR
     if pagename == "Meta":
         dir = CTM_META_DIR
-    elif pagename == "MPSS":
+    elif pagename == "Mpss":
         dir = CTM_MPSS_DIR
     else:
       dir = "~"

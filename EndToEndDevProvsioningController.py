@@ -100,7 +100,7 @@ def load_meta_from_path(filepath,Pgname):
         if Pgname:
             trigger_prov_meta(PROV_BASE)
 
-def load_meta_from_zip(filepath,Pgname):
+def load_meta_from_zip(filepath,Pgname,status_lable):
     if filepath == "":
         return
     # Extract META zip, update META_MPSS.txt and trigger load
@@ -117,16 +117,27 @@ def load_meta_from_zip(filepath,Pgname):
 
         remove_dir(META_PATH)
         os.makedirs(META_PATH)
-        
+        status_lable.set(f"Pls wait,Unzipping META to: {filepath}")
         if filepath.endswith(".7z"):
-            print("Starting 7z extraction... This may take several minutes for large files")
-            QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_META_DIR))
-            print("Extraction completed")
+            try:
+                print("Starting 7z extraction... This may take several minutes for large files")
+                QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_META_DIR))
+                status_lable.set("Extraction completed")
+            except Exception as e:   
+                status_lable.set(f"faild to unzip {e}")
+                return
         elif filepath.endswith(".zip"):
-            QSTAFInstaller._extract_zip(filepath, Path(CTM_META_DIR))
+            try:
+                QSTAFInstaller._extract_zip(filepath, Path(CTM_META_DIR))
+                status_lable.set("Extraction completed")
+            except Exception as e:   
+                status_lable.set(f"faild to unzip {e}")
+                return
+                
         update_meta_in_config(META_PATH, META_MPSS_TXT)
         # if its from meta triger else just update the meta_mpss_txt
-        print(Pgname)
+        #print(Pgname)
+        status_lable.set(f"Unzipping Done")
         if Pgname:
             trigger_prov_meta(PROV_BASE)
 
@@ -143,7 +154,7 @@ def load_mpss_from_path(filepath,Pgname):
         if Pgname:
             trigger_prov_mpss(PROV_BASE)
 
-def load_mpss_from_zip(filepath,Pgname):
+def load_mpss_from_zip(filepath,Pgname,status_lable):
     if filepath=="":
         return
     # Extract MPSS zip, update META_MPSS.txt and trigger load
@@ -159,13 +170,25 @@ def load_mpss_from_zip(filepath,Pgname):
         MPSS_PATH = os.path.join(CTM_MPSS_DIR, MPSS_ID)
         remove_dir(MPSS_PATH)
         os.makedirs(MPSS_PATH)
+        status_lable.set(f"Pls wait,Unzipping Mpss to: {filepath}")
 
         if filepath.endswith(".7z"):
-            print("Starting 7z extraction... This may take several minutes for large files")
-            QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_MPSS_DIR))
-            print("Extraction completed")
+            try:
+                print("Starting 7z extraction... This may take several minutes for large files")
+                QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_MPSS_DIR))
+                status_lable.set("Extraction completed")
+            except Exception as e:   
+                status_lable.set(f"faild to unzip {e}")
+                return
+                
         elif filepath.endswith(".zip"):
-            QSTAFInstaller._extract_zip(filepath, Path(CTM_MPSS_DIR))
+            try:
+                QSTAFInstaller._extract_zip(filepath, Path(CTM_MPSS_DIR))
+                status_lable.set(f"Unzipping Done")
+            except Exception as e:
+                status_lable.set(f"faild to unzip {e}")
+                return
+                
         update_mpss_in_config(MPSS_PATH, META_MPSS_TXT)
         # if its from Mpss triger else just update the meta_mpss_txt
         if Pgname:

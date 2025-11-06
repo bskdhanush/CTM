@@ -60,7 +60,7 @@ def get_df(csv_type):
         df.columns = df.columns.str.upper()
         if 'TIMESTAMP' in df:
             df['TIMESTAMP'] = pd.to_datetime(df['TIMESTAMP']).dt.strftime('%H:%M:%S')
-        df = df.sort_values(by=['TIMESTAMP'])
+            df = df.sort_values(by=['TIMESTAMP'])
     return df
 
 ################### TRAFFIC CSV PROCESSING START #######################################
@@ -328,34 +328,24 @@ def ipa_thruput_plot(figsize: tuple[Literal[7], Literal[4]]):
 def speedtest_plot(figsize:tuple[Literal[7], Literal[4]]):
     """Generate Speedtest plot from QSTAFonDevice based on df at CTM_LOGS_DIR"""
     df = get_df('\\*vpid1111_seqno1_SpeedTest.csv')
-    fig = Figure(figsize, dpi=100)
-    ax = [fig.add_subplot(111)]
-    if not isinstance(df, pd.DataFrame) or df.empty:
+    if isinstance(df, pd.DataFrame) and not df.empty:
+        fig = Figure(figsize, dpi=100)
+        ax = [fig.add_subplot(111)]
+        try:
+            df = df.sort_values(by=['END_TIME'])
+
+            fig = Figure(figsize, dpi=100)
+            ax = [fig.add_subplot(111)]
+
+            ax[0].scatter(df['END_TIME'], df['DOWNLOAD_SPEED_MBPS'])
+            ax[0].set_title('SPEED_TEST')
+            ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
+            fig.autofmt_xdate()
+            fig.tight_layout()
+
+        except Exception as e:
+            print(f'Exception during speedtest_plot: {e}')
         return fig
-    try:
-        df = df.sort_values(by=['end_time'])
-
-        # Group the data by the 'color' column
-        for label, group in df.groupby('SSID'):
-            ax[0].plot(
-                group['TIMESTAMP'],
-                group['NO_OF_CLIENTS'],
-                label=label,
-                marker='o',
-                linestyle='-'
-            )
-
-        # Set title and labels
-        ax[0].set_title('WifiClients')
-        ax[0].set_xlabel('TIMESTAMP')
-        ax[0].set_ylabel('NO_OF_CLIENTS')
-        ax[0].legend(title='SSID')
-        ax[0].xaxis.set_major_locator(mdates.AutoDateLocator(maxticks=6))
-        fig.autofmt_xdate()
-
-    except Exception as e:
-        print(f'Exception during speedtest_plot: {e}')
-    return fig
 
 def wifi_clients_plot(figsize:tuple[Literal[7], Literal[4]]):
     """Generate wifi_clients plot from QSTAFonDevice based on df at CTM_LOGS_DIR"""

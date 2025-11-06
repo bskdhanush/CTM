@@ -329,7 +329,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     def load_crash_table():
         """Read CSV and populate the table."""
         try:
-            crash_meta_csv = os.path.join(CTM_LOGS_DIR, "CrashRenamingMetaInfo.csv")
+            crash_meta_csv = os.path.join(CTM_LOGS_DIR, "CrashMetaInfo.csv")
             df = pd.DataFrame()
             if os.path.exists(crash_meta_csv):
                 df = pd.read_csv(crash_meta_csv)

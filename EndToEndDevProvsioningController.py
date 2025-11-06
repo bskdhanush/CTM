@@ -6,10 +6,21 @@ import shutil
 import QSTAFInstaller
 import py7zr
 from pathlib import Path
-from WifiController import get_adb_id, run_command
+from WifiController import get_adb_id, run_command, get_meta_build_info
 from JsonHandler import load_prov_json
 from Constants import CTM_META_DIR, CTM_MPSS_DIR
 
+
+def get_project_name():
+    project = None
+    meta_build = get_meta_build_info()
+    if isinstance(meta_build, str) and 'kobuk' in meta_build.lower():
+        project = "2"
+    elif isinstance(meta_build, str) and 'pinnacles' in meta_build.lower():
+        project = "1"
+    else:
+        print("Kobuk or Pinnacles Meta NOT detected from device")
+    return project
 
 def get_provisioning_base():
     cfg = load_prov_json()
@@ -27,30 +38,58 @@ def remove_dir(dir):
             print(f'Exception during remove_dir({dir}): {e}')
 
 def update_mpss_in_config(mpss_path, meta_mpss_txt):
-    with open(meta_mpss_txt, 'r') as f:
-        lines = f.readlines()
-    with open(meta_mpss_txt, 'w') as f:
-        for line in lines:
-            m = re.search(r'(.*KOBUK_MPSS\s*=\s*).*(\s*)', line)
-            if m:
-                f.write(f'{m.group(1)}{mpss_path}{m.group(2)}')
-            else:
-                f.write(line)
+    meta_build = get_meta_build_info()
+    pattern = None
+    if meta_build:
+        if 'kobuk' in meta_build.lower():
+            pattern = "(.*KOBUK_MPSS\s*=\s*).*(\s*)"
+        elif 'pinnacles' in meta_build.lower():
+            pattern = "(.*PINNACLES_MPSS\s*=\s*).*(\s*)"
+
+        if pattern:
+            with open(meta_mpss_txt, 'r') as f:
+                lines = f.readlines()
+            with open(meta_mpss_txt, 'w') as f:
+                for line in lines:
+                    # m = re.search(r'(.*KOBUK_MPSS\s*=\s*).*(\s*)', line)
+                    m = re.search(f'{pattern}', line)
+                    if m:
+                        f.write(f'{m.group(1)}{mpss_path}{m.group(2)}')
+                    else:
+                        f.write(line)
+        else:
+            print(f"update_mpss_in_config: pattern not found in {meta_mpss_txt}")
+    else:
+        print("update_mpss_in_config: MPSS Build info not found")
 
 def update_meta_in_config(meta_path, meta_mpss_txt):
-    with open(meta_mpss_txt, 'r') as f:
-        lines = f.readlines()
-    with open(meta_mpss_txt, 'w') as f:
-        for line in lines:
-            m = re.search(r'(.*KOBUK_META\s*=\s*).*(\s*)', line)
-            if m:
-                f.write(f'{m.group(1)}{meta_path}{m.group(2)}')
-            else:
-                f.write(line)
+    meta_build = get_meta_build_info()
+    pattern = None
+    if meta_build:
+        if 'kobuk' in meta_build.lower():
+            pattern = "(.*KOBUK_META\s*=\s*).*(\s*)"
+        elif 'pinnacles' in meta_build.lower():
+            pattern = "(.*PINNACLES_META\s*=\s*).*(\s*)"
+
+        if pattern:
+            with open(meta_mpss_txt, 'r') as f:
+                lines = f.readlines()
+            with open(meta_mpss_txt, 'w') as f:
+                for line in lines:
+                    # m = re.search(r'(.*KOBUK_META\s*=\s*).*(\s*)', line)
+                    m = re.search(f"{pattern}", line)
+                    if m:
+                        f.write(f'{m.group(1)}{meta_path}{m.group(2)}')
+                    else:
+                        f.write(line)
+        else:
+            print(f"update_meta_in_config: pattern not found in {meta_mpss_txt}")
+    else:
+        print("update_meta_in_config: Meta Build info not found")
 
 def load_meta_from_path(filepath,Pgname):
     # Update filepath for Meta in META_MPSS.txt and trigger load
-    if filepath=="":
+    if filepath == "":
         return
     PROV_BASE = get_provisioning_base()
     if PROV_BASE:
@@ -135,42 +174,48 @@ def load_mpss_from_zip(filepath,Pgname):
 def trigger_prov_mpss(PROV_BASE):
     os.chdir(PROV_BASE)
     remove_dir(os.path.join(PROV_BASE, 'MPSS'))
+    project = get_project_name()
+    adb_id = None
     try:
         adb_id = get_adb_id()
     except Exception as e:
         print(f'Exception during get_adb_id: {e}')
-    remove_dir(os.path.join(PROV_BASE, adb_id)) # type: ignore
+    if adb_id and project:
+        remove_dir(os.path.join(PROV_BASE, adb_id)) # type: ignore
 
-    command = [
-        'python', 'End_to_End_device_configuration.py',
-        "--project", "2",
-        "--option", "3",
-        "--meta_option", "2",
-        "--device_serial", "m"
-    ]
-    subprocess.run(command, shell=True)
-    print("MPSS Upgrade launched in a new cmd prompt")
+        command = [
+            'python', 'End_to_End_device_configuration.py',
+            "--project", project,
+            "--option", "3",
+            "--meta_option", "2",
+            "--device_serial", "m"
+        ]
+        subprocess.run(command, shell=True)
+        print("MPSS Upgrade launched in a new cmd prompt")
 
 def trigger_prov_meta(PROV_BASE):
-    os.chdir(PROV_BASE)
-    command = [
-        'python', 'End_to_End_device_configuration.py',
-        "--project", "2",
-        "--option", "2",
-        "--meta_option", "2",
-        "--device_serial", "m"
-    ]
-    subprocess.run(command, shell=True)
-    print("Meta Upgrade launched in a new cmd prompt")
-
-
-def load_qcn():
-    PROV_BASE = get_provisioning_base()
-    if PROV_BASE:
+    project = get_project_name()
+    if project:
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
-            "--project", "2",
+            "--project", project,
+            "--option", "2",
+            "--meta_option", "2",
+            "--device_serial", "m"
+        ]
+        subprocess.run(command, shell=True)
+        print("Meta Upgrade launched in a new cmd prompt")
+
+
+def load_qcn():
+    project = get_project_name()
+    PROV_BASE = get_provisioning_base()
+    if PROV_BASE and project:
+        os.chdir(PROV_BASE)
+        command = [
+            'python', 'End_to_End_device_configuration.py',
+            "--project", project,
             "--option", "4",
             "--meta_option", "2",
             "--device_serial", "m"
@@ -191,8 +236,9 @@ def update_mbn_in_config(mbn, meta_mpss_txt):
                 f.write(line)
 
 def activate_mbn(operator,Pgname):
+    project = get_project_name()
     PROV_BASE = get_provisioning_base()
-    if PROV_BASE:
+    if PROV_BASE and project:
         META_MPSS_TXT = os.path.join(PROV_BASE, 'META_MPSS.txt')
         os.chdir(PROV_BASE)
         operator_dict = {
@@ -205,7 +251,7 @@ def activate_mbn(operator,Pgname):
             if Pgname:
                 command = [
                     'python', 'End_to_End_device_configuration.py',
-                    "--project", "2",
+                    "--project", project,
                     "--option", "5",
                     "--meta_option", "2",
                     "--device_serial", "m"
@@ -217,12 +263,13 @@ def deactivate_mbn():
     pass
     
 def write_nv():
+    project = get_project_name()
     PROV_BASE = get_provisioning_base()
-    if PROV_BASE:
+    if PROV_BASE and project:
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
-            "--project", "2",
+            "--project", project,
             "--option", "6",
             "--meta_option", "2",
             "--device_serial", "m"
@@ -231,12 +278,13 @@ def write_nv():
         print("NV Load launched in a new cmd prompt")
     
 def full_provisioning():
+    project = get_project_name()
     PROV_BASE = get_provisioning_base()
-    if PROV_BASE:
+    if PROV_BASE and project:
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
-            "--project", "2",
+            "--project", project,
             "--option", "2,3,4,5,6",
             "--meta_option", "2",
             "--device_serial", "m"
@@ -247,8 +295,9 @@ def full_provisioning():
 def load_fota(filepath):
     # Push FOTA zip to device and trigger load in recovery mode
     print(f"FOTA Zip: {filepath}")
+    project = get_project_name()
     PROV_BASE = get_provisioning_base()
-    if PROV_BASE:
+    if PROV_BASE and project == '2':
         os.chdir(PROV_BASE)
         if not os.path.exists('command'):
             print(f'FOTA-command does not exist in {PROV_BASE}. Please check.')
@@ -279,7 +328,7 @@ def get_data_Meta_Mpss_txt():
                         key, value = line.split('=', 1)  # Split at first '='
                         config[key.strip()] = value.strip()
         except Exception as e:
-            print(f'No path selected for POV : {e}')
+            print(f'No path selected for Provisioning : {e}')
     
     return config
 

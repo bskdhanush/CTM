@@ -324,9 +324,18 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     # Update function just changes the StringVar values
     def update_config_disply():
         config = get_data_Meta_Mpss_txt()
-        meta_var.set(f"Meta selected :- {config.get('DE9.0_KOBUK_META', 'N/A')}")
-        mpss_var.set(f"MPSS selected :- {config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
-        mbn_var.set(f"MBN selected  :- {config.get('MBN_SW', 'N/A')}")
+        from WifiController import get_meta_build_info
+        meta_build = get_meta_build_info()
+
+        if isinstance(meta_build, str) and 'kobuk' in meta_build.lower():
+            meta_var.set(f"Meta selected :- {config.get('DE9.0_KOBUK_META', 'N/A')}")
+            mpss_var.set(f"MPSS selected :- {config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
+            mbn_var.set(f"MBN selected  :- {config.get('MBN_SW', 'N/A')}")
+
+        elif isinstance(meta_build, str) and 'pinnacles' in meta_build.lower():
+            meta_var.set(f"Meta selected :- {config.get('DE7.0_PINNACLES_META', 'N/A')}")
+            mpss_var.set(f"MPSS selected :- {config.get('DE7.0_PINNACLES_MPSS', 'N/A')}")
+            mbn_var.set(f"MBN selected  :- {config.get('MBN_SW', 'N/A')}")
 
 
     # Initial call

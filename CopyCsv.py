@@ -205,7 +205,7 @@ def copy_csv_to_latest_folder(csv, base_dir):
             dest_folder = os.path.dirname(csv_files[0])
             print(f'Copying {csv} to {dest_folder}')
             shutil.copy(csv, dest_folder)
-            os.rename(os.path.join(dest_folder, 'CrashRenamingMetaInfo.csv'), os.path.join(dest_folder, f'{prefix}_CrashRenamingMetaInfo.csv'))
+            os.rename(os.path.join(dest_folder, 'CrashMetaInfo.csv'), os.path.join(dest_folder, f'{prefix}_CrashMetaInfo.csv'))
             
 if __name__ == '__main__':
     copy_csv_main()

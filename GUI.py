@@ -240,17 +240,17 @@ def launch_gui() -> None:
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
     
     def get_crash_count_json():
-        cfg =load_json()
-        noramlCrashCount=cfg["crash_counter"]
-        RDKBCrashCount=cfg["rdkbcrash_counter"]
-        if noramlCrashCount >0:
+        cfg = load_json()
+        noramlCrashCount = cfg.get("crash_counter", 0)
+        RDKBCrashCount = cfg.get("rdkbcrash_counter", 0)
+        if noramlCrashCount > 0:
             crash_var.set(noramlCrashCount)
             crash_lbl.config(foreground=red_accent)
             crash_text_lbl.configure(foreground=red_accent)
         else:
             crash_var.set(noramlCrashCount)
             
-        if RDKBCrashCount> 0:
+        if RDKBCrashCount > 0:
             RDKB_var.set(RDKBCrashCount)
             RDKB_lbl.config(foreground=red_accent)
             RDKB_text_lbl.configure(foreground=red_accent)

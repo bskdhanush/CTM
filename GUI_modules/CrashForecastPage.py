@@ -219,10 +219,30 @@ def create_crash_forecast_page(container, pages, add_nav):
     separator.pack(fill="both", expand=False, padx=20, pady=(12, 0))
 
     # ===== CRASH TABLE SECTION =====
-    Crash_table = ttk.LabelFrame(crash_page_main, text="Crash Table")
+    Crash_table = ttk.Frame(crash_page_main, border=1) 
     Crash_table.pack(fill="both", expand=False, **PADDING)
 
-    Crash_table.rowconfigure(0, weight=0)
+    # Create header frame
+    header_frame = ttk.Frame(Crash_table)
+    header_frame.grid(row=0, column=0, columnspan=2, sticky="ew")  # Use grid instead of pack
+
+    header_frame.columnconfigure(1, weight=1)  # Spacer column expands
+
+    # Left side - "Crash Table" label
+    header_label = ttk.Label(header_frame, text="Crash Table")
+    header_label.grid(row=0, column=0, sticky="w", padx=5, pady=5)
+
+    # Right side - text label
+    auto_forecastText= ttk.Label(header_frame, text="Enable/Disable Auto-ForeCast: ")
+    auto_forecastText.grid(row=0, column=2, sticky="e", padx=(5, 2))
+
+    # Right side - checkbox (rightmost)
+    checkbox_var = tk.BooleanVar()
+    auto_forecastCheckBox = ttk.Checkbutton(header_frame, variable=checkbox_var)
+    auto_forecastCheckBox.grid(row=0, column=3, sticky="e", padx=(0, 5))
+
+    # Configure grid for Crash_table
+    Crash_table.rowconfigure(1, weight=1)  # Tree row expands
     Crash_table.rowconfigure(2, weight=0)
     Crash_table.columnconfigure(0, weight=1)
 
@@ -241,7 +261,7 @@ def create_crash_forecast_page(container, pages, add_nav):
     tree.heading("TIMESTAMP", text="TIMESTAMP")
     tree.heading("FST_ID", text="FST_ID")
 
-    tree.column("ROOT_CAUSE", width=170, anchor="center")
+    tree.column("ROOT_CAUSE", width=170, anchor="center") 
     tree.column("ADB_ID", width=120, anchor="center")
     tree.column("CRASH_PATH", width=120, anchor="center")
     tree.column("TIMESTAMP", width=140, anchor="center")
@@ -250,8 +270,8 @@ def create_crash_forecast_page(container, pages, add_nav):
     vscroll = ttk.Scrollbar(Crash_table, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vscroll.set)
 
-    tree.grid(row=0, column=0, sticky="nsew")
-    vscroll.grid(row=0, column=1, sticky="ns")
+    tree.grid(row=1, column=0, sticky="nsew")
+    vscroll.grid(row=1, column=1, sticky="ns")
 
     buttons_frame = ttk.Frame(Crash_table)
     buttons_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=(6, 0))
@@ -260,7 +280,6 @@ def create_crash_forecast_page(container, pages, add_nav):
     buttons_frame.columnconfigure(1, weight=0)
     buttons_frame.columnconfigure(2, weight=1)
     buttons_frame.columnconfigure(3, weight=0)
-
     def load_crash_table():
         try:
             crash_meta_csv = os.path.join(CTM_LOGS_DIR, "CrashMetaInfo.csv")

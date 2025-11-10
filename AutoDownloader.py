@@ -9,9 +9,9 @@ from GUI_modules import CrashForecastPage
 
 
 
-def get_downloaded_lsit():
+def get_downloaded_list():
     """Load downloaded files from JSON"""
-    cfg =(load_meta_json())
+    cfg = (load_meta_json())
     downloaded_meta = cfg.get("Meta", {})
     
     return downloaded_meta, cfg
@@ -20,7 +20,7 @@ def get_downloaded_lsit():
 
 def save_downloaded_meta(file_name, file_mtime):
     """Save file name with modification time"""
-    downloaded_meta, cfg = get_downloaded_lsit()
+    downloaded_meta, cfg = get_downloaded_list()
     
     # Update Meta dictionary with filename and mtime
     if "Meta" not in cfg:
@@ -32,13 +32,16 @@ def save_downloaded_meta(file_name, file_mtime):
 
 
 
-def checK_for_new_meta(device_name,download_status_label_update):
+def check_for_new_meta(device_name, download_status_label_update):
+    #print(device_name)
 
-    if device_name==None or device_name=="":
+    if device_name==None or device_name=="UNKNOWN":
+        #print("inside the loop")
         cfg=load_meta_json()
         device_name=cfg["CPE_META_MPSS"]["meta"]
 
-        if device_name=="UNKNOWN":
+        if device_name == None:
+            #print("Returning from loop")
             return
 
     
@@ -54,7 +57,7 @@ def checK_for_new_meta(device_name,download_status_label_update):
         file_size = file_info["size"]
         file_mtime = datetime.strptime(file_info["mtime"], "%Y-%m-%d %H:%M:%S")
 
-        downloaded_meta, cfg = get_downloaded_lsit()
+        downloaded_meta, cfg = get_downloaded_list()
 
         print(f"Checking {file_name , file_mtime}")
         
@@ -84,23 +87,27 @@ def checK_for_new_meta(device_name,download_status_label_update):
                 print(f"Download failed for {file_name}, not saving metadata:", e)
   
 
-def checK_for_new_CSV(download_status_label_update):
-    files_list=FzHandler.list_files("", "Meta","CrashRenamingMetaInfo.csv") # here Meta we can search whole incomming
-    d,cfg= get_downloaded_lsit()
-    print(f"serverTime stamp :{files_list[0]["mtime"]} \n json time stamp:{cfg["CSV"]}")
-    
-    #print(files_list)
-    if files_list[0]["mtime"]> cfg["CSV"]:
-        print(files_list[0]["mtime"],cfg["CSV"])
-        try:
-            #download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp)
-            FzHandler.download_file(files_list[0]["name"],CTM_BASE_DIR, "",download_status_label_update,"")
-        except Exception as e:
-            print(f"Exception during download_file: {e}")
-        else:
+def check_for_new_csv(download_status_label_update):
+    try:
+        files_list = FzHandler.list_files("", "Meta","CrashRenamingMetaInfo.csv") # here Meta we can search whole incomming
+        d, cfg = get_downloaded_list()
+    except Exception as e:
+        print(f'Exception during list_files in check_for_new_csv: {e}')
+    if files_list:
+        print(f"serverTime stamp :{files_list[0]["mtime"]} \n json time stamp:{cfg["CSV"]}")
+
+        #print(files_list)
+        if files_list[0]["mtime"]> cfg["CSV"]:
+            print(files_list[0]["mtime"],cfg["CSV"])
             try:
-                cfg.update({"CSV":files_list[0]["mtime"]})
-                save_meta_json(cfg)
-                set_naming_convention_from_crash_rename_csv(CrashForecastPage.log_box)
+                #download_file(remote_filename, local_dir, PageName:str, download_status_label_update, timestamp)
+                FzHandler.download_file(files_list[0]["name"],CTM_BASE_DIR, "",download_status_label_update,"")
             except Exception as e:
-                print(f"Exception during set_naming_convention_from_crash_rename_csv: {e}")
+                print(f"Exception during download_file: {e}")
+            else:
+                try:
+                    cfg.update({"CSV":files_list[0]["mtime"]})
+                    save_meta_json(cfg)
+                    set_naming_convention_from_crash_rename_csv(CrashForecastPage.log_box)
+                except Exception as e:
+                    print(f"Exception during set_naming_convention_from_crash_rename_csv: {e}")

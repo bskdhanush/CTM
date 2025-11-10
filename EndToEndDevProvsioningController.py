@@ -300,15 +300,21 @@ def write_nv():
         subprocess.run(command, shell=True)
         print("NV Load launched in a new cmd prompt")
     
-def full_provisioning():
+def full_provisioning(meta_selection=True, mpss_selection=True):
     project = get_project_name()
     PROV_BASE = get_provisioning_base()
+    option = ""
+    if meta_selection:
+        option = "2,"
+    if mpss_selection:
+        option = f"{option}3,"
+    option = f"{option}4,5,6"
     if PROV_BASE and project:
         os.chdir(PROV_BASE)
         command = [
             'python', 'End_to_End_device_configuration.py',
             "--project", project,
-            "--option", "2,3,4,5,6",
+            "--option", option,
             "--meta_option", "2",
             "--device_serial", "m"
         ]
@@ -355,4 +361,23 @@ def get_data_Meta_Mpss_txt():
     
     return config
 
+def get_device_config_txt():
+    config = {}
+    adb_id = get_adb_id()
+    PROV_BASE = get_provisioning_base()
+    if PROV_BASE and adb_id:
+        CONFIG_TXT = os.path.join(PROV_BASE, 'QCN', adb_id, 'config.txt')
+        try:
+            with open(CONFIG_TXT, 'r') as file:
+                for line in file:
+                    line = line.strip()  # Remove whitespace
+                    if ':' in line:  # Check if line contains '='
+                        key, value = line.split(':', 1)  # Split at first '='
+                        config[key.strip()] = value.strip()
+        except Exception as e:
+            print(f'No path selected for Provisioning : {e}')
+    else:
+        print(f'Valid PROV_BASE or adb_id not found')
+
+    return config
   

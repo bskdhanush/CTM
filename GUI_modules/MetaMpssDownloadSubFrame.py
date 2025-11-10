@@ -7,8 +7,8 @@ from tkinter import messagebox
 import customtkinter as ctk
 import schedule
 
-from JsonHandler import load_cfg,load_prov_json, save_json
-from AutoDownloader import checK_for_new_meta,checK_for_new_CSV
+from JsonHandler import load_cfg, save_json
+from AutoDownloader import check_for_new_meta, check_for_new_csv
 import FzHandler
 from Threading import start_thread
 
@@ -59,8 +59,8 @@ def create_Meta_Mpss_download(container, Pagename, device_name, download_status_
     def check_for_updates():
         # Your code here
         print("Checking for updates...")
-        checK_for_new_CSV(download_status_label_update)
-        checK_for_new_meta(device_name,download_status_label_update)
+        check_for_new_csv(download_status_label_update)
+        check_for_new_meta(device_name,download_status_label_update)
         
 
 

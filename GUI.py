@@ -240,17 +240,17 @@ def launch_gui() -> None:
     ).grid(row=2, column=3, columnspan=2, sticky="e", padx=20, pady=5)
     
     def get_crash_count_json():
-        cfg =load_json()
-        noramlCrashCount=cfg["crash_counter"]
-        RDKBCrashCount=cfg["rdkbcrash_counter"]
-        if noramlCrashCount >0:
+        cfg = load_json()
+        noramlCrashCount = cfg.get("crash_counter", 0)
+        RDKBCrashCount = cfg.get("rdkbcrash_counter", 0)
+        if noramlCrashCount > 0:
             crash_var.set(noramlCrashCount)
             crash_lbl.config(foreground=red_accent)
             crash_text_lbl.configure(foreground=red_accent)
         else:
             crash_var.set(noramlCrashCount)
             
-        if RDKBCrashCount> 0:
+        if RDKBCrashCount > 0:
             RDKB_var.set(RDKBCrashCount)
             RDKB_lbl.config(foreground=red_accent)
             RDKB_text_lbl.configure(foreground=red_accent)
@@ -394,8 +394,12 @@ def launch_gui() -> None:
                         RDKB_text_lbl.configure(foreground=red_accent)
 
                 elif update['type']== 'adb_id':
-                    adb_var.set(str(f"ADB ID: {update['ID']}"))
-                
+                    if update['ID'] == "--":
+                        adb_var.set(str(f"ADB ID: {update['ID']}"))
+                        adb_label.config(foreground=red_accent)
+                    else:
+                        adb_var.set(str(f"ADB ID: {update['ID']}"))
+                        adb_label.config(foreground=white_accent)                
         except Empty:
             pass
         finally:

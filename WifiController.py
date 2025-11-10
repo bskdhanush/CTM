@@ -51,7 +51,7 @@ def get_adb_id():
         if not output or stderr:
             raise Exception('adb id NOT FOUND')
         else:
-            m = re.search(r'(\w+)\s*device$', output)
+            m = re.search(r'(\w+)\s*(device|offline)$', output)
             if m:
                 adb_id = m.group(1)
     return adb_id

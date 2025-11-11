@@ -23,6 +23,8 @@ def crash_forecast(crash_path, timestamp):
         try:
             crash_forecast_exe_path = get_provisioning_base()
             cfg = load_prov_json()
+            if not cfg.get('Auto_forecast',''):
+                return
             fst_id = cfg.get('fst_id', '')
             exe_name = "crash_forecast.exe"
             magic_number = CrashForecastPage.get_magic_string()

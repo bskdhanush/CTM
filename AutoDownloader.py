@@ -35,12 +35,12 @@ def save_downloaded_meta(file_name, file_mtime):
 def check_for_new_meta(device_name, download_status_label_update):
     #print(device_name)
 
-    if device_name==None or device_name=="UNKNOWN":
+    if device_name==None or device_name=="UNKNOWN" or device_name=="":
         #print("inside the loop")
         cfg=load_meta_json()
         device_name=cfg["CPE_META_MPSS"]["meta"]
 
-        if device_name == None:
+        if  device_name==None or device_name=="UNKNOWN" or device_name=="":
             #print("Returning from loop")
             return
 
@@ -111,3 +111,8 @@ def check_for_new_csv(download_status_label_update):
                     set_naming_convention_from_crash_rename_csv(CrashForecastPage.log_box)
                 except Exception as e:
                     print(f"Exception during set_naming_convention_from_crash_rename_csv: {e}")
+                    
+                    
+if __name__=="__main__":
+    
+    check_for_new_meta("UNKNOWN", "")

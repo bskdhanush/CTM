@@ -191,23 +191,87 @@ def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     
     return MBN_frame
     
-def NV_page(parent, Pagename, device_name)-> ttk.LabelFrame :
+def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     NV_frame = ttk.LabelFrame(parent, text=f"Select NV's to install")
     NV_frame.pack(fill="x", **PADDING)  # type: ignore
+    
+    # Create Treeview for table display
+    tree_frame = tk.Frame(NV_frame)
+    tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # Create Treeview with columns
+    tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=10)
+    tree.grid(row=0, column=0, sticky="nsew")
+
+    # Add vertical scrollbar
+    scrollbar_y = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
+    scrollbar_y.grid(row=0, column=1, sticky="ns")
+    tree.configure(yscrollcommand=scrollbar_y.set)
+
+    # Add horizontal scrollbar
+    scrollbar_x = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
+    scrollbar_x.grid(row=1, column=0, sticky="ew")
+    tree.configure(xscrollcommand=scrollbar_x.set)
+
+    # Configure grid weights so the treeview expands
+    tree_frame.grid_rowconfigure(0, weight=1)
+    tree_frame.grid_columnconfigure(0, weight=1)
+
+    # Define column headings
+    tree.heading("NV Item", text="NV Item")
+    tree.heading("Value", text="Value")
+
+    # Define column widths
+    tree.column("NV Item", width=200, anchor="w", stretch=False)
+    tree.column("Value", width=600, anchor="w", stretch=False)
+    
+    def get_NVForConnectedDevice():
+        # Clear all existing rows in the table
+        for item in tree.get_children():
+            tree.delete(item)
+        
+        config = get_device_config_txt()
+        
+        # Display NV items in table
+        if not config:
+            # Insert "No device Connected" message
+            tree.insert("", "end", values=("No device Connected", ""))
+        else:
+            # Insert each NV item as a row
+            for key, value in config.items():
+                if key.startswith("NV"):
+                    tree.insert("", "end", values=(key, value))
+    
+    # For initial run 
+    get_NVForConnectedDevice()
+    
+    RefreshTableButtonFrame = ttk.Frame(NV_frame)
+    RefreshTableButtonFrame.pack(fill="x", **PADDING)  # type: ignore
+    
+    button = ttk.Button(
+        RefreshTableButtonFrame,
+        text="Refresh NV Table",
+        command=lambda: get_NVForConnectedDevice()
+    )
+    button.pack(fill="x", padx=(0, 10))   
+                
+    separator_frame = tk.Frame(NV_frame)
+    separator_frame.pack(fill="x", padx=10, pady=10)
+    ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(0, 5))
 
     # First row: label (left), button (right) in a horizontal frame
     top_row = tk.Frame(NV_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
 
-
     button = ttk.Button(
         top_row,
         text="Load NV",
-        command=lambda:start_thread(write_nv, "NVs install Thread", daemon=True)
+        command=lambda: start_thread(write_nv, "NVs install Thread", daemon=True)
     )
-    button.pack(fill="x", padx=(0, 10))
+    button.pack(fill="x", padx=(0, 10))   
     
     return NV_frame
+
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     status_text_FullPov= tk.StringVar(value="")

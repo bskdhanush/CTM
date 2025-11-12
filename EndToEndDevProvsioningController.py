@@ -1,5 +1,6 @@
 import os
 import re
+import textwrap
 import time
 import subprocess
 import shutil
@@ -365,19 +366,42 @@ def get_device_config_txt():
     config = {}
     adb_id = get_adb_id()
     PROV_BASE = get_provisioning_base()
+    
     if PROV_BASE and adb_id:
         CONFIG_TXT = os.path.join(PROV_BASE, 'QCN', adb_id, 'config.txt')
         try:
             with open(CONFIG_TXT, 'r') as file:
                 for line in file:
                     line = line.strip()  # Remove whitespace
-                    if ':' in line:  # Check if line contains '='
-                        key, value = line.split(':', 1)  # Split at first '='
-                        config[key.strip()] = value.strip()
+                    if ':' in line:  # Check if line contains ':'
+                        key, value = line.split(':', 1)  # Split at first ':'
+                        key = key.strip()
+                        value = value.strip()
+                        
+                        # Handle duplicate keys by storing values in a list
+                        if key in config:
+                            # Key already exists, append to list
+                            if isinstance(config[key], list):
+                                config[key].append(value)
+                            else:
+                                # Convert single value to list
+                                config[key] = [config[key], value]
+                        else:
+                            # First occurrence of this key
+                            config[key] = value
+                            
         except Exception as e:
             print(f'No path selected for Provisioning : {e}')
     else:
         print(f'Valid PROV_BASE or adb_id not found')
-
+    
     return config
   
+  
+  
+  
+def wrap_long_text(text, max_chars=90):
+    """Wrap text to multiple lines if it exceeds max_chars"""
+    if len(str(text)) > max_chars:
+        return '\n'.join(textwrap.wrap(str(text), width=max_chars))
+    return text

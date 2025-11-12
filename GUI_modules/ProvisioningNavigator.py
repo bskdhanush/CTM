@@ -192,7 +192,7 @@ def MBN_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     return MBN_frame
     
 def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
-    NV_frame = ttk.LabelFrame(parent, text=f"Select NV's to install")
+    NV_frame = ttk.LabelFrame(parent, text=f"Current NV's Config")
     NV_frame.pack(fill="x", **PADDING)  # type: ignore
     
     # Create Treeview for table display
@@ -221,16 +221,17 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     tree.heading("NV Item", text="NV Item")
     tree.heading("Value", text="Value")
 
-    # Define column widths
-    tree.column("NV Item", width=200, anchor="w", stretch=False)
-    tree.column("Value", width=600, anchor="w", stretch=False)
-    
+    # Define column widths - increased for long values
+    tree.column("NV Item", width=150, anchor="w", stretch=False)
+    tree.column("Value", width=700, anchor="w", stretch=True)  # Allow stretching for long values
+
     def get_NVForConnectedDevice():
         # Clear all existing rows in the table
-        for item in tree.get_children():
-            tree.delete(item)
+        tree.delete(*tree.get_children())
         
         config = get_device_config_txt()
+        
+        print(config)
         
         # Display NV items in table
         if not config:
@@ -239,10 +240,39 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
         else:
             # Insert each NV item as a row
             for key, value in config.items():
-                if key.startswith("NV"):
-                    tree.insert("", "end", values=(key, value))
-    
-    # For initial run 
+                if key == "NV":
+                    # Handle list of NV items
+                    if isinstance(value, list):
+                        for nv_entry in value:
+                            # Parse "Item=453 Value=0" format
+                            if "Item=" in nv_entry and "Value=" in nv_entry:
+                                try:
+                                    # Split to extract Item number and Value
+                                    item_part = nv_entry.split("Value=")[0].strip()
+                                    value_part = nv_entry.split("Value=")[1].strip()
+                                    item_num = item_part.replace("Item=", "").strip()
+                                    
+                                    tree.insert("", "end", values=(item_num, value_part))
+                                except:
+                                    # Fallback if parsing fails
+                                    tree.insert("", "end", values=("NV", nv_entry))
+                            else:
+                                tree.insert("", "end", values=("NV", nv_entry))
+                    else:
+                        # Single NV item (shouldn't happen with updated parser, but just in case)
+                        if "Item=" in value and "Value=" in value:
+                            try:
+                                item_part = value.split("Value=")[0].strip()
+                                value_part = value.split("Value=")[1].strip()
+                                item_num = item_part.replace("Item=", "").strip()
+                                
+                                tree.insert("", "end", values=(f"Item {item_num}", value_part))
+                            except:
+                                tree.insert("", "end", values=("NV", value))
+                        else:
+                            tree.insert("", "end", values=("NV", value))
+        
+        # For initial run 
     get_NVForConnectedDevice()
     
     RefreshTableButtonFrame = ttk.Frame(NV_frame)

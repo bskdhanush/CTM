@@ -66,14 +66,14 @@ def list_files(device_filter="", pageName="", pattern=""):
     """
     files = []
     try:
-        # if device_filter =="UNKNOWN" or device_filter==None:
-        #     print("No device connected pulling from json")
-        #     cfg=load_meta_json()
-        #     device_filter=cfg["CPE_META_MPSS"]["meta"]
+        if device_filter =="UNKNOWN" or device_filter==None:
+            print("No device connected pulling from json")
+            cfg=load_meta_json()
+            device_filter=cfg["CPE_META_MPSS"]["meta"]
 
-        #     if device_filter=="UNKNOWN"or device_filter==None:
-        #         print("no previous meta found from Json")
-        #         device_filter=""
+            if device_filter=="UNKNOWN"or device_filter==None:
+                print("no previous meta found from Json")
+                device_filter=""
 
         print(device_filter)
         keywords = []
@@ -87,8 +87,8 @@ def list_files(device_filter="", pageName="", pattern=""):
                 if device_filter and 'kobuk' in device_filter.lower():
                     keywords = ["^BF.*kobuk", "^MPSS.*kobuk", "_mbns.zip"]
         elif pattern:
+
             keywords = [pattern]
-            
     except Exception as e:
         print(f'Exception during pattern matching in list_files: {e}')
 

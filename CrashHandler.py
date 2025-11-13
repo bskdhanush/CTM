@@ -24,7 +24,7 @@ def crash_forecast(crash_path, timestamp):
         try:
             crash_forecast_exe_path = get_provisioning_base()
             cfg = load_prov_json()
-            if not cfg.get('Auto_forecast',''):
+            if cfg.get('Auto_forecast'):
                 return
             fst_id = cfg.get('fst_id', '')
             exe_name = "crash_forecast.exe"
@@ -170,7 +170,7 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                     try:
                         upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z",log_box)
                         if upload_result:
-                            remove_crash_entry(crash_path)
+                            remove_crash_entry(new_crash_path)
                     except Exception as e:
                         print(f'Exception during uploading {output_zip}: {e}')
                     return

@@ -44,7 +44,7 @@ def _default_prov():
         "Meta_path": r"C:\CTM\Meta",
         "Mpss_path": r"C:\CTM\MPSS",
         "Dapp_path": r"C:\CTM\DAPP",
-        "Auto_forecast": True
+        "Auto_forecast": False
 
     }
 

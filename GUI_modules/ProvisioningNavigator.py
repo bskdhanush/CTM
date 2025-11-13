@@ -64,13 +64,13 @@ def Meta_page(parent,Pagename,device_name):
     button_frame = tk.Frame(top_row)
     button_frame.pack(side="right", padx=(0, 10))
 
-    button2 = ttk.Button(
-        button_frame,
-        text="select Meta zip to load",
-        command=lambda: start_thread(load_meta_from_zip, "Meta install from ZIP Thread",
-                                    daemon=True, filepath=getzippath(Pagename), Pgname=Pagename,status_lable=status_text_Meta)
-    )
-    button2.pack(side="right", padx=(5, 0))
+    # button2 = ttk.Button(
+        # button_frame,
+        # text="select Meta zip to load",
+        # command=lambda: start_thread(load_meta_from_zip, "Meta install from ZIP Thread",
+                                    # daemon=True, filepath=getzippath(Pagename), Pgname=Pagename,status_lable=status_text_Meta)
+    # )
+    # button2.pack(side="right", padx=(5, 0))
 
     button1 = ttk.Button(
         button_frame,
@@ -116,20 +116,20 @@ def Mpss_page(parent, Pagename, device_name) -> ttk.Frame:
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
-    button = ttk.Button(
-        top_row,
-        text="Select MPSS zip to load",
-        command=lambda: start_thread(
-            load_mpss_from_zip,
-            "MPSS install from ZIP Thread",
-            daemon=True,
-            filepath=getzippath(Pagename),
-            Pgname=Pagename,
-            status_lable=status_text_mpss
-           # text_var=local_path   Pass the StringVar to the thread
-        )
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    # button = ttk.Button(
+        # top_row,
+        # text="Select MPSS zip to load",
+        # command=lambda: start_thread(
+            # load_mpss_from_zip,
+            # "MPSS install from ZIP Thread",
+            # daemon=True,
+            # filepath=getzippath(Pagename),
+            # Pgname=Pagename,
+            # status_lable=status_text_mpss
+           # # text_var=local_path   Pass the StringVar to the thread
+        # )
+    # )
+    # button.pack(side="right", anchor="e", padx=(0, 10))
     
     
     Bottom_frame = ttk.Frame(Mpss_frame)
@@ -335,12 +335,12 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
-    button = ttk.Button(
-        Meta_row,
-        text="select Meta zip file",
-        command=lambda: update_txt_display_lables(1)
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    # button = ttk.Button(
+        # Meta_row,
+        # text="select Meta zip file",
+        # command=lambda: update_txt_display_lables(1)
+    # )
+    # button.pack(side="right", anchor="e", padx=(0, 10))
 
 
     # Mpss selection section
@@ -369,12 +369,12 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
-    button = ttk.Button(
-        Mpss_row,
-        text="select Mpss zip file",
-        command=lambda: update_txt_display_lables(3)
-    )
-    button.pack(side="right", anchor="e", padx=(0, 10))
+    # button = ttk.Button(
+        # Mpss_row,
+        # text="select Mpss zip file",
+        # command=lambda: update_txt_display_lables(3)
+    # )
+    # button.pack(side="right", anchor="e", padx=(0, 10))
 
 
     # MBN selection section

@@ -1,4 +1,5 @@
 import os
+import shutil
 import socket
 import json
 import glob
@@ -231,7 +232,7 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_stri
     save_prov_json(cfg)
 
 def set_naming_convention_from_crash_rename_csv(log_box):
-    from Constants import CRASH_RENAME_META_CSV
+    from Constants import CRASH_RENAME_META_CSV, OCTAGON_CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
 
     market = name = fst_id = operator = tdc_serial = magic_string = None
@@ -239,7 +240,10 @@ def set_naming_convention_from_crash_rename_csv(log_box):
     try:
         log_box.insert("end", "Updating the Fields using CSV data" + "\n")
     except Exception as e:
-        print(f"Faild to added data to log box {e}")
+        print(f"Failed to added data to log box {e}")
+
+    if os.path.exists(OCTAGON_CRASH_RENAME_META_CSV):
+        shutil.copy(OCTAGON_CRASH_RENAME_META_CSV, CRASH_RENAME_META_CSV)
 
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
@@ -249,21 +253,24 @@ def set_naming_convention_from_crash_rename_csv(log_box):
         df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
 
         hostname = socket.gethostname()
-        host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
-        market = host_pool_mapping.get(hostname)
+        
+        if isinstance(df_one, pd.DataFrame) and not df_one.empty:
 
-        name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA']) or (hostname in ['LAPTOP-IDGK1E3S', 'DESKTOP-8FLRVQK', 'Mohan', 'mstft20-52'])) else 'Aniket'
+            host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
+            market = host_pool_mapping.get(hostname)
 
-        adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
-        tdc_serial = adb_tdc_map.get(_adb_id)
+            name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA', 'NEWYORK-CPE']) or (hostname in ['mstft20-52'])) else 'Aniket'
 
-        fst_id = df_one['FST_ID'].iloc[0]
+            adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
+            tdc_serial = adb_tdc_map.get(_adb_id)
 
-        magic_string = df_one['MAGIC_STRING'].iloc[0]
+            fst_id = df_one['FST_ID'].iloc[0]
 
-        operator = get_operator()
+            magic_string = df_one['MAGIC_STRING'].iloc[0]
 
-        set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+            operator = get_operator()
+
+            set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
 
 
 def get_operator():

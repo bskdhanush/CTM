@@ -59,8 +59,12 @@ def create_Meta_Mpss_download(container, Pagename, device_name, download_status_
     def check_for_updates():
         # Your code here
         print("Checking for updates...")
-        check_for_new_csv(download_status_label_update)
-        check_for_new_meta(device_name,download_status_label_update)
+        start_thread(
+            check_for_new_csv, "check_for_new_csv Thread", daemon=True, download_status_label_update=download_status_label_update
+        )
+        start_thread(
+            check_for_new_meta, "check_for_new_meta Thread", daemon=True, device_name=device_name, download_status_label_update=download_status_label_update
+        )
         
 
 

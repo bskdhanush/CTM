@@ -233,10 +233,10 @@ def create_crash_forecast_page(container, pages, add_nav):
     header_label.grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
     # Right side - text label
-    auto_forecastText= ttk.Label(header_frame, text="Enable/Disable Auto-ForeCast: ")
+    auto_forecastText= ttk.Label(header_frame, text="Disable Auto-ForeCast: ")
     auto_forecastText.grid(row=0, column=2, sticky="e", padx=(5, 2))
 
-    def is_AutoForecast_enabled() -> bool:
+    def is_AutoForecast_disabled() -> bool:
         cfg = load_prov_json()
         return cfg.get("Auto_forecast", False)
 
@@ -247,7 +247,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         print(f"Updated Auto_forecast to: {cfg['Auto_forecast']}")
 
     # Right side - checkbox (rightmost)
-    checkbox_var = tk.BooleanVar(value=is_AutoForecast_enabled())
+    checkbox_var = tk.BooleanVar(value=is_AutoForecast_disabled())
     auto_forecastCheckBox = ttk.Checkbutton(
         header_frame,
         variable=checkbox_var,

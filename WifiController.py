@@ -267,7 +267,7 @@ def update_3_slo_config_rdkb(config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    if config == 'Config_SSID':
+    if config != "Test_SSID":
         setpassword_bandwidths_rdkb()
 
 def update_2g_slo_5g6g_mlo_config_rdkb(config):
@@ -288,7 +288,7 @@ def update_2g_slo_5g6g_mlo_config_rdkb(config):
         "dmcli eRT setv Device.WiFi.Radio.3.X_CISCO_COM_ApplySetting bool true"
     ]
     run_dmcli_commands(commands)
-    if config == 'Config_SSID':
+    if config != "Test_SSID":
         setpassword_bandwidths_rdkb()
 
 def setpassword_bandwidths_rdkb():

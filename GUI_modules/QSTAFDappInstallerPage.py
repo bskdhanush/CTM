@@ -207,8 +207,8 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
                command=getDappPathAndInstall)\
                 .pack(side="right",**PADDING)  # type: ignore
 
-    ttk.Button(Dapp_install, text="Select Dapp Zip path to load", command=getSetDappZipPath)\
-    .pack(side="left", **PADDING)  # type: ignore  
+    # ttk.Button(Dapp_install, text="Select Dapp Zip path to load", command=getSetDappZipPath)\
+    # .pack(side="left", **PADDING)  # type: ignore  
 
 
 

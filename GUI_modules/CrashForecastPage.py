@@ -233,13 +233,31 @@ def create_crash_forecast_page(container, pages, add_nav):
     header_label.grid(row=0, column=0, sticky="w", padx=5, pady=5)
 
     # Right side - text label
-    auto_forecastText= ttk.Label(header_frame, text="Enable/Disable Auto-ForeCast: ")
+    auto_forecastText= ttk.Label(header_frame, text="Disable Auto-ForeCast: ")
     auto_forecastText.grid(row=0, column=2, sticky="e", padx=(5, 2))
 
+    def is_AutoForecast_disabled() -> bool:
+        cfg = load_prov_json()
+        return cfg.get("Auto_forecast", False)
+
+    def update_AutoForeCast_value():
+        cfg = load_prov_json()
+        cfg["Auto_forecast"] = bool(checkbox_var.get())
+        save_prov_json(cfg)
+        print(f"Updated Auto_forecast to: {cfg['Auto_forecast']}")
+
     # Right side - checkbox (rightmost)
-    checkbox_var = tk.BooleanVar()
-    auto_forecastCheckBox = ttk.Checkbutton(header_frame, variable=checkbox_var)
+    checkbox_var = tk.BooleanVar(value=is_AutoForecast_disabled())
+    auto_forecastCheckBox = ttk.Checkbutton(
+        header_frame,
+        variable=checkbox_var,
+        command=update_AutoForeCast_value  # no parentheses!
+    )
     auto_forecastCheckBox.grid(row=0, column=3, sticky="e", padx=(0, 5))
+
+    
+
+
 
     # Configure grid for Crash_table
     Crash_table.rowconfigure(1, weight=1)  # Tree row expands
@@ -253,6 +271,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         columns=COLUMNS,
         show="headings",
         height=6,
+        selectmode="browse"
     )
 
     tree.heading("ROOT_CAUSE", text="ROOT_CAUSE")

@@ -1,6 +1,7 @@
 
 from datetime import datetime, timedelta
 
+import WifiController
 from Constants import CTM_BASE_DIR
 import FzHandler 
 from JsonHandler import load_prov_json,save_meta_json,load_meta_json
@@ -44,9 +45,12 @@ def check_for_new_meta(device_name, download_status_label_update):
             #print("Returning from loop")
             return
 
-    
-    files_list = FzHandler.list_files(device_name, "Meta", "")  # Meta enables only auto download for Meta only 
-    #print(f"found LISt: {files_list}")
+    files_list = []
+    device_meta = WifiController.get_meta_build_info()
+    if isinstance(device_meta, str):
+        pattern = device_meta.split('.')[0]
+        files_list = FzHandler.list_files(device_name, "Meta", f'^{pattern}')  # Meta enables only auto download for Meta only
+        #print(f"found LISt: {files_list}")
 
     # Time threshold for 24 hours
     now = datetime.now()

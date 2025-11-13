@@ -271,6 +271,7 @@ def create_crash_forecast_page(container, pages, add_nav):
         columns=COLUMNS,
         show="headings",
         height=6,
+        selectmode="browse"
     )
 
     tree.heading("ROOT_CAUSE", text="ROOT_CAUSE")

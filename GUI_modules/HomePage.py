@@ -198,7 +198,7 @@ def create_Home_Page(container, pages, add_nav, root):
 
     ttk.Checkbutton(
         aws_fr,
-        text="Auto-run daily at 4 PM",
+        text="Run AWS daily at 12 PM and 4 PM",
         variable=aws_var,
         command=_toggle_aws,
     ).pack(anchor="w", padx=16)

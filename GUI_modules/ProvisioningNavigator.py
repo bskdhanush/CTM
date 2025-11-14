@@ -13,6 +13,7 @@ PADDING:dict[str, int] = {"padx": 12, "pady": 8}
 update_config_display=None
 
 
+
 def getzippath(pagenme):
         filepath = QSTAFDappInstallerPage._pick_zip(pagenme)
         return filepath
@@ -198,39 +199,37 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     # Create Treeview for table display
     tree_frame = tk.Frame(NV_frame)
     tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
+    
     # Create Treeview with columns
     tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=10)
     tree.grid(row=0, column=0, sticky="nsew")
-
+    
     # Add vertical scrollbar
     scrollbar_y = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
     scrollbar_y.grid(row=0, column=1, sticky="ns")
     tree.configure(yscrollcommand=scrollbar_y.set)
-
+    
     # Add horizontal scrollbar
     scrollbar_x = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
     scrollbar_x.grid(row=1, column=0, sticky="ew")
     tree.configure(xscrollcommand=scrollbar_x.set)
-
+    
     # Configure grid weights so the treeview expands
     tree_frame.grid_rowconfigure(0, weight=1)
     tree_frame.grid_columnconfigure(0, weight=1)
-
+    
     # Define column headings
     tree.heading("NV Item", text="NV Item")
     tree.heading("Value", text="Value")
-
+    
     # Define column widths - increased for long values
     tree.column("NV Item", width=150, anchor="w", stretch=False)
     tree.column("Value", width=700, anchor="w", stretch=True)  # Allow stretching for long values
-
+    
     def get_NVForConnectedDevice():
         # Clear all existing rows in the table
         tree.delete(*tree.get_children())
-        
         config = get_device_config_txt()
-        
         print(config)
         
         # Display NV items in table
@@ -251,12 +250,12 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
                                     item_part = nv_entry.split("Value=")[0].strip()
                                     value_part = nv_entry.split("Value=")[1].strip()
                                     item_num = item_part.replace("Item=", "").strip()
-                                    
                                     tree.insert("", "end", values=(item_num, value_part))
                                 except:
                                     # Fallback if parsing fails
                                     tree.insert("", "end", values=("NV", nv_entry))
                             else:
+                          
                                 tree.insert("", "end", values=("NV", nv_entry))
                     else:
                         # Single NV item (shouldn't happen with updated parser, but just in case)
@@ -265,14 +264,13 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
                                 item_part = value.split("Value=")[0].strip()
                                 value_part = value.split("Value=")[1].strip()
                                 item_num = item_part.replace("Item=", "").strip()
-                                
                                 tree.insert("", "end", values=(f"Item {item_num}", value_part))
                             except:
                                 tree.insert("", "end", values=("NV", value))
                         else:
                             tree.insert("", "end", values=("NV", value))
-        
-        # For initial run 
+    
+    # For initial run
     get_NVForConnectedDevice()
     
     RefreshTableButtonFrame = ttk.Frame(NV_frame)
@@ -283,22 +281,51 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
         text="Refresh NV Table",
         command=lambda: get_NVForConnectedDevice()
     )
-    button.pack(fill="x", padx=(0, 10))   
-                
+    button.pack(fill="x", padx=(0, 10))
+    
     separator_frame = tk.Frame(NV_frame)
     separator_frame.pack(fill="x", padx=10, pady=10)
     ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(0, 5))
+    
+    
 
+    cfg = load_prov_json()
+    script_path = cfg.get("provisioning_path", "Configuration file not found")
+    if script_path !="Configuration file not found":
+        # Ensures the return value is treated as a string
+        script_path = "NV Config file Path:- "+script_path + "/QCN/" + "ADB_ID"
+
+    print(script_path)
+
+    
+    # NV Path display row
+    row = tk.Frame(NV_frame)
+    row.pack(side='top', fill='x', padx=5, pady=5)
+
+    ttk.Label(row, text=script_path).pack(side='left', padx=5)
+    
+    
+
+    # Call update function to populate the label
+    
+    
+    separator_frame2 = tk.Frame(NV_frame)
+    separator_frame2.pack(fill="x", padx=10, pady=10)
+    ttk.Separator(separator_frame2, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(0, 5))
+    
     # First row: label (left), button (right) in a horizontal frame
     top_row = tk.Frame(NV_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
-
+    
     button = ttk.Button(
         top_row,
         text="Load NV",
         command=lambda: start_thread(write_nv, "NVs install Thread", daemon=True)
     )
-    button.pack(fill="x", padx=(0, 10))   
+    button.pack(fill="x", padx=(0, 10))
+    
+    
+
     
     return NV_frame
 

@@ -82,7 +82,7 @@ def create_crash_forecast_page(container, pages, add_nav):
 
     # ===== UPDATE CRASH RENAME FROM CSV =====
     update_crash_rename_from_csv_header = ttk.LabelFrame(
-        scrollable_frame, text="Update Crash Rename Fields from CSV"
+        scrollable_frame, text="Update Crash Rename Fields from CSV",
     )
     update_crash_rename_from_csv_header.pack(fill="both", expand=False, **PADDING)
 

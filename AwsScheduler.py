@@ -12,19 +12,17 @@ Usage from any UI:
 """
 from __future__ import annotations
 import os, time, subprocess, schedule, logging
-
 import JsonHandler as JH
 from Threading import *
 
 # -------------------------------------------------------------------- #
 # Configurable paths & constants
-# -------------------------------------------------------------------- 
+# -------------------------------------------------------------------- #
 BAT_PATH     = r"C:\QSTAF\QSTAFpy\bin\aws_s3_uploder.bat"
-RUN_TIME     = "16:00"                                # 4 PM every day
-
+RUN_TIMES    = ["12:00", "16:00"]  # 12 PM and 4 PM every day
 
 # -------------------------------------------------------------------- #
-#  Batch launcher – opens in a visible console
+# Batch launcher – opens in a visible console
 # -------------------------------------------------------------------- #
 def _run_bat() -> None:
     logging.info("Launching AWS BAT …")
@@ -33,31 +31,36 @@ def _run_bat() -> None:
         return
     try:
         subprocess.Popen(
-            ["cmd", "/c", BAT_PATH],                  # "/k" if you prefer it to stay open
+            ["cmd", "/c", BAT_PATH],  # "/k" if you prefer it to stay open
             cwd=os.path.dirname(BAT_PATH),
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
     except Exception as e:
         logging.exception("Failed to start BAT: %s", e)
 
-# Public “run now” helper (handy for a manual button)
+# Public "run now" helper (handy for a manual button)
 run_now = _run_bat
 
 # -------------------------------------------------------------------- #
-#  Scheduler plumbing
+# Scheduler plumbing
 # -------------------------------------------------------------------- #
-_job: schedule.Job | None = None
+_jobs: list[schedule.Job] = []
 _loop_started = False
 
 def _reschedule(enable: bool) -> None:
-    """(Re)create or cancel the daily job."""
-    global _job
-    if _job:
-        schedule.cancel_job(_job)
-        _job = None
+    """(Re)create or cancel the daily jobs."""
+    global _jobs
+    
+    # Cancel existing jobs if any
+    if _jobs:
+        for job in _jobs:
+            schedule.cancel_job(job)
+        _jobs = []
+    
     if enable:
-        logging.info("Scheduling daily run at %s", RUN_TIME)
-        _job = schedule.every().day.at(RUN_TIME).do(_run_bat)
+        logging.info("Scheduling daily runs at %s", ", ".join(RUN_TIMES))
+        for run_time in RUN_TIMES:
+            _jobs.append(schedule.every().day.at(run_time).do(_run_bat))
 
 def _loop() -> None:
     """Background thread that drives `schedule`."""
@@ -69,7 +72,7 @@ def _loop() -> None:
 def _start_loop_once() -> None:
     global _loop_started
     if not _loop_started:
-        start_thread(_loop,"AWS thread", daemon=True)
+        start_thread(_loop, "AWS thread", daemon=True)
         _loop_started = True
 
 def is_enabled() -> bool:

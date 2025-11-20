@@ -95,6 +95,7 @@ def create_crash_meta_info_csv(crash_info_dict):
         df = df.sort_values(by=['TIMESTAMP'], ascending=False)
         os.remove(crash_meta_info_csv)
     df.to_csv(crash_meta_info_csv, index=False)
+    CrashForecastPage.load_crash_table()
 
     copy_csv_to_latest_folder(crash_meta_info_csv, CONTROL_BASE)
    

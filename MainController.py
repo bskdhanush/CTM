@@ -524,7 +524,7 @@ def main() -> None:
     # auto‑stops when the main program exits
     start_thread(ADBController.run_adb_track_devices, "ADBID_watcher", daemon=True)
 
-    start_thread(cc.run_watchdog,"Json_watch_dog", daemon=True)
+    start_thread(cc.run_watchdog,"Crash path watcher", daemon=True)
     
     start_thread(check_restart_timer,"Relaunch_scenario", daemon=True)
 

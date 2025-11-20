@@ -103,6 +103,7 @@ def process_dir(root: Path,
             cfg[count_k]     = cfg.get(count_k, 0) + 1
             cfg[prev_k]      = str(p)
             cfg[timestamp_k] = mtime.isoformat()
+            print("crash processing done")
             
             start_thread(CH.crash_forecast,"Crash forecast Thread", daemon=True, crash_path=str(p), timestamp=cfg[timestamp_k])
             print(cfg[count_k])

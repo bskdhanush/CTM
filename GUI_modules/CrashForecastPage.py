@@ -1,5 +1,3 @@
-import json
-from queue import Queue
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -11,7 +9,6 @@ from Threading import start_thread
 from Constants import CTM_LOGS_DIR
 
 PADDING: dict[str, int] = {"padx": 12, "pady": 8}
-crashData_queue = Queue()
 
 # ===== MODULE-LEVEL GLOBAL VARIABLES =====
 _tree_widget = None
@@ -22,6 +19,7 @@ _tdc_serial_var = None
 _operator_var = None
 _fst_id_var = None
 _path_var = None
+_upload_status_var =None
 
 # ===== MODULE-LEVEL ACCESSIBLE FUNCTIONS =====
 
@@ -413,7 +411,22 @@ def create_crash_forecast_page(container, pages, add_nav):
             filepaths=get_selected_crash_paths(),
         ),
     ).grid(row=0, column=3, sticky="ew", **PADDING)
+    
+    
+    #=====upload label frame=====
+    upload_frame = ttk.Frame(crash_page_main) 
+    upload_frame.pack(fill="x", **PADDING)     
+    global _upload_status_var
+    _upload_status_var = tk.StringVar(value="")
 
+    Upload_status_label = tk.Label(upload_frame, textvariable=_upload_status_var,
+                            foreground="white")
+    Upload_status_label.pack(fill="x", side="left", padx=10, pady=(30,0))
+
+    
+    
+    
+    
     # ===== LOGS SECTION =====
     bottom_frame = ttk.LabelFrame(scrollable_frame, text="Logs")
     bottom_frame.pack(fill="both", expand=True, **PADDING)

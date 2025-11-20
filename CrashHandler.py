@@ -158,13 +158,13 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                     output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
                     if not get_zip_status(new_crash_path):
                         try:
-                            log_box.insert("end",f'\\n**************Zipping************** \n {output_zip}\n')
+                            log_box.insert("end",f'\n\n**************Zipping************** \n\n {output_zip}\n')
                             print(f'Zipping {output_zip}')
                             zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                             subprocess.run(zip_command, capture_output=True, text=True)
 
                             update_crash_zip_status(new_crash_path)
-                            log_box.insert("end",f'\\n**************Zipping Completed************** \n {output_zip}\n')
+                            log_box.insert("end",f'\n\n**************Zipping Completed************** \n\n {output_zip}\n')
                             
                         except Exception as e:
                            log_box.insert("end",f'Exception during zipping crash dump: {e} \n')
@@ -175,8 +175,7 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                         if upload_result:
                             remove_crash_entry(new_crash_path)
                     except Exception as e:
-                        print(f'Exception during uploading {output_zip}: {e}')
-                    
+                       CrashForecastPage._upload_status_var.set("Faild to upload")
                     return
 
 
@@ -234,10 +233,12 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_stri
     if magic_string:
         cfg["magic_string"] = magic_string
     save_prov_json(cfg)
-
+    
+    
 def set_naming_convention_from_crash_rename_csv(log_box):
     from Constants import CRASH_RENAME_META_CSV, OCTAGON_CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
+
 
     market = name = fst_id = operator = tdc_serial = magic_string = None
     

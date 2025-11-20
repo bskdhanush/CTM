@@ -28,6 +28,7 @@ from ssh2.sftp import (
 )
 import AutoDownloader 
 from JsonHandler import load_meta_json,save_meta_json
+from GUI_modules import CrashForecastPage
 
 load_dotenv()
 # HOST = os.getenv("SFTP_HOST")
@@ -258,7 +259,7 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
             
 
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
-            log_box.insert("end",f"\\n************************UPLOADING************************\n {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
+            log_box.insert("end",f"\n\n************************UPLOADING************************\n\n {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
 
             # Use standard permissions: 0644 (rw-r--r--)
             #mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR
@@ -313,14 +314,14 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size > 0 else 0
                             print(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
-                            #log_box.insert("end",(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps"))
+                            CrashForecastPage._upload_status_var.set(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps")
                             last_time = now
                             last_transferred = transferred
 
                 total_time = time.time() - start
                 avg_mbps = (transferred * 8 / (1024 * 1024)) / total_time if total_time > 0 else 0
                 print(f"\nCompleted: {transferred} bytes in {total_time:.1f}s — avg {avg_mbps:.2f} Mbps")
-                log_box.insert("end",f"\n\n ***** CRASH DUMP UPLOADED ***** \n\n")
+                log_box.insert("end",f"\n\n *************** CRASH DUMP UPLOADED *************** \n\n")
                 upload_result = True
 
             finally:

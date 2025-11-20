@@ -157,22 +157,25 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
                     output_zip = os.path.join(os.path.dirname(new_crash_path), f'{crash_name}.7z')
                     if not get_zip_status(new_crash_path):
                         try:
-                            log_box.insert("end",f'**************Zipping************** \n {output_zip}\n')
+                            log_box.insert("end",f'\\n**************Zipping************** \n {output_zip}\n')
                             print(f'Zipping {output_zip}')
                             zip_command = [seven_zip_path, 'a', output_zip, new_crash_path]
                             subprocess.run(zip_command, capture_output=True, text=True)
 
                             update_crash_zip_status(new_crash_path)
+                            log_box.insert("end",f'\\n**************Zipping Completed************** \n {output_zip}\n')
+                            
                         except Exception as e:
                            log_box.insert("end",f'Exception during zipping crash dump: {e} \n')
 
-                    log_box.insert("end",f'Uploading {output_zip} \n')
+                    
                     try:
                         upload_result = file_upload(output_zip, f"crash_upload/{crash_name}.7z",log_box)
                         if upload_result:
                             remove_crash_entry(new_crash_path)
                     except Exception as e:
                         print(f'Exception during uploading {output_zip}: {e}')
+                    
                     return
 
 
@@ -365,6 +368,8 @@ def remove_crash_entry(filepath):
         df_csv = df_csv.sort_values(by=['TIMESTAMP'], ascending=False)
         os.remove(crash_meta_info_csv)
     df_csv.to_csv(crash_meta_info_csv, index=False)
+    CrashForecastPage.load_crash_table()
+    
 
 def remove_crash_entries(filepaths):
     for filepath in filepaths:

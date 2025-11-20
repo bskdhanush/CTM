@@ -258,7 +258,7 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
             
 
             print(f"Uploading: {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path}")
-            log_box.insert("end",f"************************UPLOADING************************\n {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
+            log_box.insert("end",f"\\n************************UPLOADING************************\n {os.path.basename(filepath)} ({file_size} bytes) to {server_upload_path} \n")
 
             # Use standard permissions: 0644 (rw-r--r--)
             #mode = sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IWUSR | sftp.LIBSSH2_SFTP_S_IRUSR | sftp.LIBSSH2_SFTP_S_IRUSR

@@ -314,7 +314,7 @@ def file_upload(filepath, server_upload_path, log_box,chunk_size=1024 * 1024, pr
                             speed_mbps = speed_bps * 8 / (1024 * 1024)
                             pct = (transferred / file_size * 100) if file_size > 0 else 0
                             print(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps", end="", flush=True)
-                            CrashForecastPage._upload_status_var.set(f"\r{transferred}/{file_size} bytes ({pct:.1f}%) - {speed_mbps:.2f} Mbps")
+                            CrashForecastPage._upload_status_var.set(f"Uploading Crash Dump: ({pct:.1f}%) - {speed_mbps:.2f} Mbps")
                             last_time = now
                             last_transferred = transferred
 

@@ -165,6 +165,7 @@ def zip_and_upload_crash_dump(crash_dir_list,log_box):
 
                             update_crash_zip_status(new_crash_path)
                             log_box.insert("end",f'\n\n**************Zipping Completed************** \n\n {output_zip}\n')
+                            CrashForecastPage.load_crash_table()
                             
                         except Exception as e:
                            log_box.insert("end",f'Exception during zipping crash dump: {e} \n')

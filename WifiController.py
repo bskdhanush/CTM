@@ -84,6 +84,11 @@ def get_adb_id():
 #     # subprocess.run(["adb", "kill-server"])
 #     return None
 
+def on_device_bootup():
+    from CrashHandler import set_naming_convention_from_crash_rename_csv
+    print('on_device_bootup')
+    set_naming_convention_from_crash_rename_csv()
+
 def get_meta_build_info():
     meta = None
     run_command("adb root")

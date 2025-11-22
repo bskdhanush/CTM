@@ -236,7 +236,7 @@ def set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_stri
     save_prov_json(cfg)
     
     
-def set_naming_convention_from_crash_rename_csv(log_box):
+def set_naming_convention_from_crash_rename_csv(log_box=None):
     from Constants import CRASH_RENAME_META_CSV, OCTAGON_CRASH_RENAME_META_CSV
     from WifiController import get_adb_id, get_mpss_build_info, get_meta_build_info
 
@@ -244,7 +244,8 @@ def set_naming_convention_from_crash_rename_csv(log_box):
     market = name = fst_id = operator = tdc_serial = magic_string = None
     
     try:
-        log_box.insert("end", "Updating the Fields using CSV data" + "\n")
+        if log_box:
+            log_box.insert("end", "Updating the Fields using CSV data" + "\n")
     except Exception as e:
         print(f"Failed to added data to log box {e}")
 
@@ -278,6 +279,10 @@ def set_naming_convention_from_crash_rename_csv(log_box):
 
             set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
 
+        else:
+            cfg = load_prov_json()
+            cfg['fst_id'] = "Enter FST ID manually"
+            save_prov_json(cfg)
 
 def get_operator():
     from Constants import CTM_LOGS_DIR
@@ -289,11 +294,11 @@ def get_operator():
         if isinstance(df_operator, pd.DataFrame):
             operator = df_operator['OPERATOR'].iloc[0]
     if operator:
-        if 'TMO' in operator:
+        if 'tmo' in operator.lower():
             operator = 'TMO'
-        elif 'ATT' in operator:
+        elif 'att' in operator.lower():
             operator = 'ATT'
-        elif 'VZW' in operator:
+        elif 'verizon' in operator.lower():
             operator = 'VZW'
     return operator
     

@@ -200,7 +200,7 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
     )
         selected_Dapp_zip.set(folderpath)
         zip_Dapp_label.configure(style="TLabel")
-        DappInstaller.InstallDapp(folderpath,"")
+        DappInstaller.InstallDapp(folderpath,"",selected_Dapp_zip)
 
     ttk.Button(Dapp_install,
                text="Select Dapp path to load",

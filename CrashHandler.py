@@ -276,13 +276,26 @@ def set_naming_convention_from_crash_rename_csv(log_box=None):
             magic_string = df_one['MAGIC_STRING'].iloc[0]
 
             operator = get_operator()
-
+            
             set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+            
+            try:
+                if log_box:
+                    log_box.insert("end", f"Found data from csv:\n  market: {market}\n  name: {name}\n  fst_id: {fst_id}\n  operator: {operator}\n  tdc_serial: {tdc_serial}\n  magic_string: {magic_string}\n")
+            except Exception as e:
+                 print(f"Failed to added data to log box {e}")
+
 
         else:
             cfg = load_prov_json()
             cfg['fst_id'] = "Enter FST ID manually"
             save_prov_json(cfg)
+            
+            try:
+                if log_box:
+                    log_box.insert("end", f"No valid FST ID found. Downlaod the latest CrashRenamingMetaInfo.CSV")
+            except Exception as e:
+                 print(f"Failed to added data to log box {e}")
 
 def get_operator():
     from Constants import CTM_LOGS_DIR

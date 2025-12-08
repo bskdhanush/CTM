@@ -276,6 +276,8 @@ def set_naming_convention_from_crash_rename_csv(log_box=None):
             magic_string = df_one['MAGIC_STRING'].iloc[0]
 
             operator = get_operator()
+            
+            #log_box.insert("end",f"Found data from csv: \n market:{market} \n name:{name} \n fst_id:{fst_id} \n operator:{operator} \n tdc_serial:{tdc_serial} \n magic_string:{magic_string}" )
 
             set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
 

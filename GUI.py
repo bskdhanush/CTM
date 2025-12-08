@@ -155,7 +155,7 @@ def launch_gui() -> None:
 
     # ── Window ──────────────────────────────────────────────────────────
     root = tk.Tk()
-    root.title("CPE Test Manager V3.2")
+    root.title("CPE Test Manager V3.3")
     root.geometry("1024x768")
     root.resizable(True, True)
     sv_ttk.set_theme("dark")

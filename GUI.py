@@ -9,7 +9,7 @@ from queue import Queue,Empty
 import sv_ttk
 
 
-from GUI_modules import DataMonitorPage, DeviceProvisioningPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, CrashForecastPage
+from GUI_modules import DataMonitorPage, DeviceProvisioningPage, HomePage, QSTAFDappInstallerPage, QutsPage, SpeedTestPage, WifiRenamePage, CrashForecastPage ,LoadingScreen
 import MainController
 import WifiController
 import QutsController
@@ -289,7 +289,7 @@ def launch_gui() -> None:
         btn = ttk.Button(sidebar, text=text, width=15, command=lambda k=key: show(k))
         btn.pack(fill="x", pady=6, padx=6)
         nav_btns[key] = btn
-
+        
 
     # ── Footer / status bar ───────────────────────────────────────────────
     footer = ttk.Frame(root)
@@ -438,13 +438,11 @@ def launch_gui() -> None:
 
     # ── CPE data monitor page ────────────────────────────────────────────────
     DataMonitorPage.create_data_monitor_page(container, pages, add_nav)
-
-
-
-
+    
   
     # ── Launch ──────────────────────────────────────────────────────────────
     show("Main")
+    root.after(100, LoadingScreen.stop_loading)
 
     def on_closing():
         global observers

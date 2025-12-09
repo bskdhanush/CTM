@@ -4,10 +4,10 @@ from pathlib import Path
 import re
 import WifiController,StartTestCase
 from Constants import CTM_DAPP_DIR
-from CrashHandler import get_operator
 
 
-def InstallDapp(archive_path: str, DappInstallerType:str, Dapp_label) -> None:
+
+def InstallDapp(archive_path: str, DappInstallerType:str, Dapp_label,operator) -> None:
     device_type = None
     meta_build = WifiController.get_meta_build_info()
     if isinstance(meta_build, str) and 'kobuk' in meta_build.lower():
@@ -49,14 +49,13 @@ def InstallDapp(archive_path: str, DappInstallerType:str, Dapp_label) -> None:
             print(" folder:", extracted_folder)
             if TC_ondevice_path:
                 print("TC_ondevice_path:", TC_ondevice_path)
-                replace_ADB_TC_ondevice(TC_ondevice_path, extracted_folder, device_type,Dapp_label)
+                replace_ADB_TC_ondevice(TC_ondevice_path, extracted_folder, device_type,Dapp_label,operator)
         except Exception as e:
             print(f"Exception during replace_ADB_TC_ondevice: {e}")
     else:
         print('DAPP could not be installed, since device_type could not be determined')
 
-def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_type,Dapp_label) -> None:
-    operator=get_operator()
+def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_type,Dapp_label,operator) -> None:
     if not TC_ondevice_path.exists():
         raise FileNotFoundError(f"Extracted folder not found: {TC_ondevice_path}")
     
@@ -64,6 +63,7 @@ def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_typ
     #print(content)
     ADBId=WifiController.get_adb_id()
     if not ADBId:
+        Dapp_label.set("NO device connected PLS check")
         return 
     
     if operator == 'VZW':

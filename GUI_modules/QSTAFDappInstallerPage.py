@@ -194,18 +194,60 @@ def create_Qstaf_dapp_install_page(container, pages, add_nav):
         DappInstaller.InstallDapp(filePath,"Zip")
 
     def getDappPathAndInstall():
-        folderpath = filedialog.askdirectory(
-        title=f"Select Dapp folder",
-        initialdir=CTM_DAPP_DIR
-    )
-        selected_Dapp_zip.set(folderpath)
-        zip_Dapp_label.configure(style="TLabel")
-        DappInstaller.InstallDapp(folderpath,"",selected_Dapp_zip)
-
+            folderpath = filedialog.askdirectory(
+            title=f"Select Dapp folder",
+            initialdir=CTM_DAPP_DIR
+        )
+            selected_Dapp_zip.set(folderpath)
+            zip_Dapp_label.configure(style="TLabel")
+            operator_value =toggle_var.get()
+            #operator_value = "TMO"
+            print(operator_value)
+            DappInstaller.InstallDapp(folderpath,"",selected_Dapp_zip,operator_value)
+        
+        
     ttk.Button(Dapp_install,
                text="Select Dapp path to load",
                command=getDappPathAndInstall)\
                 .pack(side="right",**PADDING)  # type: ignore
+    
+
+    
+                
+                
+    toggle_var = tk.StringVar()
+    
+    ttk.Radiobutton(
+       Dapp_install,
+        text="ATT",
+        variable=toggle_var,
+        value="ATT",
+    ).pack(side="left", fill="x", padx=6, pady=6)
+
+  
+    ttk.Radiobutton(
+       Dapp_install,
+        text="VZW",
+        variable=toggle_var,
+        value="VZW",
+    ).pack(side="left",  fill="x", padx=6, pady=6)
+   
+ 
+    ttk.Radiobutton(
+       Dapp_install,
+        text="TMO",
+        variable=toggle_var,
+        value="TMO",
+    ).pack(side="left", fill="x", padx=6, pady=6)
+    
+    
+    
+    
+    
+  
+  
+
+
 
     # ttk.Button(Dapp_install, text="Select Dapp Zip path to load", command=getSetDappZipPath)\
     # .pack(side="left", **PADDING)  # type: ignore  

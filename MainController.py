@@ -24,6 +24,7 @@ import CrashCountController as cc
 import JsonHandler as JH
 from Constants import CTM_LOGS_DIR
 from Threading import *
+from GUI_modules import LoadingScreen
 
 # ── NEW IMPORT ────────────────────────────────────────────────────────────────
 # We need to know when to skip updates:
@@ -516,20 +517,25 @@ def get_all_speedtest_results():
     print("Speedtest results collected and saved to JSON.")
 
 def main() -> None:
+    """Entry‑point called by QSTAF_Tool.exe"""
+    # 1) Require admin
+    ensure_admin()
+    
+    # DON'T start loading screen here anymore
+    # LoadingScreen.start_loading()  # REMOVE THIS
+    LoadingScreen.start_loading()
     subprocess.call("taskkill /F /IM adb.exe", shell=False)
     init_dirs()
-
     ADBController.save_to_json("--")
     
     # auto‑stops when the main program exits
     start_thread(ADBController.run_adb_track_devices, "ADBID_watcher", daemon=True)
-
     start_thread(cc.run_watchdog,"Crash path watcher", daemon=True)
-    
     start_thread(check_restart_timer,"Relaunch_scenario", daemon=True)
-
+    
     # Launch GUI (must stay on the main thread on Windows/macOS)
     run_app()
+    LoadingScreen.stop_loading()
 
 if __name__ == "__main__":
     main()

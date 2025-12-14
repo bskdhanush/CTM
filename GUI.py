@@ -5,7 +5,6 @@ from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 import logging
 from queue import Queue,Empty
-
 import sv_ttk
 
 
@@ -461,4 +460,3 @@ def launch_gui() -> None:
 
 
 # ───────────────────────────────────────────────────────────────────────────
-

@@ -382,12 +382,11 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     
     
     
-    EFS_display_row = tk.Frame(EFS_frame)
-    EFS_display_row.pack(fill="x", padx=10,)
+    # EFS_display_row = tk.Frame(EFS_frame)
+    # EFS_display_row.pack(fill="x", padx=10,)
     
-    list_frame = tk.Frame(EFS_display_row)
+    list_frame = tk.Frame(EFS_frame)
     list_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
     tk.Label(list_frame, text="EFS To Be Installed: ").pack(anchor="w")
 
         # Scrollbar for listbox
@@ -410,6 +409,20 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
             keys_listbox.insert(tk.END,values)
         
         
+    Added_efs_to_list_row = tk.Frame(EFS_frame)
+    Added_efs_to_list_row.pack(fill="x", padx=10,)
+    
+    Added_efs_frame = tk.Frame(Added_efs_to_list_row)
+    Added_efs_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    tk.Label(Added_efs_frame,take="Added EFS to device list").pack(padx=10)
+    
+    
+    button = ttk.Button(
+        Added_efs_to_list_row,
+        text="Added EFS path",
+    )
+    button.pack(side="right", anchor="e", padx=(0, 10))
+    
     
         
     #_refresh_efs_table("")

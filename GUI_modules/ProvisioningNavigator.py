@@ -5,7 +5,7 @@ from tkinter import filedialog
 from GUI_modules import MetaMpssDownloadSubFrame, QSTAFDappInstallerPage
 from Constants import CTM_META_DIR, CTM_MPSS_DIR,CTM_DAPP_DIR
 from EndToEndDevProvsioningController import *
-from JsonHandler import load_prov_json
+from JsonHandler import load_prov_json,load_EFS_json
 from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
@@ -201,7 +201,7 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
     # Create Treeview with columns
-    tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=10)
+    tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=8)
     tree.grid(row=0, column=0, sticky="nsew")
     
     # Add vertical scrollbar
@@ -328,6 +328,97 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     
     return NV_frame
+
+
+def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
+
+    EFS_frame = ttk.LabelFrame(parent, text=f"EFS")
+    EFS_frame.pack(fill="x", **PADDING)  # type: ignore
+    
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(EFS_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+    local_path = tk.StringVar(value='Select dev:')
+    label = ttk.Label(top_row, textvariable=local_path)
+    label.pack(side="left", padx=(10, 0))
+    
+    
+    
+    def get_keys_for_device(device_name):
+       # print("inside get disply ")
+        try:
+            data = load_EFS_json()
+            _refresh_efs_table(list(data[device_name].keys()))
+            
+        except: 
+            print("No valid json found")
+    
+
+    ttk.Label(top_row,
+              text="Select Device:"
+              ).pack(side="left",padx=(10,0))
+    
+    device_var = tk.StringVar(value="")
+    
+    ttk.Radiobutton(
+        top_row,
+        text="Kobuk",
+        variable=device_var,
+        value="Kobuk",
+        command=lambda: get_keys_for_device(device_var.get())
+    ).pack(side="right", fill="x", padx=6, pady=6)
+
+  
+    ttk.Radiobutton(
+        top_row,
+        text="SDx75",
+        variable=device_var,
+        value="SDx75",
+        command=lambda: get_keys_for_device(device_var.get())
+    ).pack(side="right",  fill="x", padx=6, pady=6)
+    
+    
+    
+    
+    
+    EFS_display_row = tk.Frame(EFS_frame)
+    EFS_display_row.pack(fill="x", padx=10,)
+    
+    list_frame = tk.Frame(EFS_display_row)
+    list_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    tk.Label(list_frame, text="EFS To Be Installed: ").pack(anchor="w")
+
+        # Scrollbar for listbox
+    scrollbar = tk.Scrollbar(list_frame)
+    scrollbar.pack(side="right", fill="y")
+
+    keys_listbox = tk.Listbox(
+            list_frame,
+            yscrollcommand=scrollbar.set,
+            height=8
+        )
+    keys_listbox.pack(fill="both", expand=True)
+    scrollbar.config(command=keys_listbox.yview)\
+        
+    def _refresh_efs_table(EFS_List):
+        keys_listbox.delete(0,tk.END)
+        
+        #print(f"Inserting the values {EFS_List}")
+        for values in EFS_List:
+            keys_listbox.insert(tk.END,values)
+        
+        
+    
+        
+    #_refresh_efs_table("")
+
+    
+    
+
+
+    return EFS_frame
 
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
@@ -554,6 +645,8 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     return Full_Provisioning_frame
 
 
+
+'''
 def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     FOTA_frame = ttk.LabelFrame(parent, text=f"FOTA")
@@ -575,7 +668,7 @@ def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button.pack(fill="x", padx=(0, 10))
 
     return FOTA_frame
-    
+'''
 """
     Returns a frame containing:
       - An entry showing selected text file path

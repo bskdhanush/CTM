@@ -3,11 +3,12 @@ import json
 import os
 from pathlib import Path
 from Threading import thread_lock
-from Constants import APP_CONFIG_JSON, PROV_CONFIG_JSON, init_dirs,META_JSON_FILE
+from Constants import APP_CONFIG_JSON, PROV_CONFIG_JSON, init_dirs,META_JSON_FILE,EFS_JSON_FILE
 
 app_lock = thread_lock()
 prov_lock = thread_lock()
 meta_lock =thread_lock()
+EFS_lock =thread_lock()
 
 def _default_cfg() -> dict:
     return {
@@ -48,6 +49,19 @@ def _default_prov():
 
     }
 
+
+def _default_EFS():
+    return{
+        "Kobuk":{
+            "P0_violation":  "/nv/item_files/modem/nr5g/RRC/"
+        },
+        "SDx75":{
+            "P0_violation": "/nv/item_files/modem/nr5g/RRC/" ,
+            "EFS": "/nv/item_files/modem/lte/rrc/efs/"
+        }
+    }
+
+
 def _default_META_JSon():
     return{
             "Meta":{},
@@ -63,6 +77,10 @@ def load_cfg():
 
     if not os.path.exists(META_JSON_FILE):
         save_meta_json(_default_META_JSon())
+        
+    if not os.path.exists(EFS_JSON_FILE):
+        save_efs_json(_default_EFS())
+    
     try:
         with open(APP_CONFIG_JSON, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -104,6 +122,14 @@ def load_meta_json() -> dict:
     except Exception as e:
         print(f"{META_JSON_FILE} is has no data: %s", e)
         return {}
+    
+def load_EFS_json() -> dict:
+    try:
+        return json.loads(Path(EFS_JSON_FILE).read_text("utf-8"))
+    except Exception as e:
+        print(f"{EFS_JSON_FILE} is has no data: %s", e)
+        return {}
+
 
 def save_json(cfg: dict) -> None:
     init_dirs()
@@ -121,6 +147,13 @@ def save_meta_json(cfg):
     init_dirs()
     with meta_lock:
         with open(META_JSON_FILE, "w", encoding="utf-8")as f:
+            json.dump(cfg, f, indent=2)
+            
+            
+def save_efs_json(cfg):
+    init_dirs()
+    with EFS_lock:
+        with open(EFS_JSON_FILE, "w", encoding="utf-8")as f:
             json.dump(cfg, f, indent=2)
 
 

@@ -5,7 +5,7 @@ from tkinter import filedialog
 from GUI_modules import MetaMpssDownloadSubFrame, QSTAFDappInstallerPage
 from Constants import CTM_META_DIR, CTM_MPSS_DIR,CTM_DAPP_DIR
 from EndToEndDevProvsioningController import *
-from JsonHandler import load_prov_json
+from JsonHandler import load_prov_json,load_EFS_json
 from Threading import *
 
 PADDING:dict[str, int] = {"padx": 12, "pady": 8}
@@ -334,7 +334,7 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     EFS_frame = ttk.LabelFrame(parent, text=f"EFS")
     EFS_frame.pack(fill="x", **PADDING)  # type: ignore
-
+    
     # First row: label (left), button (right) in a horizontal frame
     top_row = tk.Frame(EFS_frame)
     top_row.pack(fill="x", padx=10, pady=(10, 0))
@@ -343,48 +343,80 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     label = ttk.Label(top_row, textvariable=local_path)
     label.pack(side="left", padx=(10, 0))
     
+    
+    
+    def get_keys_for_device(device_name):
+       # print("inside get disply ")
+        try:
+            data = load_EFS_json()
+            _refresh_efs_table(list(data[device_name].keys()))
+            
+        except: 
+            print("No valid json found")
+    
 
     ttk.Label(top_row,
               text="Select Device:"
               ).pack(side="left",padx=(10,0))
     
-    toggle_var = tk.StringVar(value="")
+    device_var = tk.StringVar(value="")
     
     ttk.Radiobutton(
         top_row,
         text="Kobuk",
-        variable=toggle_var,
+        variable=device_var,
         value="Kobuk",
+        command=lambda: get_keys_for_device(device_var.get())
     ).pack(side="right", fill="x", padx=6, pady=6)
 
   
     ttk.Radiobutton(
         top_row,
         text="SDx75",
-        variable=toggle_var,
+        variable=device_var,
         value="SDx75",
+        command=lambda: get_keys_for_device(device_var.get())
     ).pack(side="right",  fill="x", padx=6, pady=6)
     
     
-    EFS_selection_row = tk.Frame(EFS_frame)
-    EFS_selection_row.pack(fill="x", padx=10, pady=(10, 0))
     
-    meta_checkbox_var = tk.IntVar()
+    
+    
+    EFS_display_row = tk.Frame(EFS_frame)
+    EFS_display_row.pack(fill="x", padx=10,)
+    
+    list_frame = tk.Frame(EFS_display_row)
+    list_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # Checkbox
-    meta_checkbox = tk.Checkbutton(
-        Meta_row,
-        selectcolor="black",
-        variable=meta_checkbox_var
-    )
-    meta_checkbox.pack(side="left", padx=(10, 5))
+    tk.Label(list_frame, text="EFS To Be Installed: ").pack(anchor="w")
 
-    # Label next to checkbox
-    ttk.Label(Meta_row, text="Select META:").pack(side="left", padx=(0, 10))
+        # Scrollbar for listbox
+    scrollbar = tk.Scrollbar(list_frame)
+    scrollbar.pack(side="right", fill="y")
+
+    keys_listbox = tk.Listbox(
+            list_frame,
+            yscrollcommand=scrollbar.set,
+            height=8
+        )
+    keys_listbox.pack(fill="both", expand=True)
+    scrollbar.config(command=keys_listbox.yview)\
+        
+    def _refresh_efs_table(EFS_List):
+        keys_listbox.delete(0,tk.END)
+        
+        #print(f"Inserting the values {EFS_List}")
+        for values in EFS_List:
+            keys_listbox.insert(tk.END,values)
+        
+        
+    
+        
+    #_refresh_efs_table("")
+
     
     
-    
-   
+
 
     return EFS_frame
 

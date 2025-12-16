@@ -13,10 +13,12 @@ CTM_BASE_DIR = r'C:\CTM'
 CTM_META_DIR = os.path.join(CTM_BASE_DIR, 'Meta')
 CTM_MPSS_DIR = os.path.join(CTM_BASE_DIR, 'MPSS')
 CTM_DAPP_DIR = os.path.join(CTM_BASE_DIR, 'DAPP')
+CTM_EFS_DIR = os.path.join(CTM_BASE_DIR, 'EFS')
 
 APP_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'app_config.json')
 PROV_CONFIG_JSON = os.path.join(CTM_CONFIG_DIR, 'prov_config.json')
 META_JSON_FILE= os.path.join(CTM_CONFIG_DIR,'Metas_downloaded.json')
+EFS_JSON_FILE=os.path.join(CTM_EFS_DIR,'EFS.json')
 CRASH_RENAME_META_CSV = os.path.join(CTM_BASE_DIR, 'CrashRenamingMetaInfo.csv')
 OCTAGON_CRASH_RENAME_META_CSV = r'\\octagon\stability\CTM\CrashRenamingMetaInfo.csv'
 
@@ -25,5 +27,5 @@ MIN_RDKBCRASH_SIZE = 2   * 1024**2   # 2 MB
 
 
 def init_dirs():
-    for _dir in [CTM_CONFIG_DIR, CTM_LOGS_DIR, CTM_META_DIR, CTM_MPSS_DIR, CTM_DAPP_DIR]:
+    for _dir in [CTM_CONFIG_DIR, CTM_LOGS_DIR, CTM_META_DIR, CTM_MPSS_DIR, CTM_DAPP_DIR,CTM_EFS_DIR]:
         os.makedirs(_dir, exist_ok=True)

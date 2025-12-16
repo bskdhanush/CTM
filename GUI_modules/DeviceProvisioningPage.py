@@ -33,7 +33,7 @@ def set_prov_path(path_var,label):
         save_prov_json(cfg)
 
 def create_device_Configuaration_page(container, pages, add_nav, device_name, mpss_id):
-    section_names = ["Meta", "Mpss", "QCN", "MBN", "NV", "Full_Provisioning", "FOTA"]
+    section_names = ["Meta", "Mpss", "QCN", "MBN", "NV","EFS","Full_Provisioning"]
     
     # Page container
     configPage = ttk.Frame(container)
@@ -101,13 +101,13 @@ def create_device_Configuaration_page(container, pages, add_nav, device_name, mp
         elif Pagename == "NV":
             section_ui = ProvisioningNavigator.NV_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
+        elif Pagename == "EFS":
+            section_ui = ProvisioningNavigator.EFS_page(fr, Pagename, device_name)
+            section_ui.pack(fill="x", padx=8, pady=2)
         elif Pagename == "Full_Provisioning":
             section_ui = ProvisioningNavigator.Full_Provisioning_page(fr, Pagename, device_name)
             section_ui.pack(fill="x", padx=8, pady=2)
-        elif Pagename == "FOTA":
-            section_ui = ProvisioningNavigator.FOTA_page(fr, Pagename, device_name)
-            section_ui.pack(fill="x", padx=8, pady=2)
-        
+      
         return fr
     
     for Pagename in section_names:

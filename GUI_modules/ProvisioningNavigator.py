@@ -201,7 +201,7 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
     
     # Create Treeview with columns
-    tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=10)
+    tree = ttk.Treeview(tree_frame, columns=("NV Item", "Value"), show="headings", height=8)
     tree.grid(row=0, column=0, sticky="nsew")
     
     # Add vertical scrollbar
@@ -328,6 +328,65 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     
     return NV_frame
+
+
+def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
+
+    EFS_frame = ttk.LabelFrame(parent, text=f"EFS")
+    EFS_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(EFS_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+    local_path = tk.StringVar(value='Select dev:')
+    label = ttk.Label(top_row, textvariable=local_path)
+    label.pack(side="left", padx=(10, 0))
+    
+
+    ttk.Label(top_row,
+              text="Select Device:"
+              ).pack(side="left",padx=(10,0))
+    
+    toggle_var = tk.StringVar(value="")
+    
+    ttk.Radiobutton(
+        top_row,
+        text="Kobuk",
+        variable=toggle_var,
+        value="Kobuk",
+    ).pack(side="right", fill="x", padx=6, pady=6)
+
+  
+    ttk.Radiobutton(
+        top_row,
+        text="SDx75",
+        variable=toggle_var,
+        value="SDx75",
+    ).pack(side="right",  fill="x", padx=6, pady=6)
+    
+    
+    EFS_selection_row = tk.Frame(EFS_frame)
+    EFS_selection_row.pack(fill="x", padx=10, pady=(10, 0))
+    
+    meta_checkbox_var = tk.IntVar()
+
+    # Checkbox
+    meta_checkbox = tk.Checkbutton(
+        Meta_row,
+        selectcolor="black",
+        variable=meta_checkbox_var
+    )
+    meta_checkbox.pack(side="left", padx=(10, 5))
+
+    # Label next to checkbox
+    ttk.Label(Meta_row, text="Select META:").pack(side="left", padx=(0, 10))
+    
+    
+    
+   
+
+    return EFS_frame
 
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
@@ -554,6 +613,8 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     return Full_Provisioning_frame
 
 
+
+'''
 def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     FOTA_frame = ttk.LabelFrame(parent, text=f"FOTA")
@@ -575,7 +636,7 @@ def FOTA_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     button.pack(fill="x", padx=(0, 10))
 
     return FOTA_frame
-    
+'''
 """
     Returns a frame containing:
       - An entry showing selected text file path

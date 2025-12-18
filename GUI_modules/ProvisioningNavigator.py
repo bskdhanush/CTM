@@ -558,15 +558,36 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
     button = ttk.Button(
         IMEI_row,
         text="Update IMEI",
-        command=lambda: update_IMEI()
+        command=lambda:
+        start_thread(update_IMEI, "Meta update txt Thread", 
+                        daemon=True,
+                        callback=update_config_display)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
 
     
     
     def update_IMEI():
-        print("updating the imei")
-        
+        adb_id = get_adb_id()
+        PROV_BASE = get_provisioning_base()
+    
+        if PROV_BASE and adb_id:
+            CONFIG_TXT = os.path.join(PROV_BASE, 'QCN', adb_id, 'config.txt')
+            try:
+                with open(CONFIG_TXT, "r", encoding="utf-8") as f:
+                    text = f.read()
+
+                    text = re.sub(r"^IMEI:\s*\S+",
+                                f"IMEI: {imei_editable_var.get()}",
+                                text,
+                                count=1,
+                                flags=re.MULTILINE)
+
+                    with open(CONFIG_TXT, "w", encoding="utf-8") as f:
+                        f.write(text)
+            except Exception as e:
+                print(f'No path selected for Provisioning : {e}')
+            
     # button = ttk.Button(
         # Mpss_row,
         # text="select Mpss zip file",

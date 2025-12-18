@@ -202,9 +202,6 @@ def check_restart_timer():
 
 def run_app() -> None:
     """Entry‑point called by QSTAF_Tool.exe"""
-    # 1) Require admin
-    ensure_admin()
-
     #commont the below line and uncomment step 2 to check for updates
     gui.launch_gui()
 

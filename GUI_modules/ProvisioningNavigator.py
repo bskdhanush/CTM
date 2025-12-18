@@ -382,12 +382,11 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     
     
     
-    EFS_display_row = tk.Frame(EFS_frame)
-    EFS_display_row.pack(fill="x", padx=10,)
+    # EFS_display_row = tk.Frame(EFS_frame)
+    # EFS_display_row.pack(fill="x", padx=10,)
     
-    list_frame = tk.Frame(EFS_display_row)
+    list_frame = tk.Frame(EFS_frame)
     list_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
     tk.Label(list_frame, text="EFS To Be Installed: ").pack(anchor="w")
 
         # Scrollbar for listbox
@@ -408,17 +407,68 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
         #print(f"Inserting the values {EFS_List}")
         for values in EFS_List:
             keys_listbox.insert(tk.END,values)
-        
-        
     
-        
-    #_refresh_efs_table("")
+    
+    
+    separator_frame = tk.Frame(EFS_frame)
+    separator_frame.pack(fill="x", padx=10, pady=10)
 
+    ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(0, 5))
+    ttk.Label(separator_frame, text="Added EFS to the List On selectd device", font=("Arial", 10, "bold")).pack(side="left")
+    ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(5, 0))
+        
+    Added_efs_to_list_row = tk.Frame(EFS_frame)
+    Added_efs_to_list_row.pack(fill="x", padx=10)
+
+    # Entry field with placeholder hint
+    entry_container = tk.Frame(Added_efs_to_list_row)
+    entry_container.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
+    # First entry field with placeholder
+    efs_entry1 = ttk.Entry(entry_container)
+    efs_entry1.insert(0, 'Added EFS Name')
+    efs_entry1.pack(side="left", fill="x", expand=True, padx=(0, 5))
+
+    # Second entry field with placeholder
+    efs_entry2 = ttk.Entry(entry_container)
+    efs_entry2.insert(0, 'Added EFS On device location ')
+    efs_entry2.pack(side="left", fill="x", expand=True)
+
+    # Placeholder behavior for first entry
+    def on_entry1_click(event):
+        if efs_entry1.get() == 'Added EFS Name':
+            efs_entry1.delete(0, "end")
+
+    def on_entry1_focus_out(event):
+        if efs_entry1.get() == '':
+            efs_entry1.insert(0, 'Added EFS Name')
+
+    efs_entry1.bind('<FocusIn>', on_entry1_click)
+    efs_entry1.bind('<FocusOut>', on_entry1_focus_out)
+
+    # Placeholder behavior for second entry
+    def on_entry2_click(event):
+        if efs_entry2.get() == 'Added EFS On device location ':
+            efs_entry2.delete(0, "end")
+
+    def on_entry2_focus_out(event):
+        if efs_entry2.get() == '':
+            efs_entry2.insert(0, 'Added EFS On device location ')
+
+    efs_entry2.bind('<FocusIn>', on_entry2_click)
+    efs_entry2.bind('<FocusOut>', on_entry2_focus_out)
     
     
+    button = ttk.Button(
+    Added_efs_to_list_row,
+    text="Added EFS path",
+    )
+    button.pack(side="right", anchor="e")
 
 
     return EFS_frame
+
+
 
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
@@ -486,7 +536,58 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
         command=lambda: update_txt_display_lables(2)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
+    
+    
+    
+    IMEI_row= tk.Frame(Full_Provisioning_frame)
+    IMEI_row.pack(fill="x", padx=10, pady=10)
 
+    imei_editable_var = tk.StringVar()
+
+    ttk.Label(IMEI_row,
+              text="Update IMEI:"
+              ).pack(side="left", padx=(0, 10))
+    
+    imei_entry = tk.Entry(
+    IMEI_row,
+    textvariable=imei_editable_var,
+    fg="white")
+    imei_entry.pack(side="left", padx=(0, 10))
+    
+    
+    button = ttk.Button(
+        IMEI_row,
+        text="Update IMEI",
+        command=lambda:
+        start_thread(update_IMEI, "Meta update txt Thread", 
+                        daemon=True,
+                        callback=update_config_display)
+    )
+    button.pack(side="right", anchor="e", padx=(0, 10))
+
+    
+    
+    def update_IMEI():
+        adb_id = get_adb_id()
+        PROV_BASE = get_provisioning_base()
+    
+        if PROV_BASE and adb_id:
+            CONFIG_TXT = os.path.join(PROV_BASE, 'QCN', adb_id, 'config.txt')
+            try:
+                with open(CONFIG_TXT, "r", encoding="utf-8") as f:
+                    text = f.read()
+
+                    text = re.sub(r"^IMEI:\s*\S+",
+                                f"IMEI: {imei_editable_var.get()}",
+                                text,
+                                count=1,
+                                flags=re.MULTILINE)
+
+                    with open(CONFIG_TXT, "w", encoding="utf-8") as f:
+                        f.write(text)
+            except Exception as e:
+                print(f'No path selected for Provisioning : {e}')
+            
     # button = ttk.Button(
         # Mpss_row,
         # text="select Mpss zip file",
@@ -575,19 +676,22 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
             mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A')}")
 
         elif isinstance(meta_build, str) and 'pinnacles' in meta_build.lower():
             meta_var.set(f"Meta selected :- {meta_mpss_config.get('DE7.0_PINNACLES_META', 'N/A')}")
             mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE7.0_PINNACLES_MPSS', 'N/A')}")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A')}")
+
 
         else:
             meta_var.set(f"Meta selected :- UNKNOWN (Bad device state)")
             mpss_var.set(f"MPSS selected :- UNKNOWN (Bad device state)")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
-
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A_test')}")
 
     # Initial call
     update_config_display()

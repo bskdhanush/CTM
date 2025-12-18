@@ -536,7 +536,37 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
         command=lambda: update_txt_display_lables(2)
     )
     button.pack(side="right", anchor="e", padx=(0, 10))
+    
+    
+    
+    IMEI_row= tk.Frame(Full_Provisioning_frame)
+    IMEI_row.pack(fill="x", padx=10, pady=10)
 
+    imei_editable_var = tk.StringVar()
+
+    ttk.Label(IMEI_row,
+              text="Update IMEI:"
+              ).pack(side="left", padx=(0, 10))
+    
+    imei_entry = tk.Entry(
+    IMEI_row,
+    textvariable=imei_editable_var,
+    fg="white")
+    imei_entry.pack(side="left", padx=(0, 10))
+    
+    
+    button = ttk.Button(
+        IMEI_row,
+        text="Update IMEI",
+        command=lambda: update_IMEI()
+    )
+    button.pack(side="right", anchor="e", padx=(0, 10))
+
+    
+    
+    def update_IMEI():
+        print("updating the imei")
+        
     # button = ttk.Button(
         # Mpss_row,
         # text="select Mpss zip file",
@@ -625,19 +655,22 @@ def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :
             mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE9.0_KOBUK_MPSS', 'N/A')}")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A')}")
 
         elif isinstance(meta_build, str) and 'pinnacles' in meta_build.lower():
             meta_var.set(f"Meta selected :- {meta_mpss_config.get('DE7.0_PINNACLES_META', 'N/A')}")
             mpss_var.set(f"MPSS selected :- {meta_mpss_config.get('DE7.0_PINNACLES_MPSS', 'N/A')}")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A')}")
+
 
         else:
             meta_var.set(f"Meta selected :- UNKNOWN (Bad device state)")
             mpss_var.set(f"MPSS selected :- UNKNOWN (Bad device state)")
             mbn_var.set(f"MBN selected  :- {meta_mpss_config.get('MBN_SW', 'N/A')}")
             imei_var.set(f"IMEI :- {config.get('IMEI', 'N/A')}")
-
+            imei_editable_var.set(f"{config.get('IMEI', 'N/A_test')}")
 
     # Initial call
     update_config_display()

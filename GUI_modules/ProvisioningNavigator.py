@@ -407,25 +407,59 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
         #print(f"Inserting the values {EFS_List}")
         for values in EFS_List:
             keys_listbox.insert(tk.END,values)
-        
+    
+    
+    
+    separator_frame = tk.Frame(EFS_frame)
+    separator_frame.pack(fill="x", padx=10, pady=10)
+
+    ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(0, 5))
+    ttk.Label(separator_frame, text="Added EFS to the List On selectd device", font=("Arial", 10, "bold")).pack(side="left")
+    ttk.Separator(separator_frame, orient="horizontal").pack(side="left", fill="x", expand=True, padx=(5, 0))
         
     Added_efs_to_list_row = tk.Frame(EFS_frame)
-    Added_efs_to_list_row.pack(fill="x", padx=10,)
-    
-    Added_efs_frame = tk.Frame(Added_efs_to_list_row)
-    Added_efs_frame.pack(fill="both", expand=True, padx=10, pady=10)
-    tk.Label(Added_efs_frame,take="Added EFS to device list").pack(padx=10)
-    
-    
+    Added_efs_to_list_row.pack(fill="x", padx=10)
+
+    # Entry field with placeholder hint
+    entry_container = tk.Frame(Added_efs_to_list_row, bg='#2b2b2b')
+    entry_container.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
+    # First entry field with placeholder
+    efs_entry1 = tk.Entry(
+        entry_container, 
+        fg='grey', 
+        bg='#3c3c3c', 
+        insertbackground='white',
+        relief='solid',
+        bd=1,
+        highlightthickness=1,
+        highlightbackground='#555555',
+        highlightcolor='#0078d7'
+    )
+    efs_entry1.insert(0, 'Added EFS Name')
+    efs_entry1.pack(side="left", fill="x", expand=True, padx=(0, 5), ipady=3)
+
+    # Second entry field with placeholder
+    efs_entry2 = tk.Entry(
+        entry_container, 
+        fg='grey', 
+        bg='#3c3c3c', 
+        insertbackground='white',
+        relief='solid',
+        bd=1,
+        highlightthickness=1,
+        highlightbackground='#555555',
+        highlightcolor='#0078d7'
+    )
+    efs_entry2.insert(0, 'Added EFS path on dev')
+    efs_entry2.pack(side="left", fill="x", expand=True, ipady=3)
+
+    # Button on the right
     button = ttk.Button(
         Added_efs_to_list_row,
         text="Added EFS path",
     )
-    button.pack(side="right", anchor="e", padx=(0, 10))
-    
-    
-        
-    #_refresh_efs_table("")
+    button.pack(side="right", anchor="e")
 
     
     

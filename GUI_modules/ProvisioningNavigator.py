@@ -421,51 +421,54 @@ def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
     Added_efs_to_list_row.pack(fill="x", padx=10)
 
     # Entry field with placeholder hint
-    entry_container = tk.Frame(Added_efs_to_list_row, bg='#2b2b2b')
+    entry_container = tk.Frame(Added_efs_to_list_row)
     entry_container.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
     # First entry field with placeholder
-    efs_entry1 = tk.Entry(
-        entry_container, 
-        fg='grey', 
-        bg='#3c3c3c', 
-        insertbackground='white',
-        relief='solid',
-        bd=1,
-        highlightthickness=1,
-        highlightbackground='#555555',
-        highlightcolor='#0078d7'
-    )
+    efs_entry1 = ttk.Entry(entry_container)
     efs_entry1.insert(0, 'Added EFS Name')
-    efs_entry1.pack(side="left", fill="x", expand=True, padx=(0, 5), ipady=3)
+    efs_entry1.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
     # Second entry field with placeholder
-    efs_entry2 = tk.Entry(
-        entry_container, 
-        fg='grey', 
-        bg='#3c3c3c', 
-        insertbackground='white',
-        relief='solid',
-        bd=1,
-        highlightthickness=1,
-        highlightbackground='#555555',
-        highlightcolor='#0078d7'
-    )
-    efs_entry2.insert(0, 'Added EFS path on dev')
-    efs_entry2.pack(side="left", fill="x", expand=True, ipady=3)
+    efs_entry2 = ttk.Entry(entry_container)
+    efs_entry2.insert(0, 'Added EFS On device location ')
+    efs_entry2.pack(side="left", fill="x", expand=True)
 
-    # Button on the right
+    # Placeholder behavior for first entry
+    def on_entry1_click(event):
+        if efs_entry1.get() == 'Added EFS Name':
+            efs_entry1.delete(0, "end")
+
+    def on_entry1_focus_out(event):
+        if efs_entry1.get() == '':
+            efs_entry1.insert(0, 'Added EFS Name')
+
+    efs_entry1.bind('<FocusIn>', on_entry1_click)
+    efs_entry1.bind('<FocusOut>', on_entry1_focus_out)
+
+    # Placeholder behavior for second entry
+    def on_entry2_click(event):
+        if efs_entry2.get() == 'Added EFS On device location ':
+            efs_entry2.delete(0, "end")
+
+    def on_entry2_focus_out(event):
+        if efs_entry2.get() == '':
+            efs_entry2.insert(0, 'Added EFS On device location ')
+
+    efs_entry2.bind('<FocusIn>', on_entry2_click)
+    efs_entry2.bind('<FocusOut>', on_entry2_focus_out)
+    
+    
     button = ttk.Button(
-        Added_efs_to_list_row,
-        text="Added EFS path",
+    Added_efs_to_list_row,
+    text="Added EFS path",
     )
     button.pack(side="right", anchor="e")
 
-    
-    
-
 
     return EFS_frame
+
+
 
 
 def Full_Provisioning_page(parent, Pagename, device_name)-> ttk.LabelFrame :

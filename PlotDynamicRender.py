@@ -103,7 +103,7 @@ def refresh_plots():
             print(f"Exception during refresh of {plot_fn}: {e}")
 
 
-def periodic_refresh(parent_frame, interval_secs: int = 60):
+def periodic_refresh(parent_frame, interval_secs: int = 120):
     """
     Tk-based scheduler, no while True / extra GUI thread.
     """

@@ -51,8 +51,8 @@ def create_data_monitor_page(container, pages, add_nav):
 
     # populate dynamically ----
     # create plots once
-    rdp.init_plots(list_fr)
-    # then kick off the periodic in-place refresh
+    rdp.draw_all_plots(list_fr)
+    # then kick off the background refresher
     rdp.periodic_refresh(list_fr)
 
     return data_pg

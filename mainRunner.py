@@ -35,7 +35,7 @@ def check_for_new_meta(device_name):
 
 
 def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_type) -> None:
-    operator = "TMO"
+    operator = "VZW"
     if not TC_ondevice_path.exists():
         raise FileNotFoundError(f"Extracted folder not found: {TC_ondevice_path}")
     
@@ -45,17 +45,14 @@ def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_typ
         return 
     
     if operator == 'VZW':
-        print(operator + " in vzw loop")
-        
         # Uncomment the specific updateWWANProfile line
-        content = re.sub(r"//updateWWANProfile\s+0\s+0:1\s+2\s+3\s+0", 
-                        "updateWWANProfile 0 0:1 2 3 0", 
+        content = re.sub(r"//updateWWANProfile\s+0\s+0:1\s+2\s+3_0", 
+                        "updateWWANProfile 0 0:1 2 3_0", 
                         content)
         
     elif operator == "TMO":
-        print(operator)
-        content = re.sub(r"updateWWANProfile\s+0\s+0:1\s+2\s+3\s+0", 
-                        "//updateWWANProfile 0 0:1 2 3 0", 
+        content = re.sub(r"updateWWANProfile\s+0\s+0:1\s+2\s+3_0", 
+                        "//updateWWANProfile 0 0:1 2 3_0", 
                         content)
         print(content)
     else:
@@ -67,8 +64,8 @@ def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_typ
    
 if __name__ == "__main__":
     replace_ADB_TC_ondevice(
-        Path(r'D:\Assignments\TC_ondevice.txt'),
-        r"C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.7_1", 
+        Path(r'C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.9\kobuk\testcase\TC_ondevice.txt'),
+        r"C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.9", 
         'kobuk'
     )
  

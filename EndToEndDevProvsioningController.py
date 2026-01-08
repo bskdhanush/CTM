@@ -7,6 +7,7 @@ import shutil
 import QSTAFInstaller
 import py7zr
 from pathlib import Path
+from Quts_tool.CheckDeviceProvsion import check_Install_status
 from WifiController import get_adb_id, run_command, get_meta_build_info
 from JsonHandler import load_prov_json
 from Constants import CTM_META_DIR, CTM_MPSS_DIR
@@ -323,6 +324,8 @@ def full_provisioning(meta_selection=True, mpss_selection=True):
         ]
         subprocess.run(command, shell=True)
         print("Full Provisioning launched in a new cmd prompt")
+        check_Install_status(option)
+        
 
 def load_fota(filepath):
     # Push FOTA zip to device and trigger load in recovery mode

@@ -5,9 +5,11 @@ CTM_CONFIG_DIR = r'C:\ProgramData\Qualcomm\CTM\config'
 CTM_LOGS_DIR = r'C:\ProgramData\Qualcomm\CTM\logs'
 ADB_ID_JSON_DIR = r"C:\QSTAF\CTM_logs\adb_ID.json"
 
+
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")
 RDKBCRASH_ROOT     = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\appcrash_logs")
+PROV_LOG_DIR= Path(r"C:\CPE_new\filter_log\logging")
 
 CTM_BASE_DIR = r'C:\CTM'
 CTM_META_DIR = os.path.join(CTM_BASE_DIR, 'Meta')

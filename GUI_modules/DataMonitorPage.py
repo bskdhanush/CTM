@@ -46,14 +46,13 @@ def create_data_monitor_page(container, pages, add_nav):
 
     canvas.create_window((0, 0), window=list_fr, anchor="nw")
     canvas.configure(yscrollcommand=scroll.set)
-
     canvas.pack(side="left", fill="both", expand=True)
     scroll.pack(side="right", fill="y")
 
     # populate dynamically ----
-    # draw the first plot immediately
+    # create plots once
     rdp.draw_all_plots(list_fr)
     # then kick off the background refresher
     rdp.periodic_refresh(list_fr)
-    
+
     return data_pg

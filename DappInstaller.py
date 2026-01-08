@@ -89,5 +89,5 @@ def replace_ADB_TC_ondevice(TC_ondevice_path: Path, extracted_folder, device_typ
     
 
 if __name__ == "__main__":
-    replace_ADB_TC_ondevice("C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.7_1\kobuk\testcase","C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.7_1", 'kobuk')
+    replace_ADB_TC_ondevice("C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.9\kobuk\testcase","C:\CTM\DAPP\Kobuk_CPE_1.1_v1.1.9", 'kobuk')
     

@@ -4,6 +4,7 @@ from pathlib import Path
 CTM_CONFIG_DIR = r'C:\ProgramData\Qualcomm\CTM\config'
 CTM_LOGS_DIR = r'C:\ProgramData\Qualcomm\CTM\logs'
 ADB_ID_JSON_DIR = r"C:\QSTAF\CTM_logs\adb_ID.json"
+PROV_LOG_DIR= r"C:\CPE_new\filter_log\logging"
 
 DEFAULT_CRASHDUMP = Path(r"C:\Temp\automation\QSTAF\QSTAFpy\crashdumps")
 CRASHDUMP_ROOT_PCAT  = Path(r"C:\ProgramData\Qualcomm\PCAT\AddOns\CrashCollection\MemoryDumps")

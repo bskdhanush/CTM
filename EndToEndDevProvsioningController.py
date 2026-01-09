@@ -6,7 +6,7 @@ import subprocess
 import shutil
 import QSTAFInstaller
 from pathlib import Path
-from Quts_tool.CheckDeviceProvsionStatus import check_META_install_status,check_MPSS_install_status
+from CheckDeviceProvsionStatus import check_META_install_status,check_MPSS_install_status
 from WifiController import get_adb_id, run_command, get_meta_build_info
 from JsonHandler import load_prov_json
 from Constants import CTM_META_DIR, CTM_MPSS_DIR

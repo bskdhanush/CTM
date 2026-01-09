@@ -8,6 +8,7 @@ import re
 import subprocess
 from datetime import date
 import datetime
+from tkinter import messagebox
 import pandas as pd
 from GUI_modules import CrashForecastPage
 from JsonHandler import load_prov_json, save_prov_json
@@ -102,9 +103,23 @@ def create_crash_meta_info_csv(crash_info_dict):
     # display_crash_table(crash_meta_info_csv)
 
 
+Default_Crash_renaming_Stings=["Pls enter market",
+                               "Enter FST ID manually",
+                               "Enter operator",
+                               "NO_OPERATOR"]
+
 def zip_and_upload_crash_dump(crash_dir_list,log_box):
+
+    #condition to check if the crash renaming has a valid id:
+    current_crash_naming=get_crash_naming()
+    
+    if any(s in current_crash_naming for s in Default_Crash_renaming_Stings):
+        messagebox.showerror("Naming Error ", "Invalid Crash Renaming \n Please check")
+        return
+    
     # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
     # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
+    
     from FzHandler import file_upload
     df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
 

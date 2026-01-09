@@ -1,5 +1,5 @@
 import os
-from WifiController import get_adb_id
+from WifiController import get_adb_id,get_meta_build_info,get_mpss_build_info
 from Constants import PROV_LOG_DIR
 from datetime import datetime
 import tkinter as tk
@@ -12,7 +12,7 @@ list_messages=["META loading completed on Device" ,
                 "MBN loading completed on Device",
                 "NV loading completed on Device"]
 
-def check_Install_status(option):
+def check_Install_status(option,PROV_BASE):
     
     if "2" in option:
         print("Checking for meta install")
@@ -56,6 +56,20 @@ def check_the_text_file(default_msg:str):
                 
     except:
         print("NO such file")
+        
+        
+def check_meta_install_status(PROV_BASE):
+    adb_Id= "123"#get_adb_id()
+    if adb_Id:
+        CurrentMetaOnDevice="Kobuk.LE.1.1-00033-EBOOT.CPE.WKK-1"#get_meta_build_info()
+        file_path = os.path.join(PROV_BASE, "META_MPSS.txt")
+        try:
+            with open(file_path, 'r') as f:
+                content=f.read()
+                if not CurrentMetaOnDevice in content:
+                    messagebox.showerror("Failure", "Meta install failed! \nPlease Check")
+        except: 
+            print("No such file")
             
         
     

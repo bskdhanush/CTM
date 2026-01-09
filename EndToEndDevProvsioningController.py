@@ -5,12 +5,12 @@ import time
 import subprocess
 import shutil
 import QSTAFInstaller
-import py7zr
 from pathlib import Path
-from Quts_tool.CheckDeviceProvsion import check_META_install_status,check_MPSS_install_status
+from CheckDeviceProvsion import check_META_install_status,check_MPSS_install_status
 from WifiController import get_adb_id, run_command, get_meta_build_info
 from JsonHandler import load_prov_json
 from Constants import CTM_META_DIR, CTM_MPSS_DIR
+import py7zr
 
 
 def get_project_name():
@@ -125,7 +125,8 @@ def load_meta_from_zip(filepath,Pgname,status_lable):
         if filepath.endswith(".7z"):
             try:
                 print("Starting 7z extraction... This may take several minutes for large files")
-                QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_META_DIR))
+               # QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_META_DIR))
+                with py7zr.SevenZipFile(filepath, mode="r") as z:z.extractall(path=CTM_META_DIR)
                 status_lable.set("Extraction completed")
             except Exception as e:   
                 status_lable.set(f"faild to unzip {e}")
@@ -179,7 +180,8 @@ def load_mpss_from_zip(filepath,Pgname,status_lable):
         if filepath.endswith(".7z"):
             try:
                 print("Starting 7z extraction... This may take several minutes for large files")
-                QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_MPSS_DIR))
+                #QSTAFInstaller._extract_7z_with_cli(filepath, Path(CTM_MPSS_DIR))
+                with py7zr.SevenZipFile(filepath, mode="r") as z:z.extractall(path=CTM_MPSS_DIR)
                 status_lable.set("Extraction completed")
             except Exception as e:   
                 status_lable.set(f"faild to unzip {e}")

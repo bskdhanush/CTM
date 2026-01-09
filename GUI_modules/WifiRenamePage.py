@@ -78,21 +78,21 @@ def create_wifi_renaming_page(container, pages, add_nav):
 
     ttk.Radiobutton(
         toggle_fr,
-        text="OWRT (ATT)",
+        text="Pinnacles OWRT (ATT)",
         variable=toggle_var,
         value="OWRT",
     ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
 
     ttk.Radiobutton(
         toggle_fr,
-        text="RDKB (TMO)",
+        text="Pinnacles RDKB (TMO)",
         variable=toggle_var,
         value="RDKB",
     ).pack(side="left", expand=True, fill="x", padx=6, pady=6)
    
     ttk.Radiobutton(
         toggle_fr,
-        text="Kobuk",
+        text="Kobuk OWRT",
         variable=toggle_var,
         value="Kobuk",
     ).pack(side="left", expand=True, fill="x", padx=6, pady=6)

@@ -86,9 +86,8 @@ def list_files(device_filter="", pageName="", pattern=""):
                     keywords = ["^Kobuk"]
             elif pageName == "Mpss":
                 if device_filter and 'kobuk' in device_filter.lower():
-                    keywords = ["^BF.*kobuk", "^MPSS.*kobuk", "_mbns.zip"]
+                    keywords = ["^MPSS.*kobuk"]
         elif pattern:
-
             keywords = [pattern]
     except Exception as e:
         print(f'Exception during pattern matching in list_files: {e}')

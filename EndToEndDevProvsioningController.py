@@ -307,7 +307,22 @@ def write_nv():
         ]
         subprocess.run(command, shell=True)
         print("NV Load launched in a new cmd prompt")
-    
+
+def load_efs():
+    project = get_project_name()
+    PROV_BASE = get_provisioning_base()
+    if PROV_BASE and project:
+        os.chdir(PROV_BASE)
+        command = [
+            'python', 'End_to_End_device_configuration.py',
+            "--project", project,
+            "--option", "7",
+            "--meta_option", "2",
+            "--device_serial", "m"
+        ]
+        subprocess.run(command, shell=True)
+        print('Load_EFS launched in a new cmd prompt')
+
 def full_provisioning(meta_selection=True, mpss_selection=True):
     project = get_project_name()
     PROV_BASE = get_provisioning_base()

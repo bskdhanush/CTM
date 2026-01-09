@@ -198,7 +198,7 @@ def update_3_mlo_config_kobuk(config):
         ssid = f"QSTAF_MLO_{_adb_id}{prefix}"
 
         mlo_json_data = {
-            "4": {
+            "3": {
                 "command": "enableMLO",
                 "input": {
                     "band_config": "2_5_6",
@@ -209,6 +209,26 @@ def update_3_mlo_config_kobuk(config):
                     "Metadata": {
                         "vpid": 0,
                         "start_delay": "0:1"
+                    }
+                }
+            },
+            "4": {
+                "command": "disableWlan",
+                "input": {
+                    "start_delay": 0,
+                    "Metadata": {
+                        "vpid": 0,
+                        "start_delay": "2:3"
+                    }
+                }
+            },
+            "5": {
+                "command": "enableWlan",
+                "input": {
+                    "start_delay": 0,
+                    "Metadata": {
+                        "vpid": 0,
+                        "start_delay": "2:3"
                     }
                 }
             }

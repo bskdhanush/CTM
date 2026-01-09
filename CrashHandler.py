@@ -103,17 +103,20 @@ def create_crash_meta_info_csv(crash_info_dict):
     # display_crash_table(crash_meta_info_csv)
 
 
-Default_Crash_renaming_Stings=["Pls enter market",
-                               "Enter FST ID manually",
-                               "Enter operator",
+Default_Crash_renaming_Stings=["Plsentermarket",
+                               "EnterFSTIDmanually",
+                               "Enteroperator",
+                               "EnterTDCSerial"
                                "NO_OPERATOR"]
 
 def zip_and_upload_crash_dump(crash_dir_list,log_box):
 
     #condition to check if the crash renaming has a valid id:
     current_crash_naming=get_crash_naming()
+    print(current_crash_naming)
     
     if any(s in current_crash_naming for s in Default_Crash_renaming_Stings):
+        print("inside msg box")
         messagebox.showerror("Naming Error ", "Invalid Crash Renaming \n Please check")
         return
     
@@ -270,47 +273,54 @@ def set_naming_convention_from_crash_rename_csv(log_box=None):
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
         _adb_id = get_adb_id()
-        _mpss_build = get_mpss_build_info()
-        _meta_build = get_meta_build_info().strip('"')
-        df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
+        if _adb_id:
+            _mpss_build = get_mpss_build_info()
+            _meta_build = get_meta_build_info().strip('"')
+            df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
 
-        hostname = socket.gethostname()
-        
-        if isinstance(df_one, pd.DataFrame) and not df_one.empty:
-
-            host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
-            market = host_pool_mapping.get(hostname)
-
-            name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA', 'NEWYORK-CPE']) or (hostname in ['mstft20-52'])) else 'Aniket'
-
-            adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
-            tdc_serial = adb_tdc_map.get(_adb_id)
-
-            fst_id = df_one['FST_ID'].iloc[0]
-
-            magic_string = df_one['MAGIC_STRING'].iloc[0]
-
-            operator = get_operator()
+            hostname = socket.gethostname()
             
-            set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
-            
-            try:
-                if log_box:
-                    log_box.insert("end", f"Found data from csv:\n  market: {market}\n  name: {name}\n  fst_id: {fst_id}\n  operator: {operator}\n  tdc_serial: {tdc_serial}\n  magic_string: {magic_string}\n")
-            except Exception as e:
-                 print(f"Failed to added data to log box {e}")
+            if isinstance(df_one, pd.DataFrame) and not df_one.empty:
+
+                host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
+                market = host_pool_mapping.get(hostname)
+
+                name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA', 'NEWYORK-CPE']) or (hostname in ['mstft20-52'])) else 'Aniket'
+
+                adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
+                tdc_serial = adb_tdc_map.get(_adb_id)
+
+                fst_id = df_one['FST_ID'].iloc[0]
+
+                magic_string = df_one['MAGIC_STRING'].iloc[0]
+
+                operator = get_operator()
+                
+                set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+                
+                try:
+                    if log_box:
+                        log_box.insert("end", f"Found data from csv:\n  market: {market}\n  name: {name}\n  fst_id: {fst_id}\n  operator: {operator}\n  tdc_serial: {tdc_serial}\n  magic_string: {magic_string}\n")
+                except Exception as e:
+                    print(f"Failed to added data to log box {e}")
 
 
-        else:
+            else:
+                cfg = load_prov_json()
+                cfg['fst_id'] = "Enter FST ID manually"
+                save_prov_json(cfg)
+                
+                try:
+                    if log_box:
+                        log_box.insert("end", f"No valid FST ID found. Downlaod the latest CrashRenamingMetaInfo.CSV")
+                except Exception as e:
+                    print(f"Failed to added data to log box {e}")
+        else: 
             cfg = load_prov_json()
             cfg['fst_id'] = "Enter FST ID manually"
+            cfg['tdc_serial'] = "Enter TDC Serial"
             save_prov_json(cfg)
             
-            try:
-                if log_box:
-                    log_box.insert("end", f"No valid FST ID found. Downlaod the latest CrashRenamingMetaInfo.CSV")
-            except Exception as e:
-                 print(f"Failed to added data to log box {e}")
 
 def get_operator():
     from Constants import CTM_LOGS_DIR

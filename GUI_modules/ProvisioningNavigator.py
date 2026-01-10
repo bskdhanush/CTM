@@ -331,6 +331,24 @@ def NV_page(parent, Pagename, device_name) -> ttk.LabelFrame:
 
 
 def EFS_page(parent, Pagename, device_name) -> ttk.LabelFrame:
+    EFS_frame = ttk.LabelFrame(parent, text=f"Install EFS")
+    EFS_frame.pack(fill="x", **PADDING)  # type: ignore
+
+    # First row: label (left), button (right) in a horizontal frame
+    top_row = tk.Frame(EFS_frame)
+    top_row.pack(fill="x", padx=10, pady=(10, 0))
+
+    button = ttk.Button(
+        top_row,
+        text="Load EFS",
+        command=lambda: start_thread(load_efs, "EFS install Thread", daemon=True)
+    )
+    button.pack(fill="x", padx=(0, 10))
+
+    return EFS_frame
+
+
+def EFS_page_DEPRECATED(parent, Pagename, device_name) -> ttk.LabelFrame:
 
     EFS_frame = ttk.LabelFrame(parent, text=f"EFS")
     EFS_frame.pack(fill="x", **PADDING)  # type: ignore

@@ -69,7 +69,7 @@ def create_wifi_renaming_page(container, pages, add_nav):
     
     OWRT_CHOICES = ("3 SLO", "2G-5G MLO", "3 MLO")
     RDKB_CHOICES = ("3 SLO", "2G SLO + 5G-6G MLO")
-    Kobuk_CHOICES = ("3_MLO")
+    Kobuk_CHOICES = ("3_MLO",)
 
     toggle_var = tk.StringVar(value="Kobuk")
 

@@ -353,6 +353,8 @@ def update_3_mlo_config():
     pass
 
 def update_cpe_wifi_config(toggle_var,wifi_config,config):
+    
+    print(f"Current config {toggle_var,wifi_config,config}")
     # Read Meta
     try:
         meta = get_meta_build_info()

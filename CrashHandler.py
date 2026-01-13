@@ -272,31 +272,41 @@ def set_naming_convention_from_crash_rename_csv(log_box=None):
 
     if os.path.exists(CRASH_RENAME_META_CSV):
         df_crash_rename = pd.read_csv(CRASH_RENAME_META_CSV, index_col=False)
+        df_one = pd.DataFrame()
         _adb_id = get_adb_id()
         if _adb_id:
-            _mpss_build = get_mpss_build_info()
-            _meta_build = get_meta_build_info().strip('"')
-            df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
+            try:
+                _mpss_build = get_mpss_build_info()
+                _meta_build = get_meta_build_info().strip('"')
+                df_one = df_crash_rename[(df_crash_rename['META'] == _meta_build) & (df_crash_rename['MPSS'] == _mpss_build)]
 
-            hostname = socket.gethostname()
-            
+                hostname = socket.gethostname()
+            except Exception as e:
+                print(f'Exception while reading {CRASH_RENAME_META_CSV} based on Meta and MPSS: {e}')
+
             if isinstance(df_one, pd.DataFrame) and not df_one.empty:
+                try:
+                    host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
+                    market = host_pool_mapping.get(hostname)
 
-                host_pool_mapping = json.loads(df_one['HOST_POOL_MAPPING'].iloc[0])
-                market = host_pool_mapping.get(hostname)
+                    if ((market in ['LV-CPE', 'Seattle-CPE', 'Phoenix-CPE', 'NEWYORK-CPE']) or (
+                            hostname in ['mstft20-52'])):
+                        name = 'Kiran'
+                    else:
+                        name = 'Aniket'
 
-                name = 'Kiran' if ((market in ['LV-CPE', 'Seattle-CPE', 'Dallas-CPE-SA', 'NEWYORK-CPE']) or (hostname in ['mstft20-52'])) else 'Aniket'
+                    adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
+                    tdc_serial = adb_tdc_map.get(_adb_id)
 
-                adb_tdc_map = json.loads(df_one['ADB_TDC_MAPPING'].iloc[0])
-                tdc_serial = adb_tdc_map.get(_adb_id)
+                    fst_id = df_one['FST_ID'].iloc[0]
 
-                fst_id = df_one['FST_ID'].iloc[0]
+                    magic_string = df_one['MAGIC_STRING'].iloc[0]
 
-                magic_string = df_one['MAGIC_STRING'].iloc[0]
-
-                operator = get_operator()
+                    operator = get_operator()
                 
-                set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+                    set_naming_convention(market, name, fst_id, operator, tdc_serial, magic_string)
+                except Exception as e:
+                    print(f'Exception while setting FST naming_convention: {e}')
                 
                 try:
                     if log_box:
@@ -304,22 +314,27 @@ def set_naming_convention_from_crash_rename_csv(log_box=None):
                 except Exception as e:
                     print(f"Failed to added data to log box {e}")
 
-
             else:
-                cfg = load_prov_json()
-                cfg['fst_id'] = "Enter FST ID manually"
-                save_prov_json(cfg)
+                try:
+                    cfg = load_prov_json()
+                    cfg['fst_id'] = "Enter FST ID manually"
+                    save_prov_json(cfg)
+                except Exception as e:
+                    print(f"Exception while updating prov_json with fst_id: {e}")
                 
                 try:
                     if log_box:
                         log_box.insert("end", f"No valid FST ID found. Downlaod the latest CrashRenamingMetaInfo.CSV")
                 except Exception as e:
                     print(f"Failed to added data to log box {e}")
-        else: 
-            cfg = load_prov_json()
-            cfg['fst_id'] = "Enter FST ID manually"
-            cfg['tdc_serial'] = "Enter TDC Serial"
-            save_prov_json(cfg)
+        else:
+            try:
+                cfg = load_prov_json()
+                cfg['fst_id'] = "Enter FST ID manually"
+                cfg['tdc_serial'] = "Enter TDC Serial"
+                save_prov_json(cfg)
+            except Exception as e:
+                print(f"Exception while updating prov_json with fst_id and tdc_serial: {e}")
             
 
 def get_operator():

@@ -331,7 +331,7 @@ def full_provisioning(meta_selection=True, mpss_selection=True):
         option = "2,"
     if mpss_selection:
         option = f"{option}3,"
-    option = f"{option}4,5,6"
+    option = f"{option}4,5,6,7"
     if PROV_BASE and project:
         os.chdir(PROV_BASE)
         command = [

@@ -400,8 +400,7 @@ def create_crash_forecast_page(container, pages, add_nav):
             "Zip and upload thread",
             daemon=True,
             crash_dir_list=get_selected_crash_paths(),
-            log_box=_log_box_widget,
-            crash_naming_label=crash_naming_label
+            log_box=_log_box_widget
         ),
 
 

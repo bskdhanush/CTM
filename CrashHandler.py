@@ -110,7 +110,7 @@ Default_Crash_renaming_Stings=["Plsentermarket",
                                "NO_OPERATOR",
                                "Something Wrong"]
 
-def zip_and_upload_crash_dump(crash_dir_list,log_box,crash_naming_label):
+def zip_and_upload_crash_dump(crash_dir_list,log_box):
 
     #condition to check if the crash renaming has a valid id:
     current_crash_naming=get_crash_naming()

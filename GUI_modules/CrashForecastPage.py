@@ -296,13 +296,13 @@ def create_crash_forecast_page(container, pages, add_nav):
     )
     crash_naming_label.pack(fill="both", expand=True, **PADDING)
 
-    ttk.Button(
-        crash_page_main,
-        text="GET Crash Naming",
-        command=lambda: crash_naming_label.config(
-            text=f"Current Renaming: \n\n{CrashHandler.get_crash_naming()}"
-        ),
-    ).pack(fill="both", expand=False, **PADDING)
+    # ttk.Button(
+    #     crash_page_main,
+    #     text="GET Crash Naming",
+    #     command=lambda: crash_naming_label.config(
+    #         text=f"Current Renaming: \n\n{CrashHandler.get_crash_naming()}"
+    #     ),
+    # ).pack(fill="both", expand=False, **PADDING)
 
     separator = ttk.Separator(crash_page_main, orient="horizontal")
     separator.pack(fill="both", expand=False, padx=20, pady=(12, 0))
@@ -386,14 +386,24 @@ def create_crash_forecast_page(container, pages, add_nav):
     ttk.Button(
         buttons_frame,
         text="Zip & Upload Crash dump",
-        command=lambda: start_thread(
+        command=lambda:check_naming_and_Upload()
+    ).grid(row=0, column=1, sticky="ew", **PADDING)
+
+
+
+    def check_naming_and_Upload():
+        # crash_naming_label.config(
+        #     text=f"Current Renaming: \n\n{CrashHandler.get_crash_naming()}"
+        # ),
+        start_thread(
             CrashHandler.zip_and_upload_crash_dump,
             "Zip and upload thread",
             daemon=True,
             crash_dir_list=get_selected_crash_paths(),
             log_box=_log_box_widget,
+            crash_naming_label=crash_naming_label
         ),
-    ).grid(row=0, column=1, sticky="ew", **PADDING)
+
 
     ttk.Button(
         buttons_frame,

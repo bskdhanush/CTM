@@ -129,7 +129,7 @@ def get_speedtest_csv_list():
 def get_total_copy_csv_list():
     csv_copy_list = []
     control_csv_patterns = ['\\**\\*RFBandInfo.csv', '\\**\\*QSH.csv', '\\**\\*QSH_DL_STATS.csv',
-                            '\\**\\*QSH_FR_MODE.csv',
+                            '\\**\\*QSH_FR_MODE.csv', '\\**\\*QSH_CHANNEL.csv',
                             '\\**\\*QSH_ENL2.csv', '\\**\\*qstaf_monitor_connected_devices.csv',
                             '\\**\\*qstaf_monitor.csv', '\\**\\*qstaf_gps_monitor.csv', '\\**\\*control_metadata.csv']
     traffic_csv_patterns = ['\\**\\*Ping.csv', '\\**\\*Zoomcall.csv', '\\**\\*BrowseUrl.csv',
@@ -192,9 +192,9 @@ def copy_csv_main():
     except Exception as e:
         print(f'Exception during delete_old_csv: {e}')
 
-
-def copy_csv_to_latest_folder(csv, base_dir):
+def get_latest_qstaf_folder(base_dir):
     csv_files = sorted(glob.glob(base_dir + '\\**\\*.csv', recursive=True), reverse=True)
+    dest_folder = None
     prefix = None
     if len(csv_files):
         for csv_file in csv_files:
@@ -204,10 +204,15 @@ def copy_csv_to_latest_folder(csv, base_dir):
                 break
         if prefix:
             dest_folder = os.path.dirname(csv_files[0])
-            print(f'Copying {csv} to {dest_folder}')
-            shutil.copy(csv, dest_folder)
-            os.rename(os.path.join(dest_folder, 'CrashMetaInfo.csv'), os.path.join(dest_folder, f'{prefix}_CrashMetaInfo.csv'))
-            
+    return dest_folder, prefix
+
+def copy_csv_to_latest_folder(csv, base_dir):
+    dest_folder, prefix = get_latest_qstaf_folder(base_dir)
+    if dest_folder and prefix:
+        print(f'Copying {csv} to {dest_folder}')
+        shutil.copy(csv, dest_folder)
+        os.rename(os.path.join(dest_folder, 'CrashMetaInfo.csv'), os.path.join(dest_folder, f'{prefix}_CrashMetaInfo.csv'))
+
             
 if __name__ == '__main__':
     copy_csv_main()

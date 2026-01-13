@@ -107,34 +107,33 @@ Default_Crash_renaming_Stings=["Plsentermarket",
                                "EnterFSTIDmanually",
                                "Enteroperator",
                                "EnterTDCSerial"
-                               "NO_OPERATOR"]
+                               "NO_OPERATOR",
+                               "Something Wrong"]
 
 def zip_and_upload_crash_dump(crash_dir_list,log_box,crash_naming_label):
 
     #condition to check if the crash renaming has a valid id:
     current_crash_naming=get_crash_naming()
     print(current_crash_naming)
-    
-    if any(s in current_crash_naming for s in Default_Crash_renaming_Stings):
-        print("inside msg box")
-        messagebox.showerror("Naming Error ", "Invalid Crash Renaming \n Please check")
-        return
-    else:
-          
-        text = f"Current Renaming:\n\n{get_crash_naming()}"
-        proceed = messagebox.askyesno("Confirm", text)  # Yes=True, No=False
+     
+    text = f"Current Renaming:\n\n {current_crash_naming}"
+    proceed = messagebox.askyesno("Confirm", text)  # Yes=True, No=False
 
-        if proceed:
-                print("Continuing…")
-                # place your continue logic here
-        else:
-                print("Cancelled.")
-                return
+    if proceed:
+        # print("Continuing…")
+        print(current_crash_naming)
+        if any(s in current_crash_naming for s in Default_Crash_renaming_Stings):
+            # print("inside msg box")
+            messagebox.showerror("Naming Error ", "Invalid Crash Renaming \n Please check")
+            return
+    else:
+                # print("Cancelled.")
+        return
 
     
     # Goes through CrashMetaInfo.csv and triggers zip & upload for each row
     # Update CrashMetaInfo.csv by deleting corresponding row -> display_crash_table
-    
+    print("continuing")
     from FzHandler import file_upload
     df = pd.read_csv(os.path.join(CTM_LOGS_DIR, 'CrashMetaInfo.csv'))
 

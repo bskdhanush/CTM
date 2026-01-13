@@ -188,6 +188,7 @@ def check_restart_timer():
             if mode == 'control':
                 if elapsed >= control_reset_timer:
                     stop_framework(mode)
+                    QutsController.restart_quts()
                     time.sleep(10)
                     start_framework(mode)
             elif mode == 'traffic':

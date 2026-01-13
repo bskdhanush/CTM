@@ -356,33 +356,37 @@ def get_operator():
     return operator
     
 def get_crash_naming(orig_crash_name='', count=1):
-    crash_name = None
+    crash_name = 'Something Wrong. Pls check!'
     date_folder = ''
-    m = re.search(r'^(\d{4})(\d{4})-(\d+)', orig_crash_name)
-    if m:
-        date_folder = f'{m.group(2)}{m.group(1)}'
-    else:
-        date_folder = date.today()
-        date_folder = date_folder.strftime("%m%d%Y")
-    # count = 1
-    market, name, fst_id, operator, tdc_serial ,magicSting= get_naming_convention()
+    try:
+        m = re.search(r'^(\d{4})(\d{4})-(\d+)', orig_crash_name)
+        if m:
+            date_folder = f'{m.group(2)}{m.group(1)}'
+        else:
+            date_folder = date.today()
+            date_folder = date_folder.strftime("%m%d%Y")
+        # count = 1
+        market, name, fst_id, operator, tdc_serial, magicSting = get_naming_convention()
 
-    if not market:
-        print('market is not valid. Pls check')
-    if not name:
-        print('name is not valid. Pls check')
-    if not fst_id:
-        print('fst_id is not valid. Pls check')
-    # if not date_folder:
-    #     print('date_folder is not valid. Pls check')
-    if not operator:
-        print('operator is not valid. Pls check')
-    if not tdc_serial:
-        print('tdc_serial is not valid. Pls check')
+        if not market:
+            print('market is not valid. Pls check')
+        if not name:
+            print('name is not valid. Pls check')
+        if not fst_id or 'manually' in fst_id:
+            print('fst_id is not valid. Pls check')
+            fst_id = None
+        # if not date_folder:
+        #     print('date_folder is not valid. Pls check')
+        if not operator:
+            print('operator is not valid. Pls check')
+        if not tdc_serial:
+            print('tdc_serial is not valid. Pls check')
 
-    if market and name and fst_id and operator and tdc_serial:
-        crash_name = f"{market}_{name}_{fst_id}_{date_folder}_{operator}_{count}_{tdc_serial}_LAN_DRI"
-        crash_name = re.sub(r'\s+', '', crash_name)
+        if market and name and fst_id and operator and tdc_serial:
+            crash_name = f"{market}_{name}_{fst_id}_{date_folder}_{operator}_{count}_{tdc_serial}_LAN_DRI"
+            crash_name = re.sub(r'\s+', '', crash_name)
+    except Exception as e:
+        print(f'Exception during get_crash_naming: {e}')
     return crash_name
 
 def get_zip_status(crash_path):

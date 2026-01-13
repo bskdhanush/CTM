@@ -117,7 +117,7 @@ def update_loaded_build_timestamp_csv(csv='Loaded_Build_Timestamp.csv', adb_id='
         df_existing = pd.read_csv(csv_path)
         os.remove(csv_path)
     df = pd.concat([df_existing, df], axis=0)
-    df = df.drop_duplicates()
+    df.drop_duplicates(subset=['META', 'MPSS'], keep='first', inplace=True)
     df.to_csv(csv_path, index=False)
     print(f'csv created: {csv_path}. Copying it to QSTAF Control location')
     dest_folder, prefix = get_latest_qstaf_folder(CONTROL_BASE)

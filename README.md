@@ -4,9 +4,11 @@ To build the exe with cmd : pyinstaller --onefile MainController.py --name CTM -
 
 
 ***** USE the follwoing to create EXE ******
+Without cmd:
+pyinstaller --onefile MainController.py --name CTM --noconfirm --windowed --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --hidden-import=ssh2 --hidden-import=ssh2.agent --hidden-import=ssh2.channel --hidden-import=ssh2.error_codes --hidden-import=ssh2.exceptions --hidden-import=ssh2.fileinfo --hidden-import=ssh2.knownhost --hidden-import=ssh2.listener --hidden-import=ssh2.pkey --hidden-import=ssh2.publickey --hidden-import=ssh2.session --hidden-import=ssh2.sftp --hidden-import=ssh2.sftp_handle --hidden-import=ssh2.statinfo --hidden-import=ssh2.utils 
+
+With cmd:
 pyinstaller --onefile MainController.py --name CTM --noconfirm --console --icon=logs/logo.ico --add-data "config;config" --add-data "GUI_modules;GUI_modules" --hidden-import=ssh2 --hidden-import=ssh2.agent --hidden-import=ssh2.channel --hidden-import=ssh2.error_codes --hidden-import=ssh2.exceptions --hidden-import=ssh2.fileinfo --hidden-import=ssh2.knownhost --hidden-import=ssh2.listener --hidden-import=ssh2.pkey --hidden-import=ssh2.publickey --hidden-import=ssh2.session --hidden-import=ssh2.sftp --hidden-import=ssh2.sftp_handle --hidden-import=ssh2.statinfo --hidden-import=ssh2.utils 
-
-
 
 
 D:/work/GUI/Quts_tool/myenv_312/Scripts/Activate.ps1    

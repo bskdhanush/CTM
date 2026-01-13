@@ -291,10 +291,10 @@ def create_crash_forecast_page(container, pages, add_nav):
     separator = ttk.Separator(second_row_frame, orient="horizontal")
     separator.pack(fill="both", expand=False, padx=20, pady=(12, 0))
 
-    crash_naming_label = ttk.Label(
-        second_row_frame, text="Current Renaming: \n\n", wraplength=1000
-    )
-    crash_naming_label.pack(fill="both", expand=True, **PADDING)
+    # crash_naming_label = ttk.Label(
+    #     second_row_frame, text="Current Renaming: \n\n", wraplength=1000
+    # )
+    # crash_naming_label.pack(fill="both", expand=True, **PADDING)
 
     # ttk.Button(
     #     crash_page_main,

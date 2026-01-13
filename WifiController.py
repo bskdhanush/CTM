@@ -245,9 +245,9 @@ def update_3_mlo_config_kobuk(config):
     print("Kobuk 3 MLO selected with test SSID")
     config_json = os.path.join(CTM_CONFIG_DIR, 'config.json')
     if config == "Test_SSID":
-        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'mlo_config_test.json')
+        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'kobuk_mlo_config_test.json')
     else:
-        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'mlo_config.json')
+        mlo_config_json = os.path.join(CTM_CONFIG_DIR, 'kobuk_mlo_config.json')
 
     if not os.path.exists(mlo_config_json):
         prefix = ""
@@ -312,13 +312,13 @@ def update_3_mlo_config_kobuk(config):
     run_command("adb shell mkdir /data/dapp/wlan")
     run_command("adb shell cp /data/dapp/qstaf.kb.* /data/dapp/wlan/")
 
-    run_command(f"adb push {config_json} /data/dapp/wlan/")
-    run_command(f"adb push {config_json} /")  # to be removed in next Dapp release
+    run_command(f"adb push {config_json} /data/dapp/wlan/config.json")
+                                                                                  
     run_command(f"adb push {mlo_config_json} /data/dapp/wlan/")
     if config == "Test_SSID":
-        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/mlo_config_test.json")
+        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/kobuk_mlo_config_test.json")
     else:
-        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/mlo_config.json")
+        run_command(command=f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/kobuk_mlo_config.json")
     # run_command(f"adb shell /data/dapp/wlan/qstaf.kb.* /data/dapp/wlan/{mlo_config_json} /data/dapp/wlan/{config_json}")  # to be changed to in next Dapp release
 
 

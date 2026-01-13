@@ -1,9 +1,13 @@
 import time
+import datetime
 import subprocess
 import re
 import os
 import json
-from Constants import CTM_CONFIG_DIR
+from Constants import CTM_CONFIG_DIR, CTM_LOGS_DIR
+import pandas as pd
+import glob
+import shutil
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -84,10 +88,62 @@ def get_adb_id():
 #     # subprocess.run(["adb", "kill-server"])
 #     return None
 
+def update_loaded_build_timestamp_csv(csv='Loaded_Build_Timestamp.csv', adb_id='', meta='', mpss='', time_stamp=''):
+    from datetime import datetime
+    from CopyCsv import get_latest_qstaf_folder, CONTROL_BASE
+
+    # Get current date and time
+    now = datetime.now()
+    # Format: [YYYYMMDDHHMMSS]_YYYY_MM_DD_
+    csv_prefix = f"[{now.strftime('%Y%m%d%H%M%S')}]_{now.strftime('%Y_%m_%d')}_"
+
+    build_dict = {
+        'META': [meta],
+        'MPSS': [mpss],
+        'TIMESTAMP': [time_stamp]
+    }
+    print(f'build_dict: {build_dict}')
+    df = pd.DataFrame(build_dict)
+    csv = f'{csv_prefix}{adb_id}_vpid0_seqno0_{csv}'
+
+    bt_csv_files = sorted(glob.glob(CTM_LOGS_DIR + '\\**\\*Loaded_Build_Timestamp.csv', recursive=True), reverse=True)
+    if len(bt_csv_files):
+        csv_path = bt_csv_files[0]
+    else:
+        csv_path = os.path.join(CTM_LOGS_DIR, csv)
+
+    df_existing = pd.DataFrame()
+    if os.path.exists(csv_path):
+        df_existing = pd.read_csv(csv_path)
+        os.remove(csv_path)
+    df = pd.concat([df_existing, df], axis=0)
+    df = df.drop_duplicates()
+    df.to_csv(csv_path, index=False)
+    print(f'csv created: {csv_path}. Copying it to QSTAF Control location')
+    dest_folder, prefix = get_latest_qstaf_folder(CONTROL_BASE)
+    if dest_folder:
+        shutil.copy(csv_path, dest_folder)
+
+def update_meta_mpss_builds():
+    # Update Meta and MPSS builds on every boot-up
+    _adb_id = get_adb_id()
+    if _adb_id:
+        try:
+            _mpss_build = get_mpss_build_info()
+            _meta_build = get_meta_build_info().strip('"')
+            update_loaded_build_timestamp_csv('Loaded_Build_Timestamp.csv', _adb_id, meta=_meta_build,
+                                              mpss=_mpss_build,
+                                              time_stamp=datetime.datetime.fromtimestamp(time.time()).strftime(
+                                                  "%Y-%m-%d_%H:%M:%S"))
+        except Exception as e:
+            print(f'Exception: {e}')
+
 def on_device_bootup():
     from CrashHandler import set_naming_convention_from_crash_rename_csv
     from GUI_modules.CrashForecastPage import update_crash_rename_fields
     print('on_device_bootup')
+
+    update_meta_mpss_builds()
     set_naming_convention_from_crash_rename_csv()
     update_crash_rename_fields()
 

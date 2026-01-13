@@ -62,6 +62,8 @@ def check_the_text_file(default_msg:str):
 def check_META_install_status(PROV_BASE,TypeOfProv):  #TypeOfProv ="fullProv"
     timeout=10*60 # 10 min 
     file_path = os.path.join(PROV_BASE, "META_MPSS.txt")
+    with open(file_path, 'r') as f:
+        content = f.read()
     sleep(300) # 5 min sleep before checking 
     start = time.time()
     while True:    
@@ -69,54 +71,43 @@ def check_META_install_status(PROV_BASE,TypeOfProv):  #TypeOfProv ="fullProv"
         if adb_Id:
             CurrentMetaOnDevice=get_meta_build_info() # eg: "Kobuk.LE.1.1-0003-EBOOT.CPE.WKK-1"
             try:
-                with open(file_path, 'r') as f:
-                    content=f.read()
-                    if not CurrentMetaOnDevice in content:
-                        elapsed = time.time() - start
-                        if elapsed >= timeout:
-                            messagebox.showerror("Failure", "Meta install failed! \nPlease Check")
-                            return
-                    else:
-                        print("build loaded")
-                        if TypeOfProv == "Full":
-                            check_MPSS_install_status(PROV_BASE)
+                if not CurrentMetaOnDevice in content:
+                    elapsed = time.time() - start
+                    if elapsed >= timeout:
+                        messagebox.showerror("Failure", "Meta install failed! \nPlease Check")
                         return
-                    
+                else:
+                    print("build loaded")
+                    if TypeOfProv == "Full":
+                        check_MPSS_install_status(PROV_BASE)
+                    return
             except: 
-                print("No such file")
-        sleep(20) #
+                print(f"Exception during check_META_install_status: {e}")
+        sleep(20)
         
         
 def check_MPSS_install_status(PROV_BASE):
     timeout=10*60 # 10 min 
     file_path = os.path.join(PROV_BASE, "META_MPSS.txt")
+    with open(file_path, 'r') as f:
+        content = f.read()
     sleep(300) # 5 min sleep before checking 
     start = time.time()
     while True:    
         adb_Id=get_adb_id()
         if adb_Id:
-            CurrentMetaOnDevice=get_mpss_build_info() 
+            CurrentMpssOnDevice=get_mpss_build_info()
             try:
-                with open(file_path, 'r') as f:
-                    content=f.read()
-                    if not CurrentMetaOnDevice in content:
-                        elapsed = time.time() - start
-                        if elapsed >= timeout:
-                            messagebox.showerror("Failure", "Meta install failed! \nPlease Check")
-                            return
-                    else:
-                        print("build loaded")
+                if not CurrentMpssOnDevice in content:
+                    elapsed = time.time() - start
+                    if elapsed >= timeout:
+                        messagebox.showerror("Failure", "MPSS install failed! \nPlease Check")
                         return
-                    
-            except: 
-                print("No such file")
-        sleep(20) #
-                
-
-                
-    
-    
-            
-        
+                else:
+                    print("build loaded")
+                    return
+            except Exception as e:
+                print(f"Exception during check_MPSS_install_status: {e}")
+        sleep(20)
     
     

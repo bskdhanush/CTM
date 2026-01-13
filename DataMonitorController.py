@@ -553,7 +553,7 @@ def data_call_state_plot(figsize: tuple[Literal[7], Literal[4]]):
 
 def channel_conditions_plot(figsize: tuple[Literal[7], Literal[4]]):
     """ RSRP and SNR plots from QSH_FR_MODE csv """
-    df = get_df('\\*QSH_FR_MODE.csv')
+    df = get_df('\\*QSH_CHANNEL.csv')
 
     fig = None
 
